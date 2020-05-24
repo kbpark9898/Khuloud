@@ -1,15 +1,15 @@
 import Vue from 'vue'
 import VueRouter from 'vue-router'
-import Home from '../views/Home.vue'
-import Login from '../views/Login.vue'
-import Main from '../views/Main.vue'
-import Contact from '../views/Contact.vue'
-import File from '../views/File.vue'
-import FavList from '../views/FavList.vue'
-import QuickList from '../views/QuickList.vue'
-import Feedback from '../views/Feedback.vue'
-import ToolView from '../views/ToolView'
-import RegistUser from '../views/RegistUser'
+// import Home from '../views/Home.vue'
+// import Login from '../views/Login.vue'
+// import Main from '../views/Main.vue'
+// import Contact from '../views/Contact.vue'
+// import File from '../views/File.vue'
+// import FavList from '../views/FavList.vue'
+// import QuickList from '../views/QuickList.vue'
+// import Feedback from '../views/Feedback.vue'
+// import ToolView from '../views/ToolView'
+// import RegistUser from '../views/RegistUser'
 Vue.use(VueRouter);
 
 
@@ -20,48 +20,52 @@ export default new VueRouter ({
     routes : [
       {
         path: '/',
+        redirect: '/Login'
+      },
+      {
+        path: '/home',
         name: 'Home',
-        component: Home
+        component: () => import('../views/Home.vue')
       },
       {
         path: '/main',
         name:'Main',
-        component: Main
+        component: () => import('../views/Main.vue')
       },
       {
         path: '/contact',
         name:'Contact',
-        component: Contact
+        component: () => import('../views/Contact.vue')
       },
       {
-        path: '/RegistUser',
+        path: '/registuser',
         name: 'RegistUser',
-        component: RegistUser
+        component: () => import('../views/RegistUser.vue')
       },
       {
         path: '/login',
         name: 'Login',
-        component:Login,
+        component: () => import('../views/Login.vue')
       },
       {
         path:'/file',
         name:'File',
-        component: File
+        component: () => import('../views/File.vue')
       },
       {
         path:'/fav',
         name:'Fav',
-        component: FavList
+        component: () => import('../views/FavList.vue')
       },
       {
         path:'/quick',
         name:'Quick',
-        component : QuickList
+        component : () => import('../views/QuickList.vue')
       },
       {
         path:'/feedback',
         name:'Feedback',
-        component: Feedback
+        component: () => import('../views/Feedback.vue')
       }
 
     ]
