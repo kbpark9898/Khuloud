@@ -3,7 +3,7 @@
 </template>
 
 <script>
-import ToolView from './views/ToolView'
+import ToolView from './components/ToolView'
 
   export default {
     data() {

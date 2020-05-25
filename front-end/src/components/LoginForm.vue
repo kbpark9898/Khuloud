@@ -22,7 +22,7 @@
               >
                 <v-toolbar-title>KhuLoud</v-toolbar-title>
                 <v-spacer></v-spacer>
-                <v-tooltip bottom>
+                <!-- <v-tooltip bottom>
                   <template v-slot:activator="{ on }">
                     <v-btn
                       :href="source"
@@ -35,14 +35,15 @@
                     </v-btn>
                   </template>
                   <span>Source</span>
-                </v-tooltip>
+                </v-tooltip> -->
               </v-toolbar>
               <v-card-text>
-                <v-form>
+                <v-form @submit.prevent="submitForm"> 
                   <v-text-field
-                    label="Login"
-                    name="login"
+                    label="ID"
+                    name="ID"
                     type="text"
+                    v-model="id"
                   ></v-text-field>
 
                   <v-text-field
@@ -50,13 +51,14 @@
                     label="Password"
                     name="password"
                     type="password"
+                    v-model="password"
                   ></v-text-field>
                 </v-form>
               </v-card-text>
               <v-card-actions>
                 <v-spacer></v-spacer>
-                <v-btn color="primary" @click = "$router.push({name: 'RegistUser'})">Regist</v-btn>
-                <v-btn color="primary" router :to="{name: 'Main'}" exact>Login</v-btn>
+                <!-- <v-btn color="primary" @click = "$router.push({name: 'RegistUser'})">Regist</v-btn> -->
+                <v-btn color="primary" :disabled="!id || !password" router :to="{name: 'Main'}" exact>Login</v-btn>
               </v-card-actions>
             </v-card>
           </v-col>
@@ -67,9 +69,36 @@
 </template>
 
 <script>
+
+
   export default {
-    props: {
-      source: String,
-    },
+      data() {
+          return {
+              id: '',
+              password: ''
+          }
+      },
+      methods: {
+          async submitForm(){
+              try {
+                  const usderData = {
+                      id: this.id,
+                      password: this.password
+                  };
+                  const { data } = await loginUser(userData);
+                  this.$store.commit('setid', data.user.userid);
+                  this.$router.push('/main');
+                  
+              } catch (error) {
+                  console.log(error.response.data);
+              } finally {
+                  this.initForm();
+              }
+          }
+      },
+      initForm(){
+          this.id ='';
+          this.password='';
+      }
   }
 </script>

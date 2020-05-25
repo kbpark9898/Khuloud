@@ -5,11 +5,19 @@ Vue.use(Vuex)
 
 export default new Vuex.Store({
   state: {
+    id: '',
   },
   mutations: {
+    setId(state, userid){
+      state.id = id;
+    },
+    clearid(state){
+      state.id= '';
+    }
   },
-  actions: {
-  },
-  modules: {
+  getters: {
+    isLogin(state){
+      return state.id !== '';
+    }
   }
 })

@@ -40,12 +40,12 @@ export default new VueRouter ({
       {
         path: '/registuser',
         name: 'RegistUser',
-        component: () => import('../views/RegistUser.vue')
+        component: () => import('../views/SignupPage.vue')
       },
       {
         path: '/login',
         name: 'Login',
-        component: () => import('../views/Login.vue')
+        component: () => import('../views/LoginPage.vue')
       },
       {
         path:'/file',

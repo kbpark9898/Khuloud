@@ -22,32 +22,18 @@
               >
                 <v-toolbar-title>KhuLoud</v-toolbar-title>
                 <v-spacer></v-spacer>
-                <v-tooltip bottom>
-                  <template v-slot:activator="{ on }">
-                    <v-btn
-                      :href="source"
-                      icon
-                      large
-                      target="_blank"
-                      v-on="on"
-                    >
-                      <v-icon>mdi-code-tags</v-icon>
-                    </v-btn>
-                  </template>
-                  <span>Source</span>
-                </v-tooltip>
               </v-toolbar>
               <v-card-text>
-                <v-form>
+                <v-form @submit.prevent="submitForm">
                   <v-text-field
                     label="ID"
-                    v-model="Id"
+                    v-model="id"
                     name="ID"
                     type="text"
                   ></v-text-field>
 
                   <v-text-field
-                    v-model="Password"
+                    v-model="password"
                     label="Password"
                     name="password"
                     type="password"
@@ -55,7 +41,7 @@
 
                   <v-text-field
                     label="Name"
-                    v-model="Name"
+                    v-model="name"
                     name="name"
                     type="name"
                   ></v-text-field>
@@ -66,11 +52,17 @@
                     :rules="emailRules"
                     name="Email"
                   ></v-text-field>
+
+                  <v-text-field 
+                  label="Contact" 
+                  v-model="contact" 
+                  name="Contact">
+                  </v-text-field>
                 </v-form>
               </v-card-text>
               <v-card-actions>
                 <v-spacer></v-spacer>
-                <v-btn color="primary" @click = "$router.push({name: 'Login'})">Regist</v-btn>
+                <v-btn color="primary" :disabled="!id || !password || !name || !email || !contact" @click = "$router.push({name: 'Login'})">Regist</v-btn>
               </v-card-actions>
             </v-card>
           </v-col>
@@ -82,8 +74,41 @@
 
 <script>
   export default {
-    props: {
-      source: String,
-    },
+      data() {
+          return {
+              id: '',
+              password: '',
+              name: '',
+              email: '',
+              contact: '',
+          }
+      },
+      methods: {
+          async submitForm() {
+              try {
+                  const usderData = {
+                      id: this.id,
+                      password: this.password,
+                      name: this.name,
+                      email: this.email,
+                      contact: this.contact
+                  };
+                  const { data } = await registerUser(userData);
+                  console.log("회원가입 완료"); 
+                  this.$router.push('/');
+              } catch (error) {
+                  console.log(error.response.data);
+              } finally{
+                  this.initForm();
+              }
+          },
+          initForm(){
+              this.id = '';
+              this.password ='';
+              this.name = '';
+              this.email = '';
+              this.contact = '';
+          }
+      }
   }
 </script>
