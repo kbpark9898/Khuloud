@@ -20,7 +20,7 @@ router.post('/', function(req, res, next) {
                 if(bytes===user_pw) {
                     console.log("user login successfully");
                     req.session.user_id=result[0].user_id;
-                    res.redirect('/main');
+                    res.status(200).send({ user_id: result[0].user_id });
                 }else{
                     console.log("wrong password!");
                 }

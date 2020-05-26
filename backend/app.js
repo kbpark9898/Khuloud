@@ -50,10 +50,10 @@ app.use(express.static('views'));
 app.use(passport.initialize());
 app.use(passport.session());
 
-app.use('/', indexRouter);
-app.use('/user', userRouter);
-app.use('/login', loginRouter);
-app.use('/RegistUser', registerRouter);
+app.use('/api/', indexRouter);
+app.use('/api/user', userRouter);
+app.use('/api/login', loginRouter);
+app.use('/api/RegistUser', registerRouter);
 //app.use('/users', usersRouter);
 
 // catch 404 and forward to error handler
