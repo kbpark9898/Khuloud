@@ -26,7 +26,7 @@
         </v-list-item-avatar>
 
         <v-list-item-content>
-          <v-list-item-title v-text="item"></v-list-item-title>
+          <v-list-item-title v-text="item.folder_name"></v-list-item-title>
         </v-list-item-content>
 
         <v-list-item-action>
@@ -89,8 +89,7 @@
          +{{ files.length - 2 }} File(s)
        </span>
      </template>
-   </v-file-input>
-       <template>
+    </v-file-input>
       <v-btn
         bottom
         color="blue"
@@ -102,7 +101,6 @@
       >
         <v-icon>mdi-plus</v-icon>
     </v-btn>
-    </template>
     <v-dialog
       v-model="dialog"
       width="800px"
@@ -114,7 +112,7 @@
         <v-container>
           <div>
             <v-icon>mdi-folder</v-icon>
-            <v-text-field placeholder="name" id="foldername" type="text" v-mode="foldername" @click="makeF"></v-text-field>
+            <v-text-field placeholder="name" id="foldername" type="text" v-model="foldername" ></v-text-field>
           </div>
         </v-container>
         <v-card-actions>
@@ -126,7 +124,7 @@
           >Cancel</v-btn>
           <v-btn
             text
-            @click="dialog = false"
+            @click="makeF"
           >Create</v-btn>
         </v-card-actions>
       </v-card>
@@ -173,22 +171,14 @@ import { dropbox, makeFolder } from '../api/index';
               folder_name : this.foldername
             };
             const response = await makeFolder(folderData);
-            if (reponse.status == 200){
-              try {
-                const res = await deropbox(folderData.user_id);
-                this.$store.commit('setFolder', response.data.folders);
-                this.$store.commit('setFile', response.data.files);
-              } catch (error) {
-                console.log("에러");
-                console.log(error.response.data);     
-              }
-            }
+            this.$store.commit('setFolder', response.data.folders);
             console.log("폴더 생성 완료");
           } catch (error) {
             console.log("에러");
             console.log(error.response.data);
           } finally{
             this.initFolderName();
+            this.dialog = false;
           }
         }
       }
