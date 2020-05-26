@@ -14,4 +14,8 @@ function registerUser(userData) {
     return axios.post('/api/login', userData);
   }
   
-  export { registerUser, loginUser };
+function dropbox(userData){
+  return axios.get('/api/dropbox', userData);
+}
+
+  export { registerUser, loginUser, dropbox };

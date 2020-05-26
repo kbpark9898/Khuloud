@@ -17,19 +17,16 @@
       <v-subheader inset>Folders</v-subheader>
 
       <v-list-item
-        v-for="item in items"
+        v-for="item in this.$store.getters.folderL"
         :key="item.title"
-        @click=""
+        @click="$router.push({name: 'Folder'})"
       >
         <v-list-item-avatar>
-          <v-icon
-
-          >{{item.iconClass}}</v-icon>
+          <v-icon>mdi-folder</v-icon>
         </v-list-item-avatar>
 
         <v-list-item-content>
-          <v-list-item-title v-text="item.title"></v-list-item-title>
-          <v-list-item-subtitle v-text="item.subtitle"></v-list-item-subtitle>
+          <v-list-item-title v-text="item"></v-list-item-title>
         </v-list-item-content>
 
         <v-list-item-action>
@@ -49,12 +46,11 @@
         @click=""
       >
         <v-list-item-avatar>
-          <v-icon> {{item.iconClass}}</v-icon>
+          <v-icon> mdi-file</v-icon>
         </v-list-item-avatar>
 
         <v-list-item-content>
-          <v-list-item-title v-text="item.title"></v-list-item-title>
-          <v-list-item-subtitle v-text="item.subtitle"></v-list-item-subtitle>
+          <v-list-item-title v-text="item"></v-list-item-title>
         </v-list-item-content>
 
         <v-list-item-action>
@@ -98,17 +94,40 @@
 </template>
 
 <script>
+import { dropbox } from '../api/index';
   export default {
-    data: () => ({
-      items: [
-        { icon: 'folder', iconClass: 'mdi-folder', title: 'Photos', subtitle: 'Jan 9, 2014' },
-        { icon: 'folder', iconClass: 'mdi-folder', title: 'Recipes', subtitle: 'Jan 17, 2014' },
-        { icon: 'folder', iconClass: 'mdi-folder', title: 'Work', subtitle: 'Jan 28, 2014' },
-      ],
-      items2: [
-        { icon: 'assignment', iconClass: 'mdi-file', title: 'Vacation itinerary', subtitle: 'Jan 20, 2014' },
-        { icon: 'call_to_action', iconClass: 'mdi-PdfBox', title: 'Kitchen remodel', subtitle: 'Jan 10, 2014' },
-      ],
-    }),
+    data() {
+      return {
+        folders: [],
+        files: [],
+        search:'',
+      }
+    },
+    async created(){
+        try {
+          const userData = {
+            user_id: this.$store.getters.userId,
+            cur: '/', 
+          };
+          const { data } = await dropbox(userData);
+          console.log(data);
+          this.$store.commit('setFolder', data.folders);
+          this.$store.commit('setFile', data.files);
+        } catch (error) {
+          console.log("에러");
+          console.log(error.response.data);          
+        }
+      }
+    // data: () => ({
+    //   items: [
+    //     { icon: 'folder', iconClass: 'mdi-folder', title: 'Photos', subtitle: 'Jan 9, 2014' },
+    //     { icon: 'folder', iconClass: 'mdi-folder', title: 'Recipes', subtitle: 'Jan 17, 2014' },
+    //     { icon: 'folder', iconClass: 'mdi-folder', title: 'Work', subtitle: 'Jan 28, 2014' },
+    //   ],
+    //   items2: [
+    //     { icon: 'assignment', iconClass: 'mdi-file', title: 'Vacation itinerary', subtitle: 'Jan 20, 2014' },
+    //     { icon: 'call_to_action', iconClass: 'mdi-PdfBox', title: 'Kitchen remodel', subtitle: 'Jan 10, 2014' },
+    //   ],
+    // }),
   }
 </script>

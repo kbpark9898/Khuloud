@@ -66,6 +66,11 @@ export default new VueRouter ({
         path:'/feedback',
         name:'Feedback',
         component: () => import('../views/Feedback.vue')
+      },
+      {
+        path: '/folder',
+        name: 'Folder',
+        component: () => import('../views/FolderPage.vue')
       }
 
     ]
