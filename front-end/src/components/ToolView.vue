@@ -4,6 +4,7 @@
       v-model="drawer"
       :clipped="$vuetify.breakpoint.lgAndUp"
       app
+      v-if="isUserLogin"
     >
     <v-list dense>
       <v-list-item router :to="{name: 'Main'}" exact>
@@ -88,10 +89,8 @@
       color="blue darken-3"
       dark
     >
-      <!-- <template v-if="isUserLogin">
-        <v-app-bar-nav-icon @click.stop="drawer = !drawer"></v-app-bar-nav-icon>
-      </template> -->
-      <v-app-bar-nav-icon @click.stop="drawer = !drawer"></v-app-bar-nav-icon>
+
+      <v-app-bar-nav-icon @click.stop="drawer = !drawer" v-if="isUserLogin"></v-app-bar-nav-icon>
       <v-toolbar-title
         style="width: 300px"
         class="ml-0 pl-4"
@@ -111,32 +110,20 @@
       <template v-else>
         <div></div>
       </template>
-      <!-- <v-text-field
-        v-if="isUserLogin"
-        flat
-        solo-inverted
-        hide-details
-        prepend-inner-icon="mdi-magnify"
-        label="전체 검색"
-        class="hidden-sm-and-down"
-      ></v-text-field> -->
       <v-spacer></v-spacer>
       <template v-if="isUserLogin">
         <v-btn icon @click = "logoutUser">
-          <v-icon>mid-login</v-icon>
+          <v-icon>mdi-login</v-icon>
         </v-btn>
       </template>
       <template v-else>
         <v-btn icon @click = "$router.push({name: 'Login'})">
           <v-icon>mdi-login</v-icon>
         </v-btn>
-        <v-btn icon @click="$router.push({name: 'RegistUser'})">
+        <v-btn icon @click = "$router.push({name: 'RegistUser'})">
           <v-icon>mdi-account</v-icon>
         </v-btn>
       </template>
-      <!-- <v-btn icon @click = "$router.push({name: 'Login'})">
-        <v-icon>mdi-login</v-icon>
-      </v-btn> -->
     </v-app-bar>
     <v-content>
       <v-container
@@ -272,7 +259,7 @@ export default {
     }),
     computed: {
       isUserLogin(){
-        return this.$store.getters.isUserLogin;
+        return this.$store.getters.isLogin;
       },
     },
     methods: {

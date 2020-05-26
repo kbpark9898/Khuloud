@@ -9,7 +9,7 @@ export default new Vuex.Store({
   },
   mutations: {
     setId(state, userid){
-      state.id = id;
+      state.id = userid;
     },
     clearid(state){
       state.id= '';

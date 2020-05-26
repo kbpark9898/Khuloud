@@ -5,11 +5,13 @@ const instance = axios.create({
 });
 
 function registerUser(userData) {
-    return instance.post('RegistUser', userData);
+  // const url = 'http://localhost:3000/api/signup'
+    return axios.post('/api/RegistUser', userData);
   }
   
   function loginUser(userData) {
-    return instance.post('login', userData);
+    // const url = 'http://localhost:3000/api/login'
+    return axios.post('/api/login', userData);
   }
   
   export { registerUser, loginUser };

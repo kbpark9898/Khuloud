@@ -22,23 +22,10 @@
               >
                 <v-toolbar-title>KhuLoud</v-toolbar-title>
                 <v-spacer></v-spacer>
-                <!-- <v-tooltip bottom>
-                  <template v-slot:activator="{ on }">
-                    <v-btn
-                      :href="source"
-                      icon
-                      large
-                      target="_blank"
-                      v-on="on"
-                    >
-                      <v-icon>mdi-code-tags</v-icon>
-                    </v-btn>
-                  </template>
-                  <span>Source</span>
-                </v-tooltip> -->
+
               </v-toolbar>
               <v-card-text>
-                <v-form @submit.prevent="submitForm"> 
+                <v-form > 
                   <v-text-field
                     label="ID"
                     name="ID"
@@ -57,8 +44,7 @@
               </v-card-text>
               <v-card-actions>
                 <v-spacer></v-spacer>
-                <!-- <v-btn color="primary" @click = "$router.push({name: 'RegistUser'})">Regist</v-btn> -->
-                <v-btn color="primary" :disabled="!id || !password" router :to="{name: 'Main'}" exact>Login</v-btn>
+                <v-btn color="primary" :disabled="!id || !password" @click="submitForm">Login</v-btn>
               </v-card-actions>
             </v-card>
           </v-col>
@@ -69,7 +55,7 @@
 </template>
 
 <script>
-
+import { loginUser } from '../api/index'
 
   export default {
       data() {
@@ -81,24 +67,27 @@
       methods: {
           async submitForm(){
               try {
-                  const usderData = {
-                      id: this.id,
-                      password: this.password
+                  const userData = {
+                      user_id: this.id,
+                      user_pw: this.password
                   };
                   const { data } = await loginUser(userData);
-                  this.$store.commit('setid', data.user.userid);
+                  console.log(data);
+                  
+                  this.$store.commit('setId', data.user_id);
                   this.$router.push('/main');
                   
               } catch (error) {
+                  console.log("에러");
                   console.log(error.response.data);
               } finally {
                   this.initForm();
               }
-          }
-      },
-      initForm(){
+          },
+          initForm(){
           this.id ='';
           this.password='';
-      }
+        }
+      },
   }
 </script>
