@@ -41,7 +41,7 @@
       <v-subheader inset>Files</v-subheader>
 
       <v-list-item
-        v-for="item in items2"
+        v-for="item in this.$store.getters.fileL"
         :key="item.title"
         @click=""
       >
@@ -90,44 +90,107 @@
        </span>
      </template>
    </v-file-input>
+       <template>
+      <v-btn
+        bottom
+        color="blue"
+        dark
+        fab
+        fixed
+        right
+        @click="dialog = !dialog"
+      >
+        <v-icon>mdi-plus</v-icon>
+    </v-btn>
+    </template>
+    <v-dialog
+      v-model="dialog"
+      width="800px"
+    >
+      <v-card>
+        <v-card-title class="grey darken-2">
+          Create Folder
+        </v-card-title>
+        <v-container>
+          <div>
+            <v-icon>mdi-folder</v-icon>
+            <v-text-field placeholder="name" id="foldername" type="text" v-mode="foldername" @click="makeF"></v-text-field>
+          </div>
+        </v-container>
+        <v-card-actions>
+          <v-spacer></v-spacer>
+          <v-btn
+            text
+            color="primary"
+            @click="dialog = false"
+          >Cancel</v-btn>
+          <v-btn
+            text
+            @click="dialog = false"
+          >Create</v-btn>
+        </v-card-actions>
+      </v-card>
+    </v-dialog>
   </div>
 </template>
 
 <script>
-import { dropbox } from '../api/index';
+import { dropbox, makeFolder } from '../api/index';
   export default {
     data() {
       return {
+        foldername: '',
         folders: [],
         files: [],
         search:'',
+        id: '',
+        dialog: false,
       }
     },
     async created(){
         try {
-          const userData = {
-            user_id: this.$store.getters.userId,
-            cur: '/', 
-          };
-          const { data } = await dropbox(userData);
-          console.log(data);
-          this.$store.commit('setFolder', data.folders);
-          this.$store.commit('setFile', data.files);
+          const userData = this.$store.state.id;
+          console.log(this.id);
+          
+          const response = await dropbox(userData);
+          console.log(response);
+          this.$store.commit('setFolder', response.data.folders);
+          this.$store.commit('setFile', response.data.files);
         } catch (error) {
           console.log("에러");
           console.log(error.response.data);          
         }
+      },
+      methods: {
+        initFolderName(){
+          this.foldername = '';
+        },
+        async makeF(){
+          try {
+            const folderData = {
+              user_id : this.$store.state.id,
+              cur : this.$store.state.id,
+              folder_name : this.foldername
+            };
+            const response = await makeFolder(folderData);
+            if (reponse.status == 200){
+              try {
+                const res = await deropbox(folderData.user_id);
+                this.$store.commit('setFolder', response.data.folders);
+                this.$store.commit('setFile', response.data.files);
+              } catch (error) {
+                console.log("에러");
+                console.log(error.response.data);     
+              }
+            }
+            console.log("폴더 생성 완료");
+          } catch (error) {
+            console.log("에러");
+            console.log(error.response.data);
+          } finally{
+            this.initFolderName();
+          }
+        }
       }
-    // data: () => ({
-    //   items: [
-    //     { icon: 'folder', iconClass: 'mdi-folder', title: 'Photos', subtitle: 'Jan 9, 2014' },
-    //     { icon: 'folder', iconClass: 'mdi-folder', title: 'Recipes', subtitle: 'Jan 17, 2014' },
-    //     { icon: 'folder', iconClass: 'mdi-folder', title: 'Work', subtitle: 'Jan 28, 2014' },
-    //   ],
-    //   items2: [
-    //     { icon: 'assignment', iconClass: 'mdi-file', title: 'Vacation itinerary', subtitle: 'Jan 20, 2014' },
-    //     { icon: 'call_to_action', iconClass: 'mdi-PdfBox', title: 'Kitchen remodel', subtitle: 'Jan 10, 2014' },
-    //   ],
-    // }),
   }
 </script>

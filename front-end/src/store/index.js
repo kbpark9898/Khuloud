@@ -8,6 +8,7 @@ export default new Vuex.Store({
     id: '',
     folders: [],
     files: [],
+    cur:'/',
   },
   mutations: {
     setId(state, userid){
@@ -20,8 +21,8 @@ export default new Vuex.Store({
       state.folders  = folderlist;
     },
     setFile(state, filelist){
-      state.files = fileList;
-    }
+      state.files = filelist;
+    },
   },
   getters: {
     isLogin(state){

@@ -15,7 +15,11 @@ function registerUser(userData) {
   }
   
 function dropbox(userData){
-  return axios.get('/api/dropbox', userData);
+  return axios.get(`/api/folder/${userData}`);
 }
 
-  export { registerUser, loginUser, dropbox };
+function makeFolder(folderData){
+  return axios.post('/api/makefolder', folderData);
+}
+
+  export { registerUser, loginUser, dropbox, makeFolder };
