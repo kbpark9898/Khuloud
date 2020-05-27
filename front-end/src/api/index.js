@@ -5,17 +5,26 @@ const instance = axios.create({
 });
 
 function registerUser(userData) {
-  // const url = 'http://localhost:3000/api/signup'
+    // const url = 'http://localhost:3000/api/signup'
     return axios.post('/api/RegistUser', userData);
-  }
-  
-  function loginUser(userData) {
-    // const url = 'http://localhost:3000/api/login'
-    return axios.post('/api/login', userData);
-  }
-  
-function dropbox(userData){
-  return axios.get('/api/dropbox', userData);
 }
 
-  export { registerUser, loginUser, dropbox };
+function loginUser(userData) {
+    // const url = 'http://localhost:3000/api/login'
+    return axios.post('/api/login', userData);
+}
+
+function folder(curData) {
+    return axios.get('/api/folder/show', {
+        params: {
+            id: curData.id,
+            cur: curData.cur
+        }
+    });
+}
+
+function makeFolder(folderData) {
+    return axios.post('/api/folder/makefolder', folderData);
+}
+
+export { registerUser, loginUser, folder, makeFolder };

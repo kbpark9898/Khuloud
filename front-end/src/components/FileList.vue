@@ -12,10 +12,8 @@
         hide-details
       ></v-text-field>
     </v-toolbar>
-
     <v-list two-line subheader>
       <v-subheader inset>Folders</v-subheader>
-
       <v-list-item
         v-for="item in this.$store.getters.folderL"
         :key="item.title"
@@ -24,35 +22,28 @@
         <v-list-item-avatar>
           <v-icon>mdi-folder</v-icon>
         </v-list-item-avatar>
-
         <v-list-item-content>
-          <v-list-item-title v-text="item"></v-list-item-title>
+          <v-list-item-title v-text="item.folder_name"></v-list-item-title>
         </v-list-item-content>
-
         <v-list-item-action>
           <v-btn icon>
             <v-icon color="grey lighten-1">mdi-information</v-icon>
           </v-btn>
         </v-list-item-action>
       </v-list-item>
-
       <v-divider inset></v-divider>
-
       <v-subheader inset>Files</v-subheader>
-
       <v-list-item
-        v-for="item in items2"
+        v-for="item in this.$store.getters.fileL"
         :key="item.title"
         @click=""
       >
         <v-list-item-avatar>
           <v-icon> mdi-file</v-icon>
         </v-list-item-avatar>
-
         <v-list-item-content>
           <v-list-item-title v-text="item"></v-list-item-title>
         </v-list-item-content>
-
         <v-list-item-action>
           <v-btn icon>
             <v-icon color="grey lighten-1">mdi-information</v-icon>
@@ -81,7 +72,6 @@
        >
          {{ text }}
        </v-chip>
-
        <span
          v-else-if="index === 2"
          class="overline grey--text text--darken-3 mx-2"
@@ -90,44 +80,98 @@
        </span>
      </template>
    </v-file-input>
+      <v-btn
+        bottom
+        color="blue"
+        dark
+        fab
+        fixed
+        right
+        @click="dialog = !dialog"
+      >
+        <v-icon>mdi-plus</v-icon>
+    </v-btn>
+    <v-dialog
+      v-model="dialog"
+      width="800px"
+    >
+      <v-card>
+        <v-card-title class="grey darken-2">
+          Create Folder
+        </v-card-title>
+        <v-container>
+          <div>
+            <v-icon>mdi-folder</v-icon>
+            <v-text-field placeholder="name" id="foldername" type="text" v-model="foldername"></v-text-field>
+          </div>
+        </v-container>
+        <v-card-actions>
+          <v-spacer></v-spacer>
+          <v-btn
+            text
+            color="primary"
+            @click="dialog = false"
+          >Cancel</v-btn>
+          <v-btn
+            text
+            @click="makeF"
+          >Create</v-btn>
+        </v-card-actions>
+      </v-card>
+    </v-dialog>
   </div>
 </template>
 
 <script>
-import { dropbox } from '../api/index';
+import { folder, makeFolder } from '../api/index';
   export default {
     data() {
-      return {
+      return {  
+        foldername:'',
         folders: [],
         files: [],
         search:'',
+        dialog:false
       }
     },
     async created(){
         try {
-          const userData = {
-            user_id: this.$store.getters.userId,
-            cur: '/', 
-          };
-          const { data } = await dropbox(userData);
-          console.log(data);
-          this.$store.commit('setFolder', data.folders);
-          this.$store.commit('setFile', data.files);
+          const curData = {
+            id : this.$store.state.id,
+            cur: this.$store.state.cur
+          }
+          const response = await folder(curData);
+          console.log(response);
+          this.$store.commit('setFolder', response.data.folders);
         } catch (error) {
           console.log("에러");
-          console.log(error.response.data);          
+          console.log(error.response.data);
         }
-      }
-    // data: () => ({
-    //   items: [
-    //     { icon: 'folder', iconClass: 'mdi-folder', title: 'Photos', subtitle: 'Jan 9, 2014' },
-    //     { icon: 'folder', iconClass: 'mdi-folder', title: 'Recipes', subtitle: 'Jan 17, 2014' },
-    //     { icon: 'folder', iconClass: 'mdi-folder', title: 'Work', subtitle: 'Jan 28, 2014' },
-    //   ],
-    //   items2: [
-    //     { icon: 'assignment', iconClass: 'mdi-file', title: 'Vacation itinerary', subtitle: 'Jan 20, 2014' },
-    //     { icon: 'call_to_action', iconClass: 'mdi-PdfBox', title: 'Kitchen remodel', subtitle: 'Jan 10, 2014' },
-    //   ],
-    // }),
+      },
+       methods: {
+         initFolderName(){
+           this.foldername = '';
+         },
+         async makeF(){
+           try {
+             const folderData = {
+               user_id : this.$store.state.id,
+               cur : this.$store.state.cur,
+               folder_name : this.foldername
+             };
+             const response = await makeFolder(folderData); 
+             console.log(response.data)
+             console.log("폴더 생성 완료");
+             this.$store.commit('setFolder', response.data.folders);
+           } catch (error) {
+             console.log("에러");
+             console.log(error.response.data);
+           } finally{
+             this.initFolderName();
+             this.dialog = false;
+           }
+         }
+
+  }
   }
 </script>

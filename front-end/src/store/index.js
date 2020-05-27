@@ -4,37 +4,44 @@ import Vuex from 'vuex'
 Vue.use(Vuex)
 
 export default new Vuex.Store({
-  state: {
-    id: '',
-    folders: [],
-    files: [],
-  },
-  mutations: {
-    setId(state, userid){
-      state.id = userid;
+    state: {
+        id: '',
+        folders: {},
+        files: {},
+        cur: '/',
     },
-    clearid(state){
-      state.id= '';
+    mutations: {
+        setId(state, userid) {
+            state.id = userid;
+        },
+        clearid(state) {
+            state.id = '';
+        },
+        setFolder(state, folderlist) {
+            state.folders = folderlist;
+        },
+        setFile(state, filelist) {
+            state.files = filelist;
+        },
+        setCur(state, cur) {
+            state.cur = cur;
+        }
     },
-    setFolder(state, folderlist){
-      state.folders  = folderlist;
-    },
-    setFile(state, filelist){
-      state.files = fileList;
+    getters: {
+        isLogin(state) {
+            return state.id !== '';
+        },
+        userID(state) {
+            return state.id;
+        },
+        folderL(state) {
+            return state.folders;
+        },
+        fileL(state) {
+            return state.files;
+        },
+        cur(state) {
+            return state.cur;
+        }
     }
-  },
-  getters: {
-    isLogin(state){
-      return state.id !== '';
-    },
-    userID(state){
-      return state.id;
-    },
-    folderL(state){
-      return state.folders;
-    },
-    fileL(state){
-      return state.files;
-    }
-  }
 })
