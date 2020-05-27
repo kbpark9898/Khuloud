@@ -143,9 +143,10 @@ var S3 = {
         var targetPath = targetFile.substring(0, index);
 
         S3.getFileList(bucketName, userId, targetPath, function (res, data) {
+            var answer = false;
             if (!res) {
                 console.log("Overlap Check Error on Get List");
-                callback(false);
+                callback(false, false);
             } else {
                 if (data) {
                     for (var i = 0; i < data.Contents.length; i++) {
@@ -153,11 +154,12 @@ var S3 = {
                         var paths = fullpath.split('/');
                         var index = paths[0].length + paths[1].length + 2;
                         if (fullpath.substring(index) == targetFile) {
-                            callback(true);
+                            answer = true;
+                            break;
                         }
                     }
                     console.log("Overlap Check Success");
-                    callback(false);
+                    callback(true, answer);
                 }
             }
         })
@@ -222,24 +224,47 @@ var S3 = {
             Key: 'drive/' + userId + '/' + targetFile,
             Body: pathbody
         };
-        S3.isFileOverlapped(bucketName, userId, targetFile, function (res) {
-            if (res) {
-                console.log("Upload Error FileOverlapped");
+        S3.isFileOverlapped(bucketName, userId, targetFile, function (res, ans) {
+            if (!res) {
+                console.log("Overlap Check failed");
                 callback(false);
             } else {
-                s3.upload(uploadParams, function (err, data) {
-                    if (err) {
-                        console.log("Upload Error" + err);
-                        callback(false);
-                    } else {
-                        console.log("Upload Success");
-                        console.log(data);
-                        callback(true);
-                    }
-                })
+                if (ans) {
+                    console.log("File Duplication");
+                    callback(false);
+                } else {
+                    s3.upload(uploadParams, function (err, data) {
+                        if (err) {
+                            console.log("Upload Error" + err);
+                            callback(false);
+                        } else {
+                            console.log("Upload Success");
+                            callback(true);
+                        }
+                    })
+                }
             }
         })
 
+    },
+
+    uploadFiles: function (iter, errFiles, bucketName, userId, sourceFiles, targetPath, bodies, callback) {
+        if (iter < sourceFiles.length) {
+            S3.uploadFile(bucketName, userId, sourceFiles[iter], targetPath, bodies[iter], function (res) {
+                if (!res) {
+                    errFiles.push(sourceFiles[iter]);
+                }
+                S3.uploadFiles(iter + 1, errFiles, bucketName, userId, sourceFiles, targetPath, bodies, callback);
+            })
+        } else {
+            if (errFiles.length != 0) {
+                console.log("Upload Files Error on Uploading Some Files");
+                callback(false, errFiles);
+            } else {
+                console.log("Upload Files Success");
+                callback(true, errFiles);
+            }
+        }
     },
 }
 

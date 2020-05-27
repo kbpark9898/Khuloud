@@ -8,9 +8,58 @@ AWS.config.loadFromPath(__dirname + "/../modules/awsconfig.json");
 var S3 = require('../modules/s3/s3');
 
 
+
 // /file/upload
 router.post('/', function (req, res) {
-    var user_id = req.session.user_id;
+    //var userId = req.user.userId;
+    var userId = 'shlee';
+
+    var sourceFiles = [];
+    var errFiles = [];
+    var targetPath = '';
+    var bodies = [];
+
+
+    var form = new formidable.IncomingForm();
+    form.multiples = true;
+    form.parse(req, function (err, fields, files) {
+        if(!files.file[0]){
+            sourceFiles.push(files.file.name);
+            bodies.push(files.file.path);
+        }else{
+            for (var file of files.file) {
+                sourceFiles.push(file.name);
+                bodies.push(file.path);
+            }
+        }
+
+        S3.uploadFiles(0, errFiles, S3.BUCKET_NAME, userId, sourceFiles, targetPath, bodies, function (result, errFiles) {
+            var newSourceFiles = [];
+            if (!result) {   // 에러 파일이 있는 경우
+                for (var sourceFile of sourceFiles) {
+                    if (!(sourceFile in errFiles)) {
+                        newSourceFiles.push(sourceFile);
+                    }
+                }
+            }
+            for (var sourceFile of sourceFiles) {
+                var sql = 'INSERT INTO files (file_name, user_id) VALUES (?, ?)';
+                connection.query(sql, [sourceFile, userId], function (err, result) {
+                    if (err) {
+                        console.log('insert file {', sourceFile, '} in db failed');
+                    }
+                })
+            }
+            res.end("Errfiles: ", errFiles);
+        })
+    })
+})
+
+/*
+// /file/upload
+router.post('/', function (req, res) {
+    //var user_id = req.session.user_id;
+    var user_id = 'shlee';
 
     var form = new formidable.IncomingForm();
     form.parse(req, function (err, fields, files) {
@@ -24,9 +73,10 @@ router.post('/', function (req, res) {
                 console.log("Upload db error");
                 throw err;
             } else {
-                S3.uploadFile(S3.BUCKET_NAME, userId, sourceFile, targetPath, files.image.path, function (result) {
+                S3.uploadFile(S3.BUCKET_NAME, user_id, sourceFile, targetPath, files.file.path, function (result) {
                     if (result) {
                         console.log("Upload Success");
+                        res.send(result);
                     } else {
                         console.log("Upload Fail: Check FIle Duplication");
                     }
@@ -35,6 +85,7 @@ router.post('/', function (req, res) {
         });
     })
 });
+*/
 
 
 module.exports = router;
