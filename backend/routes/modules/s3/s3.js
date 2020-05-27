@@ -144,9 +144,11 @@ var S3 = {
 
         S3.getFileList(bucketName, userId, targetPath, function (res, data) {
             var answer = false;
+            var lvNum;
+
             if (!res) {
                 console.log("Overlap Check Error on Get List");
-                callback(false, false);
+                callback(false, answer, lvNum);
             } else {
                 if (data) {
                     for (var i = 0; i < data.Contents.length; i++) {
@@ -155,11 +157,18 @@ var S3 = {
                         var index = paths[0].length + paths[1].length + 2;
                         if (fullpath.substring(index) == targetFile) {
                             answer = true;
+                            var splited = targetFile.split('(').join(',').split(')').join(',').split(',');
+                            if (splited.length != 3){
+                                lvNum = 0;
+                            }else{
+                                lvNum = parseInt(splited[1]);
+                                console.log('isNum', lvNum);
+                            }
                             break;
                         }
                     }
                     console.log("Overlap Check Success");
-                    callback(true, answer);
+                    callback(true, answer, lvNum);
                 }
             }
         })
@@ -183,6 +192,18 @@ var S3 = {
                 })
             }
         })
+    },
+
+    makeVersion: function(bucketName, userId, sourceFile, lvNum, callback){
+        var sourceFile;
+        var splited = sourceFile.split('(').join(',').split(')').join(',').split(',');
+        if (splited.length != 3){
+            sourceFile = sourceFile.split('.')[0] + '(' + lvNum.toString() + ')' + sourceFile.split('.')[1];
+        }else{
+            sourceFile = sourceFile.split('(')[0] + '(' + lvNum.toString() + ')' + sourceFile.split(')')[1];
+        }
+        console.log('makeVersion ', sourceFile);
+        callback(true, sourceFile);
     },
 
     // sourceFile에 임의의 경로가 포함된 경우
@@ -224,22 +245,29 @@ var S3 = {
             Key: 'drive/' + userId + '/' + targetFile,
             Body: pathbody
         };
-        S3.isFileOverlapped(bucketName, userId, targetFile, function (res, ans) {
+        S3.isFileOverlapped(bucketName, userId, targetFile, function (res, ans, lvNum) {
             if (!res) {
                 console.log("Overlap Check failed");
-                callback(false);
+                callback(false, sourceFile);
             } else {
                 if (ans) {
                     console.log("File Duplication");
-                    callback(false);
+                    S3.makeVersion(bucketName, userId, sourceFile, lvNum+1, function(res, versionedSourceFile){
+                        if (!res){
+                            console.log("Make version failed");
+                            callback(false, sourceFile);
+                        }else{
+                            S3.uploadFile(bucketName, userId, versionedSourceFile, targetPath, body, callback);
+                        }
+                    })
                 } else {
                     s3.upload(uploadParams, function (err, data) {
                         if (err) {
                             console.log("Upload Error" + err);
-                            callback(false);
+                            callback(false, sourceFile);
                         } else {
                             console.log("Upload Success");
-                            callback(true);
+                            callback(true, sourceFile);
                         }
                     })
                 }
@@ -250,9 +278,12 @@ var S3 = {
 
     uploadFiles: function (iter, errFiles, bucketName, userId, sourceFiles, targetPath, bodies, callback) {
         if (iter < sourceFiles.length) {
-            S3.uploadFile(bucketName, userId, sourceFiles[iter], targetPath, bodies[iter], function (res) {
+            S3.uploadFile(bucketName, userId, sourceFiles[iter], targetPath, bodies[iter], function (res, resSourceFile) {
                 if (!res) {
                     errFiles.push(sourceFiles[iter]);
+                }
+                if (sourceFiles[iter] != resSourceFile){    // 파일 중복으로 다른 버전이 생긴 경우
+                    sourceFiles[iter] = resSourceFile;
                 }
                 S3.uploadFiles(iter + 1, errFiles, bucketName, userId, sourceFiles, targetPath, bodies, callback);
             })
