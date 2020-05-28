@@ -19,7 +19,7 @@
         v-for="item in this.$store.getters.folderL"
         :key="item.title"
         :search="search"
-        @click.right="show"
+        @click.right="show(item.folder_name,$event)"
         @click.left="moveF(item.folder_name)"
       >
         <v-list-item-avatar >
@@ -29,38 +29,7 @@
           <v-list-item-title v-text="item.folder_name"></v-list-item-title>
         </v-list-item-content>
 
-              <v-dialog
-      v-model="dialog2"
-      width="500px"
-      >
-      <v-card>
-        <v-card-title class="grey darken-2">
-          Move Folder
-        </v-card-title>
-        <v-container>
-          <v-list-item
-          v-for="item2 in fMove"
-          :key="item2.title"
-          @click.prevent="transferF(item.folder_name, item2.folder_name)"
-          >
-              <v-list-item-avatar>
-                <v-icon>mdi-folder</v-icon>
-              </v-list-item-avatar>
-              <v-list-item-content>
-                <v-list-item-title v-text="item2.folder_name"></v-list-item-title>
-              </v-list-item-content>
-          </v-list-item>
-        </v-container>
-        <v-card-actions>
-          <v-spacer></v-spacer>
-          <v-btn
-            text
-            color="primary"
-            @click="initfMove"
-          >Cancel</v-btn>
-        </v-card-actions>
-      </v-card>
-    </v-dialog>
+              
 
         <v-menu
       v-model="showMenu"
@@ -70,16 +39,51 @@
       offset-y
     >
       <v-list dense>
-        <v-list-item @click.prevent="moveW(item.folder_name)">
+        <v-list-item @click.prevent="dialog2 = !dialog2">
           <v-list-item-title>이동</v-list-item-title>
         </v-list-item>
-        <v-list-item @click.prevent="deleteF(item.folder_name)">
+        <v-list-item @click.prevent="deleteF">
           <v-list-item-title>삭제</v-list-item-title>
         </v-list-item>
       </v-list>
     </v-menu>
       </v-list-item>
-
+<v-dialog
+      v-model="dialog2"
+      width="500px"
+      >
+      <v-card>
+        <v-card-title class="grey darken-2">
+          Move Folder
+        </v-card-title>
+        <v-container>
+          <v-list-item-group
+          v-for="item2 in folders"
+          :key="item2.folder_id"
+          >
+            <template v-if="!(item2.folder_name === curfName)">
+              <v-hover @click.left="transferF(item2.folder_name)">
+              <v-list-item-avatar>
+                <v-icon>mdi-folder</v-icon>
+              </v-list-item-avatar>
+              <v-list-item-content>
+                <v-list-item-title v-text="item2.folder_name"></v-list-item-title>
+              </v-list-item-content>
+              </v-hover>
+            </template>
+            <!-- <template v-else></template> -->
+          </v-list-item-group>
+        </v-container>
+        <v-card-actions>
+          <v-spacer></v-spacer>
+          <v-btn
+            text
+            color="primary"
+            @click="cancelMove"
+          >Cancel</v-btn>
+        </v-card-actions>
+      </v-card>
+    </v-dialog>
       <v-divider inset></v-divider>
       <v-subheader inset>Files</v-subheader>
       <v-list-item
@@ -143,7 +147,6 @@
       >
         <v-icon>mdi-plus</v-icon>
     </v-btn>
-    
     <v-dialog
       v-model="dialog"
       width="500px"
@@ -181,9 +184,9 @@ import Axios from 'axios';
     data() {
       return {
         foldername:'',
+        curfName:'',
         folders: [],
         files: [],
-        fMove:[],
         search:'',
         id: '',
         dialog:false,
@@ -215,6 +218,10 @@ import Axios from 'axios';
        methods: {
          initFolderName(){
            this.foldername = '';
+         },
+         cancelMove(){
+            this.curfName = '';
+            this.dialog2 = false;
          },
          async makeF(){
            try {
@@ -270,12 +277,12 @@ import Axios from 'axios';
             console.log(error.response.data);
           }
         },
-        async deleteF(folderName){
+        async deleteF(){
           try {
             const cData = {
               id: this.$store.state.id,
               cur : this.$store.state.cur,
-              folder_name: folderName
+              folder_name: this.curfName
             }
             const response = await deleteFolder(cData);
             console.log(response);
@@ -284,16 +291,18 @@ import Axios from 'axios';
           } catch (error) {
             console.log("에러");
             console.log(error.response.data);
-          }
+          } finally{
+             this.curfName = '';
+           }
         },
-        async transferF(folderName1, folderName2){
+        async transferF(folderName){
           try {
             const cData = {
               id: this.$store.state.id,
               cur : this.$store.state.cur,
-              folder_name: folderName1,
+              folder_name: this.curfName,
               isfolder: true,
-              newPath: this.$store.state.cur + folderName2
+              newPath: this.$store.state.cur + folderName   + '/'
             }
             const response = await moveFolder(cData);
             console.log(response);
@@ -304,30 +313,19 @@ import Axios from 'axios';
             console.log(error.response.data);
           } finally{
              this.initFolderName();
+             this.curfName = '';
              this.dialog2 = false;
            }
         },
-        show (e) {
+        show (folderN, e) {
           e.preventDefault()
+          this.curfName = folderN;
           this.showMenu = false
           this.x = e.clientX
           this.y = e.clientY
           this.$nextTick(() => {
           this.showMenu = true
         })
-      },
-      moveW(fName){
-        for(let i of this.folders){
-          if(i.folder_name !==fName){
-            this.fMove.push(i);
-          }
-        }
-        this.dialog2 = !this.dialog2;
-        console.log(fName);
-      },
-      initfMove(){
-        this.fMove = [];
-        this.dialog2 = !this.dialog2;
       }
     }
   }
