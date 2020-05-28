@@ -7,7 +7,7 @@ var S3 = require('../modules/s3/s3');
 
 
 router.get('/', function (req, res) {
-    var user_id = req.query.user_id;
+    var user_id = req.session.user_id;
 
     var sql = 'SELECT * FROM files WHERE user_id = (?) ORDER BY date DESC';
     connection.query(sql, user_id, function (err, result) {
@@ -22,7 +22,7 @@ router.get('/', function (req, res) {
 // /file/:name
 router.get('/:name', function (req, res) {
     var file_name = req.params.name;
-    var user_id = req.query.user_id;
+    var user_id = req.session.user_id;
 
     var s3 = new AWS.S3();
 

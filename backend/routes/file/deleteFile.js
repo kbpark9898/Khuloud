@@ -8,8 +8,7 @@ var S3 = require('../modules/s3/s3');
 
 // /file/delete/:name
 router.get('/:name', function (req, res) {
-    //var user_id = req.session.user_id;
-    var user_id = 'shlee';
+    var user_id = req.session.user_id;
 
     var sourceFile = req.params.name;
     var targetPath = 'trashcan';

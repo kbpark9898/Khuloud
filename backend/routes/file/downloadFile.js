@@ -11,8 +11,7 @@ var S3 = require('../modules/s3/s3');
 // /file/download/:name
 router.get('/:name', function (req, res) {
     var file_name = req.params.name;
-    //var user_id = req.session.user_id;
-    var user_id = 'shlee';
+    var user_id = req.session.user_id;
 
     var sourceFile = file_name;
     var tempDownloadDir = __dirname + '/../modules/s3/download/' + user_id + '/' + file_name;

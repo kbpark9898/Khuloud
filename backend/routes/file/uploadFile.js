@@ -11,8 +11,7 @@ var S3 = require('../modules/s3/s3');
 
 // /file/upload
 router.post('/', function (req, res) {
-    //var user_id = req.body.user_id;
-    var user_id = 'shlee';
+    var user_id = req.session.user_id;
 
     var sourceFiles = [];
     var errFiles = [];
