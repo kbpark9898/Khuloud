@@ -9,6 +9,7 @@ var indexRouter = require('./routes/index');
 var userRouter = require('./routes/userlogin/user');
 var loginRouter = require('./routes/userlogin/login');
 var registerRouter = require('./routes/userlogin/register');
+var folderRouter = require('./routes/folders');
 
 
 var passport = require('passport');
@@ -17,19 +18,19 @@ var config = require('./routes/modules/config');
 
 //port
 passport.serializeUser(function(user, done) {
-  console.log('serialized');
-  done(null, user);
+    console.log('serialized');
+    done(null, user);
 });
 passport.deserializeUser(function(user, done) {
-  console.log('deserialized');
-  done(null, user);
+    console.log('deserialized');
+    done(null, user);
 });
 
 
 var app = express();
 
 // view engine setup
-app.set('views', [path.join(__dirname, 'views'),path.join(__dirname ,'dist')]);
+app.set('views', [path.join(__dirname, 'views'), path.join(__dirname, 'dist')]);
 // app.set('view engine', 'ejs');
 
 app.use(logger('dev'));
@@ -39,9 +40,9 @@ app.use(cookieParser());
 app.use(express.static(path.join(__dirname, 'public')));
 
 app.use(session({
-  secret: 'mykey',
-  saveUninitialized: true,
-  resave: true
+    secret: 'mykey',
+    saveUninitialized: true,
+    resave: true
 }));
 
 app.use(express.static('public'));
@@ -54,22 +55,23 @@ app.use('/api/', indexRouter);
 app.use('/api/user', userRouter);
 app.use('/api/login', loginRouter);
 app.use('/api/RegistUser', registerRouter);
+app.use('/api/folder', folderRouter);
 //app.use('/users', usersRouter);
 
 // catch 404 and forward to error handler
 app.use(function(req, res, next) {
-  next(createError(404));
+    next(createError(404));
 });
 
 // error handler
 app.use(function(err, req, res, next) {
-  // set locals, only providing error in development
-  res.locals.message = err.message;
-  res.locals.error = req.app.get('env') === 'development' ? err : {};
+    // set locals, only providing error in development
+    res.locals.message = err.message;
+    res.locals.error = req.app.get('env') === 'development' ? err : {};
 
-  // render the error page
-  res.status(err.status || 500);
-  res.render('error');
+    // render the error page
+    res.status(err.status || 500);
+    res.render('error');
 });
 
 module.exports = app;

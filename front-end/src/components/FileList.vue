@@ -12,10 +12,8 @@
         hide-details
       ></v-text-field>
     </v-toolbar>
-
     <v-list two-line subheader>
       <v-subheader inset>Folders</v-subheader>
-
       <v-list-item
         v-for="item in this.$store.getters.folderL"
         :key="item.title"
@@ -24,22 +22,17 @@
         <v-list-item-avatar>
           <v-icon>mdi-folder</v-icon>
         </v-list-item-avatar>
-
         <v-list-item-content>
           <v-list-item-title v-text="item.folder_name"></v-list-item-title>
         </v-list-item-content>
-
         <v-list-item-action>
           <v-btn icon>
             <v-icon color="grey lighten-1">mdi-information</v-icon>
           </v-btn>
         </v-list-item-action>
       </v-list-item>
-
       <v-divider inset></v-divider>
-
       <v-subheader inset>Files</v-subheader>
-
       <v-list-item
         v-for="item in this.$store.getters.fileL"
         :key="item.title"
@@ -48,11 +41,9 @@
         <v-list-item-avatar>
           <v-icon> mdi-file</v-icon>
         </v-list-item-avatar>
-
         <v-list-item-content>
           <v-list-item-title v-text="item"></v-list-item-title>
         </v-list-item-content>
-
         <v-list-item-action>
           <v-btn icon>
             <v-icon color="grey lighten-1">mdi-information</v-icon>
@@ -81,7 +72,6 @@
        >
          {{ text }}
        </v-chip>
-
        <span
          v-else-if="index === 2"
          class="overline grey--text text--darken-3 mx-2"
@@ -89,7 +79,7 @@
          +{{ files.length - 2 }} File(s)
        </span>
      </template>
-    </v-file-input>
+   </v-file-input>
       <v-btn
         bottom
         color="blue"
@@ -112,7 +102,7 @@
         <v-container>
           <div>
             <v-icon>mdi-folder</v-icon>
-            <v-text-field placeholder="name" id="foldername" type="text" v-model="foldername" ></v-text-field>
+            <v-text-field placeholder="name" id="foldername" type="text" v-model="foldername"></v-text-field>
           </div>
         </v-container>
         <v-card-actions>
@@ -133,54 +123,57 @@
 </template>
 
 <script>
-import { dropbox, makeFolder } from '../api/index';
+import { folder, makeFolder } from '../api/index';
   export default {
     data() {
       return {
-        foldername: '',
+        foldername:'',
         folders: [],
         files: [],
         search:'',
         id: '',
-        dialog: false,
+        dialog:false
       }
     },
     async created(){
         try {
-          const userData = this.$store.state.id;
-          console.log(this.id);
-          
-          const response = await dropbox(userData);
+          const curData = {
+            id : this.$store.state.id,
+            cur: this.$store.state.cur
+          }
+          const response = await folder(curData);
           console.log(response);
           this.$store.commit('setFolder', response.data.folders);
-          this.$store.commit('setFile', response.data.files);
+          this.$store.commit('setCur', response.data.cur);
         } catch (error) {
           console.log("에러");
-          console.log(error.response.data);          
+          console.log(error.response.data);
         }
       },
-      methods: {
-        initFolderName(){
-          this.foldername = '';
-        },
-        async makeF(){
-          try {
-            const folderData = {
-              user_id : this.$store.state.id,
-              cur : this.$store.state.id,
-              folder_name : this.foldername
-            };
-            const response = await makeFolder(folderData);
-            this.$store.commit('setFolder', response.data.folders);
-            console.log("폴더 생성 완료");
-          } catch (error) {
-            console.log("에러");
-            console.log(error.response.data);
-          } finally{
-            this.initFolderName();
-            this.dialog = false;
-          }
-        }
-      }
+       methods: {
+         initFolderName(){
+           this.foldername = '';
+         },
+         async makeF(){
+           try {
+             const folderData = {
+               user_id : this.$store.state.id,
+               cur : this.$store.state.cur,
+               folder_name : this.foldername
+             };
+             const response = await makeFolder(folderData);
+             console.log(response.data)
+             console.log("폴더 생성 완료");
+             this.$store.commit('setFolder', response.data.folders);
+           } catch (error) {
+             console.log("에러");
+             console.log(error.response.data);
+           } finally{
+             this.initFolderName();
+             this.dialog = false;
+           }
+         }
+
+  }
   }
 </script>
