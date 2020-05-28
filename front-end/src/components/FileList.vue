@@ -18,19 +18,18 @@
       <v-list-item
         v-for="item in this.$store.getters.folderL"
         :key="item.title"
-        @click="moveF(item.folder_name)"
       >
-        <v-list-item-avatar>
+        <v-list-item-avatar @click="moveF(item.folder_name)">
           <v-icon>mdi-folder</v-icon>
         </v-list-item-avatar>
-        <v-list-item-content>
+        <v-list-item-content @click="moveF(item.folder_name)">
           <v-list-item-title v-text="item.folder_name"></v-list-item-title>
         </v-list-item-content>
         <v-list-item-action>
           <v-btn icon>
             <v-icon color="grey lighten-1">mdi-information</v-icon>
           </v-btn>
-          <v-btn icon>
+          <v-btn icon @click="deleteF(item.folder_name)">
             <v-icon color="grey lighten-1">mdi-delete</v-icon>
           </v-btn>
         </v-list-item-action>
