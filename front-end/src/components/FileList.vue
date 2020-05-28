@@ -30,7 +30,7 @@
             <v-icon color="grey lighten-1">mdi-information</v-icon>
           </v-btn>
           <v-btn icon>
-            <v-icon color="grey ligthen-1">mdi-delete</v-icon>
+            <v-icon color="grey lighten-1">mdi-delete</v-icon>
           </v-btn>
         </v-list-item-action>
       </v-list-item>
@@ -50,6 +50,9 @@
         <v-list-item-action>
           <v-btn icon>
             <v-icon color="grey lighten-1">mdi-information</v-icon>
+          </v-btn>
+          <v-btn icon>
+            <v-icon color="grey lighten-1">mdi-delted</v-icon>
           </v-btn>
         </v-list-item-action>
       </v-list-item>
@@ -124,7 +127,6 @@
     </v-dialog>
   </div>
 </template>
-
 <script>
 import { folder, makeFolder } from '../api/index';
   export default {
@@ -191,7 +193,6 @@ import { folder, makeFolder } from '../api/index';
           console.log(error.response.data);
         }
          }
-
-  }
+    }
   }
 </script>
