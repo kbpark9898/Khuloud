@@ -17,7 +17,7 @@
       <v-list-item
         v-for="item in this.$store.getters.folderL"
         :key="item.title"
-        @click="$router.push({name: 'Folder'})"
+        @click="moveF(item.folder_name)"
       >
         <v-list-item-avatar>
           <v-icon>mdi-folder</v-icon>
@@ -139,7 +139,7 @@ import { folder, makeFolder } from '../api/index';
         try {
           const curData = {
             id : this.$store.state.id,
-            cur: this.$store.state.cur
+            cur: '/'
           }
           const response = await folder(curData);
           console.log(response);
@@ -172,6 +172,21 @@ import { folder, makeFolder } from '../api/index';
              this.initFolderName();
              this.dialog = false;
            }
+         },
+         async moveF(move_folder_name){
+           try {
+          const curData = {
+            id : this.$store.state.id,
+            cur: this.$store.state.cur + move_folder_name + '/'
+          }
+          const response = await folder(curData);
+          console.log(response);
+          this.$store.commit('setFolder', response.data.folders);
+          this.$store.commit('setCur', response.data.cur);
+        } catch (error) {
+          console.log("에러");
+          console.log(error.response.data);
+        }
          }
 
   }

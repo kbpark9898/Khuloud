@@ -20,13 +20,21 @@ router.get('/show', function(req, res, next) {
     folders = {}
     let checkfolder = 'SELECT * FROM folders WHERE location = ? AND user_id = ?;';
     connection.query(checkfolder, [curPath, user_id], function(err, rows, fields) {
-        if (rows.length != 0) {
-            res.status(200).send({
-                folders: rows,
-                cur: curPath
-            })
+        if (err) {
+            console.log('select error');
+            res.status(404).send()
         } else {
-            res.send({ error: "Does not exist" });
+            if (rows.length != 0) {
+                res.status(200).send({
+                    folders: rows,
+                    cur: curPath
+                })
+            } else {
+                res.status(200).send({
+                    folders: rows,
+                    cur: curPath
+                })
+            }
         }
     });
 });
