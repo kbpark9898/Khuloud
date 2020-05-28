@@ -7,18 +7,14 @@ var S3 = require('../modules/s3/s3');
 
 
 router.get('/', function (req, res) {
-    //var userId = req.session.user_id;
-    var userId = 'shlee';
+    var user_id = req.query.user_id;
 
     var sql = 'SELECT * FROM files WHERE user_id = (?) ORDER BY date DESC';
-    connection.query(sql, [userId], function (err, result) {
-        if (err){
-            console.log('bringing fileList failed');
-        }
-        else {
-            console.log('bringing fileList success');
-            res.send(result);
-            //res.render('file/files');
+    connection.query(sql, user_id, function (err, result) {
+        if (result.length == 0){
+            res.send({error: 'Exist Nothing'});
+        }else{
+            res.status(200).send({files: result});
         }
     })
 });
@@ -26,8 +22,7 @@ router.get('/', function (req, res) {
 // /file/:name
 router.get('/:name', function (req, res) {
     var file_name = req.params.name;
-    //var user_id = req.session.user_id;
-    var user_id = 'shlee';
+    var user_id = req.query.user_id;
 
     var s3 = new AWS.S3();
 

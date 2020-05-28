@@ -11,8 +11,8 @@ var S3 = require('../modules/s3/s3');
 
 // /file/upload
 router.post('/', function (req, res) {
-    //var userId = req.user.userId;
-    var userId = 'shlee';
+    //var user_id = req.body.user_id;
+    var user_id = 'shlee';
 
     var sourceFiles = [];
     var errFiles = [];
@@ -33,7 +33,7 @@ router.post('/', function (req, res) {
             }
         }
 
-        S3.uploadFiles(0, errFiles, S3.BUCKET_NAME, userId, sourceFiles, targetPath, bodies, function (result, errFiles) {
+        S3.uploadFiles(0, errFiles, S3.BUCKET_NAME, user_id, sourceFiles, targetPath, bodies, function (result, errFiles) {
             var newSourceFiles = [];
             if (!result) {   // 에러 파일이 있는 경우
                 for (var sourceFile of sourceFiles) {
@@ -43,14 +43,14 @@ router.post('/', function (req, res) {
                 }
             }
             for (var sourceFile of sourceFiles) {
-                var sql = 'INSERT INTO files (file_name, user_id) VALUES (?, ?)';
-                connection.query(sql, [sourceFile, userId], function (err, result) {
+                var sql = 'INSERT INTO files (file_name, user_id, location) VALUES (?, ?, ?)';
+                connection.query(sql, [file_name, user_id, targetPath], function (err, result) {
                     if (err) {
                         console.log('insert file {', sourceFile, '} in db failed');
                     }
                 })
             }
-            res.end("Errfiles: ", errFiles);
+            res.send({Errfiles: errFiles});
         })
     })
 })

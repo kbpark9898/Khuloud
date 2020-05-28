@@ -24,7 +24,7 @@
                 <v-spacer></v-spacer>
               </v-toolbar>
               <v-card-text>
-                <v-form @submit.prevent="submitForm">
+                <v-form>
                   <v-text-field
                     label="ID"
                     v-model="id"
@@ -49,7 +49,6 @@
                   <v-text-field
                     label="E-mail"
                     v-model="email"
-                    :rules="emailRules"
                     name="Email"
                   ></v-text-field>
 
@@ -62,7 +61,7 @@
               </v-card-text>
               <v-card-actions>
                 <v-spacer></v-spacer>
-                <v-btn color="primary" :disabled="!id || !password || !name || !email || !contact" @click = "$router.push({name: 'Login'})">Regist</v-btn>
+                <v-btn color="primary" :disabled="!id || !password || !name || !email || !contact" @click="submitForm">Regist</v-btn>
               </v-card-actions>
             </v-card>
           </v-col>
@@ -73,6 +72,8 @@
 </template>
 
 <script>
+import { registerUser } from '../api/index'
+
   export default {
       data() {
           return {
@@ -86,17 +87,19 @@
       methods: {
           async submitForm() {
               try {
-                  const usderData = {
-                      id: this.id,
-                      password: this.password,
-                      name: this.name,
-                      email: this.email,
-                      contact: this.contact
+                  const userData = {
+                      user_id: this.id,
+                      user_pw: this.password,
+                      user_name: this.name,
+                      user_email: this.email,
+                      user_phone: this.contact
                   };
                   const { data } = await registerUser(userData);
                   console.log("회원가입 완료"); 
                   this.$router.push('/');
               } catch (error) {
+                  console.log("에러");
+                  
                   console.log(error.response.data);
               } finally{
                   this.initForm();

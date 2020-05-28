@@ -21,7 +21,7 @@ router.post('/', function(req, res, next) {
     var user_phone=req.body.user_phone;
 
     var sqlquery = "SELECT  * FROM users WHERE user_id = ?";
-        connection.query(sqlquery, [user_id], function (err, result) {
+        connection.query(sqlquery, [user_id], function (err, rows) {
             if (rows.length == 0) {
                 user_pw=cryptoM.encrypt(user_pw);
                 console.log(user_pw);
@@ -32,13 +32,12 @@ router.post('/', function(req, res, next) {
                         console.log("inserting user failed");
                         throw err;
                     } else {
-                        res.redirect('/login');
+                         res.status(200).send('saved');
 
                     }
                 });
             } else {
-                res.redirect("/login");
-                throw err;
+                res.status(404).send(err);
             }
         });
 });

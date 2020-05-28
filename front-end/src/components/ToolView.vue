@@ -4,6 +4,7 @@
       v-model="drawer"
       :clipped="$vuetify.breakpoint.lgAndUp"
       app
+      v-if="isUserLogin"
     >
     <v-list dense>
       <v-list-item router :to="{name: 'Main'}" exact>
@@ -88,10 +89,8 @@
       color="blue darken-3"
       dark
     >
-      <!-- <template v-if="isUserLogin">
-        <v-app-bar-nav-icon @click.stop="drawer = !drawer"></v-app-bar-nav-icon>
-      </template> -->
-      <v-app-bar-nav-icon @click.stop="drawer = !drawer"></v-app-bar-nav-icon>
+
+      <v-app-bar-nav-icon @click.stop="drawer = !drawer" v-if="isUserLogin"></v-app-bar-nav-icon>
       <v-toolbar-title
         style="width: 300px"
         class="ml-0 pl-4"
@@ -111,32 +110,20 @@
       <template v-else>
         <div></div>
       </template>
-      <!-- <v-text-field
-        v-if="isUserLogin"
-        flat
-        solo-inverted
-        hide-details
-        prepend-inner-icon="mdi-magnify"
-        label="전체 검색"
-        class="hidden-sm-and-down"
-      ></v-text-field> -->
       <v-spacer></v-spacer>
       <template v-if="isUserLogin">
         <v-btn icon @click = "logoutUser">
-          <v-icon>mid-login</v-icon>
+          <v-icon>mdi-login</v-icon>
         </v-btn>
       </template>
       <template v-else>
         <v-btn icon @click = "$router.push({name: 'Login'})">
           <v-icon>mdi-login</v-icon>
         </v-btn>
-        <v-btn icon @click="$router.push({name: 'RegistUser'})">
+        <v-btn icon @click = "$router.push({name: 'RegistUser'})">
           <v-icon>mdi-account</v-icon>
         </v-btn>
       </template>
-      <!-- <v-btn icon @click = "$router.push({name: 'Login'})">
-        <v-icon>mdi-login</v-icon>
-      </v-btn> -->
     </v-app-bar>
     <v-content>
       <v-container
@@ -145,112 +132,6 @@
         <router-view></router-view>
       </v-container>
     </v-content>
-    <template v-if="isUserLogin">
-      <v-btn
-        bottom
-        color="pink"
-        dark
-        fab
-        fixed
-        right
-        @click="dialog = !dialog"
-      >
-        <v-icon>mdi-plus</v-icon>
-    </v-btn>
-    </template>
-    <!-- <v-btn
-      bottom
-      color="pink"
-      dark
-      fab
-      fixed
-      right
-      @click="dialog = !dialog"
-    >
-      <v-icon>mdi-plus</v-icon>
-    </v-btn> -->
-    <v-dialog
-      v-model="dialog"
-      width="800px"
-    >
-      <v-card>
-        <v-card-title class="grey darken-2">
-          Create contact
-        </v-card-title>
-        <v-container>
-          <v-row class="mx-2">
-            <v-col
-              class="align-center justify-space-between"
-              cols="12"
-            >
-              <v-row
-                align="center"
-                class="mr-0"
-              >
-                <v-avatar
-                  size="40px"
-                  class="mx-3"
-                >
-                  <img
-                    src="//ssl.gstatic.com/s2/oz/images/sge/grey_silhouette.png"
-                    alt=""
-                  >
-                </v-avatar>
-                <v-text-field
-                  placeholder="Name"
-                ></v-text-field>
-              </v-row>
-            </v-col>
-            <v-col cols="6">
-              <v-text-field
-                prepend-icon="mdi-account-card-details-outline"
-                placeholder="Company"
-              ></v-text-field>
-            </v-col>
-            <v-col cols="6">
-              <v-text-field
-                placeholder="Job title"
-              ></v-text-field>
-            </v-col>
-            <v-col cols="12">
-              <v-text-field
-                prepend-icon="mdi-mail"
-                placeholder="Email"
-              ></v-text-field>
-            </v-col>
-            <v-col cols="12">
-              <v-text-field
-                type="tel"
-                prepend-icon="mdi-phone"
-                placeholder="(000) 000 - 0000"
-              ></v-text-field>
-            </v-col>
-            <v-col cols="12">
-              <v-text-field
-                prepend-icon="mdi-text"
-                placeholder="Notes"
-              ></v-text-field>
-            </v-col>
-          </v-row>
-        </v-container>
-        <v-card-actions>
-          <v-btn
-            text
-            color="primary"
-          >More</v-btn>
-          <v-spacer></v-spacer>
-          <v-btn
-            text
-            color="primary"
-            @click="dialog = false"
-          >Cancel</v-btn>
-          <v-btn
-            text
-            @click="dialog = false"
-          >Save</v-btn>
-        </v-card-actions>
-      </v-card>
-    </v-dialog>
   </v-app>
 </template>
 
@@ -272,7 +153,7 @@ export default {
     }),
     computed: {
       isUserLogin(){
-        return this.$store.getters.isUserLogin;
+        return this.$store.getters.isLogin;
       },
     },
     methods: {
