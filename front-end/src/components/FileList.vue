@@ -18,22 +18,66 @@
       <v-list-item
         v-for="item in this.$store.getters.folderL"
         :key="item.title"
+        :search="search"
+        @click.right="show"
+        @click.left="moveF(item.folder_name)"
       >
-        <v-list-item-avatar @click="moveF(item.folder_name)">
+        <v-list-item-avatar >
           <v-icon>mdi-folder</v-icon>
         </v-list-item-avatar>
-        <v-list-item-content @click="moveF(item.folder_name)">
+        <v-list-item-content >
           <v-list-item-title v-text="item.folder_name"></v-list-item-title>
         </v-list-item-content>
-        <v-list-item-action>
-          <v-btn icon>
-            <v-icon color="grey lighten-1">mdi-information</v-icon>
-          </v-btn>
-          <v-btn icon @click="deleteF(item.folder_name)">
-            <v-icon color="grey lighten-1">mdi-delete</v-icon>
-          </v-btn>
-        </v-list-item-action>
       </v-list-item>
+
+
+       <v-menu
+      v-model="showMenu"
+      :position-x="x"
+      :position-y="y"
+      absolute
+      offset-y
+    >
+      <v-list dense>
+        <v-list-item @click.prevent="dialog2 = !dialog2">
+          <v-list-item-title>이동</v-list-item-title>
+        </v-list-item>
+        <v-list-item @click.prevent="deleteF">
+          <v-list-item-title>삭제</v-list-item-title>
+        </v-list-item>
+      </v-list>
+    </v-menu>
+
+        <v-dialog
+      v-model="dialog2"
+      width="500px"
+    >
+      <v-card>
+        <v-card-title class="grey darken-2">
+          Move Folder
+        </v-card-title>
+        <v-container>
+          <div>
+            <v-icon>mdi-folder</v-icon>
+            <v-text-field placeholder="name" id="foldername" type="text" v-model="foldername"></v-text-field>
+          </div>
+        </v-container>
+        <v-card-actions>
+          <v-spacer></v-spacer>
+          <v-btn
+            text
+            color="primary"
+            @click="dialog2 = false"
+          >Cancel</v-btn>
+          <v-btn
+            text
+            @click=""
+          >Move</v-btn>
+        </v-card-actions>
+      </v-card>
+    </v-dialog>
+
+
       <v-divider inset></v-divider>
       <v-subheader inset>Files</v-subheader>
       <v-list-item
@@ -99,7 +143,7 @@
     </v-btn>
     <v-dialog
       v-model="dialog"
-      width="800px"
+      width="500px"
     >
       <v-card>
         <v-card-title class="grey darken-2">
@@ -138,7 +182,13 @@ import Axios from 'axios';
         files: [],
         search:'',
         id: '',
-        dialog:false
+        dialog:false,
+        search: '',
+        howMenu: false,
+        showMenu: false,
+        x: 0,
+        y: 0,
+        dialog2:false
       }
     },
     async created(){
@@ -226,7 +276,16 @@ import Axios from 'axios';
             console.log("에러");
             console.log(error.response.data);
           }
-        }
+        },
+        show (e) {
+          e.preventDefault()
+          this.showMenu = false
+          this.x = e.clientX
+          this.y = e.clientY
+          this.$nextTick(() => {
+          this.showMenu = true
+        })
+      }
     }
   }
 </script>
