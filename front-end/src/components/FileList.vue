@@ -219,10 +219,9 @@ import Axios from 'axios';
               cur : this.$store.state.cur,
               folder_name: folderName
             }
-            const reponse = await deleteFolder(cData);
-            console.log(response.data);
+            const response = await deleteFolder(cData);
+            console.log(response);
             this.$store.commit('setFolder', response.data.folders);
-            this.$store.commit('setCur', response.data.cur);
           } catch (error) {
             console.log("에러");
             console.log(error.response.data);

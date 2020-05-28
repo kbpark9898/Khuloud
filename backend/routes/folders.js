@@ -29,26 +29,17 @@ router.get('/show', function(req, res, next) {
             parentPath += '/';
         }
     }
-    folders = {}
     let checkfolder = 'SELECT * FROM folders WHERE location = ? AND user_id = ?;';
     connection.query(checkfolder, [curPath, user_id], function(err, rows, fields) {
         if (err) {
             console.log('select error');
             res.status(404).send()
         } else {
-            if (rows.length != 0) {
-                res.status(200).send({
-                    folders: rows,
-                    cur: curPath,
-                    parentPath: parentPath
-                })
-            } else {
-                res.status(200).send({
-                    folders: rows,
-                    cur: curPath,
-                    parentPath: parentPath
-                })
-            }
+            res.status(200).send({
+                folders: rows,
+                cur: curPath,
+                parentPath: parentPath
+            })
         }
     });
 });
@@ -70,39 +61,37 @@ router.post('/makefolder', function(req, res, next) {
     let checksql = 'SELECT * FROM folders WHERE location = ? AND folder_name = ?;';
     console.log(req.body)
     connection.query(checksql, [cur, folder_name], function(err, rows, fields) {
-        if (rows.length == 0) {
-            s3.putObject(params, function(err, data) {
-                if (err) {
-                    console.log('s3 error');
-                    throw err;
-                } else {
-                    console.log(data);
-                }
-            });
-            let sql = 'INSERT INTO folders (folder_name,location,user_id,created) values (?,?,?,?);';
-            let values = [folder_name, cur, user_id, date];
-            connection.query(sql, values, function(err, result, field) {
-                if (err) {
-                    console.log('insert error');
-                    throw err;
-                } else {
-                    folders = {}
-                    let checkfolder = 'SELECT * FROM folders WHERE location = ? AND user_id = ?;';
-                    connection.query(checkfolder, [cur, user_id], function(err, rows, fields) {
-                        if (rows.length != 0) {
-                            res.status(200).send({
-                                folders: rows
-                            })
-                        } else {
-                            res.send({ error: "Does not exist" });
-                        }
-                    });
-                }
-            });
-
+        if (err) {
 
         } else {
-            res.status(404).send({ error: "same name error" });
+            if (rows.length == 0) {
+                s3.putObject(params, function(err, data) {
+                    if (err) {
+                        console.log('s3 error');
+                        throw err;
+                    } else {
+                        console.log(data);
+                        let sql = 'INSERT INTO folders (folder_name,location,user_id,created) values (?,?,?,?);';
+                        let values = [folder_name, cur, user_id, date];
+                        connection.query(sql, values, function(err, result, field) {
+                            if (err) {
+                                console.log('insert error');
+                                throw err;
+                            } else {
+                                let checkfolder = 'SELECT * FROM folders WHERE location = ? AND user_id = ?;';
+                                connection.query(checkfolder, [cur, user_id], function(err, rows, fields) {
+                                    console.log(rows);
+                                    res.status(200).send({
+                                        folders: rows
+                                    })
+                                });
+                            }
+                        });
+                    }
+                });
+            } else {
+                res.status(404).send({ error: "same name error" });
+            }
         }
     });
 });
@@ -110,48 +99,49 @@ router.post('/makefolder', function(req, res, next) {
 
 router.post('/delfolder', function(req, res, next) {
 
-    user_id = req.body.user_id;
-    curPath = user_id + req.body.cur;
+    user_id = req.body.id;
+    let cur = req.body.cur;
+    curPath = user_id + cur;
     let folder_name = req.body.folder_name;
     let params = {
-        Bucket: BUCKET_NAME + curPath,
-        Key: folder_name + '/'
+        Bucket: BUCKET_NAME,
+        Key: curPath + folder_name + '/'
     };
-    let checksql = 'SELECT * FROM folders WHERE location = ? AND folder_name = ?;';
-    let values = [curPath, folder_name];
-
+    let checksql = 'SELECT * FROM folders WHERE location = ? AND folder_name = ? AND user_id = ?;';
+    let values = [cur, folder_name, user_id];
     connection.query(checksql, values, function(err, rows, fields) {
-        if (rows.length != 0) {
-            s3.deleteObject(params, function(err, data) {
-                if (err) {
-                    //throw err;
-                } else {
-                    let sql = 'DELETE FROM folders WHERE location = ? AND folder_name = ?;';
-                    connection.query(sql, values, function(err, result, field) {
-                        if (err) {
-                            //throw err;
-                        } else {
-                            folders = {}
-                            let checkfolder = 'SELECT * FROM folders WHERE location = ? AND user_id = ?;';
-                            connection.query(checkfolder, [cur, user_id], function(err, rows, fields) {
-                                if (rows.length != 0) {
-                                    res.status(200).send({
-                                        folders: rows,
-                                        cur: curPath
-                                    })
-                                } else {
-                                    res.send({ error: "Does not exist" });
-                                }
-                            });
-
-                        }
-                    });
-                }
-            });
-
-
+        if (err) {
+            res.status(404).send({ error: "error" });
         } else {
-            res.send({ error: "Does not exist" });
+            if (rows.length != 0) {
+                s3.deleteObject(params, function(err, data) {
+                    if (err) {
+                        console.log('s3 error');
+                        //throw err;
+                    } else {
+                        console.log(data);
+                        let sql = 'DELETE FROM folders WHERE location = ? AND folder_name = ? AND user_id = ?;';
+                        connection.query(sql, values, function(err, result, field) {
+                            if (err) {
+                                //throw err;
+                            } else {
+                                console.log(cur);
+                                console.log(user_id);
+                                let checkfolder = 'SELECT * FROM folders WHERE location = ? AND user_id = ?;';
+                                connection.query(checkfolder, [cur, user_id], function(err, rows, fields) {
+                                    res.status(200).send({
+                                        folders: rows
+                                    })
+                                });
+
+                            }
+                        });
+                    }
+                });
+            } else {
+                console.log(req.body);
+                res.status(304).send({ error: "Does not exist" });
+            }
         }
     });
 });
