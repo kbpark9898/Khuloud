@@ -28,10 +28,7 @@
         <v-list-item-content >
           <v-list-item-title v-text="item.folder_name"></v-list-item-title>
         </v-list-item-content>
-      </v-list-item>
-
-
-       <v-menu
+               <v-menu
       v-model="showMenu"
       :position-x="x"
       :position-y="y"
@@ -40,15 +37,19 @@
     >
       <v-list dense>
         <v-list-item @click.prevent="dialog2 = !dialog2">
+          <v-icon>mdi-folder</v-icon>
           <v-list-item-title>이동</v-list-item-title>
         </v-list-item>
-        <v-list-item @click.prevent="deleteF">
+        <v-list-item @click.prevent="deleteF(item.folder_name)">
           <v-list-item-title>삭제</v-list-item-title>
         </v-list-item>
       </v-list>
     </v-menu>
+      </v-list-item>
 
-        <v-dialog
+
+
+    <v-dialog
       v-model="dialog2"
       width="500px"
     >
