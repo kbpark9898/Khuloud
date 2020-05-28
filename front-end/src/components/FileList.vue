@@ -142,9 +142,10 @@ import { folder, makeFolder } from '../api/index';
             cur: '/'
           }
           const response = await folder(curData);
-          console.log(response);
+          console.log(response.data);
           this.$store.commit('setFolder', response.data.folders);
           this.$store.commit('setCur', response.data.cur);
+          this.$store.commit('setParent', response.data.parentPath);
         } catch (error) {
           console.log("에러");
           console.log(error.response.data);
@@ -162,9 +163,9 @@ import { folder, makeFolder } from '../api/index';
                folder_name : this.foldername
              };
              const response = await makeFolder(folderData);
-             console.log(response.data)
-             console.log("폴더 생성 완료");
-             this.$store.commit('setFolder', response.data.folders);
+            console.log(response.data)
+            console.log("폴더 생성 완료");
+            this.$store.commit('setFolder', response.data.folders);
            } catch (error) {
              console.log("에러");
              console.log(error.response.data);
@@ -180,9 +181,10 @@ import { folder, makeFolder } from '../api/index';
             cur: this.$store.state.cur + move_folder_name + '/'
           }
           const response = await folder(curData);
-          console.log(response);
+          console.log(response.data);
           this.$store.commit('setFolder', response.data.folders);
           this.$store.commit('setCur', response.data.cur);
+          this.$store.commit('setParent', response.data.parentPath);
         } catch (error) {
           console.log("에러");
           console.log(error.response.data);
