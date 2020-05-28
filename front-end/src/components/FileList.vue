@@ -29,6 +29,9 @@
           <v-btn icon>
             <v-icon color="grey lighten-1">mdi-information</v-icon>
           </v-btn>
+          <v-btn icon>
+            <v-icon color="grey ligthen-1">mdi-delete</v-icon>
+          </v-btn>
         </v-list-item-action>
       </v-list-item>
       <v-divider inset></v-divider>
