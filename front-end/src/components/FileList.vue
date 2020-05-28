@@ -79,11 +79,7 @@
          +{{ files.length - 2 }} File(s)
        </span>
      </template>
-<<<<<<< HEAD
    </v-file-input>
-=======
-    </v-file-input>
->>>>>>> eacf2da71fd7ae8340b48d4dac8ee121a816fd94
       <v-btn
         bottom
         color="blue"
@@ -106,11 +102,7 @@
         <v-container>
           <div>
             <v-icon>mdi-folder</v-icon>
-<<<<<<< HEAD
             <v-text-field placeholder="name" id="foldername" type="text" v-model="foldername"></v-text-field>
-=======
-            <v-text-field placeholder="name" id="foldername" type="text" v-model="foldername" ></v-text-field>
->>>>>>> eacf2da71fd7ae8340b48d4dac8ee121a816fd94
           </div>
         </v-container>
         <v-card-actions>
@@ -131,34 +123,20 @@
 </template>
 
 <script>
-<<<<<<< HEAD
 import { folder, makeFolder } from '../api/index';
   export default {
     data() {
-      return {  
+      return {
         foldername:'',
         folders: [],
         files: [],
         search:'',
         id: '',
         dialog:false
-=======
-import { dropbox, makeFolder } from '../api/index';
-  export default {
-    data() {
-      return {
-        foldername: '',
-        folders: [],
-        files: [],
-        search:'',
-        id: '',
-        dialog: false,
->>>>>>> eacf2da71fd7ae8340b48d4dac8ee121a816fd94
       }
     },
     async created(){
         try {
-<<<<<<< HEAD
           const curData = {
             id : this.$store.state.id,
             cur: this.$store.state.cur
@@ -166,21 +144,12 @@ import { dropbox, makeFolder } from '../api/index';
           const response = await folder(curData);
           console.log(response);
           this.$store.commit('setFolder', response.data.folders);
-=======
-          const userData = this.$store.state.id;
-          console.log(this.id);
-          
-          const response = await dropbox(userData);
-          console.log(response);
-          this.$store.commit('setFolder', response.data.folders);
-          this.$store.commit('setFile', response.data.files);
->>>>>>> eacf2da71fd7ae8340b48d4dac8ee121a816fd94
+          this.$store.commit('setCur', response.data.cur);
         } catch (error) {
           console.log("에러");
           console.log(error.response.data);
         }
       },
-<<<<<<< HEAD
        methods: {
          initFolderName(){
            this.foldername = '';
@@ -192,7 +161,7 @@ import { dropbox, makeFolder } from '../api/index';
                cur : this.$store.state.cur,
                folder_name : this.foldername
              };
-             const response = await makeFolder(folderData); 
+             const response = await makeFolder(folderData);
              console.log(response.data)
              console.log("폴더 생성 완료");
              this.$store.commit('setFolder', response.data.folders);
@@ -206,30 +175,5 @@ import { dropbox, makeFolder } from '../api/index';
          }
 
   }
-=======
-      methods: {
-        initFolderName(){
-          this.foldername = '';
-        },
-        async makeF(){
-          try {
-            const folderData = {
-              user_id : this.$store.state.id,
-              cur : this.$store.state.id,
-              folder_name : this.foldername
-            };
-            const response = await makeFolder(folderData);
-            this.$store.commit('setFolder', response.data.folders);
-            console.log("폴더 생성 완료");
-          } catch (error) {
-            console.log("에러");
-            console.log(error.response.data);
-          } finally{
-            this.initFolderName();
-            this.dialog = false;
-          }
-        }
-      }
->>>>>>> eacf2da71fd7ae8340b48d4dac8ee121a816fd94
   }
 </script>
