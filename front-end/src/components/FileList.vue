@@ -28,27 +28,7 @@
         <v-list-item-content >
           <v-list-item-title v-text="item.folder_name"></v-list-item-title>
         </v-list-item-content>
-      </v-list-item>
-
-
-       <v-menu
-      v-model="showMenu"
-      :position-x="x"
-      :position-y="y"
-      absolute
-      offset-y
-    >
-      <v-list dense>
-        <v-list-item @click.prevent="dialog2 = !dialog2">
-          <v-list-item-title>이동</v-list-item-title>
-        </v-list-item>
-        <v-list-item @click.prevent="deleteF">
-          <v-list-item-title>삭제</v-list-item-title>
-        </v-list-item>
-      </v-list>
-    </v-menu>
-
-        <v-dialog
+         <v-dialog
       v-model="dialog2"
       width="500px"
     >
@@ -71,12 +51,28 @@
           >Cancel</v-btn>
           <v-btn
             text
-            @click=""
+            @click="transferF(item.folder_name)"
           >Move</v-btn>
         </v-card-actions>
       </v-card>
     </v-dialog>
-
+        <v-menu
+      v-model="showMenu"
+      :position-x="x"
+      :position-y="y"
+      absolute
+      offset-y
+    >
+      <v-list dense>
+        <v-list-item @click.prevent="dialog2 = !dialog2">
+          <v-list-item-title>이동</v-list-item-title>
+        </v-list-item>
+        <v-list-item @click.prevent="deleteF(item.folder_name)">
+          <v-list-item-title>삭제</v-list-item-title>
+        </v-list-item>
+      </v-list>
+    </v-menu>
+      </v-list-item>
 
       <v-divider inset></v-divider>
       <v-subheader inset>Files</v-subheader>
@@ -172,7 +168,7 @@
   </div>
 </template>
 <script>
-import { folder, makeFolder, deleteFolder } from '../api/index';
+import { folder, makeFolder, deleteFolder, moveFolder } from '../api/index';
 import Axios from 'axios';
   export default {
     data() {
@@ -276,6 +272,26 @@ import Axios from 'axios';
             console.log("에러");
             console.log(error.response.data);
           }
+        },
+        async transferF(folderName){
+          try {
+            const cData = {
+              id: this.$store.state.id,
+              cur : this.$store.state.cur,
+              folder_name: folderName,
+              isfolder: true,
+              newPath: this.foldername
+            }
+            const response = await moveFolder(cData);
+            console.log(response);
+            this.$store.commit('setFolder', response.data.folders);
+          } catch (error) {
+            console.log("에러");
+            console.log(error.response.data);
+          } finally{
+             this.initFolderName();
+             this.dialog2 = false;
+           }
         },
         show (e) {
           e.preventDefault()
