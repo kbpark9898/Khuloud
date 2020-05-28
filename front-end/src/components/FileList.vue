@@ -14,6 +14,7 @@
     </v-toolbar>
     <v-list two-line subheader>
       <v-subheader inset>Folders</v-subheader>
+      <v-btn @click="moveParent">...</v-btn>
       <v-list-item
         v-for="item in this.$store.getters.folderL"
         :key="item.title"
@@ -128,7 +129,8 @@
   </div>
 </template>
 <script>
-import { folder, makeFolder } from '../api/index';
+import { folder, makeFolder, deleteFolder } from '../api/index';
+import Axios from 'axios';
   export default {
     data() {
       return {
@@ -184,17 +186,49 @@ import { folder, makeFolder } from '../api/index';
           const curData = {
             id : this.$store.state.id,
             cur: this.$store.state.cur + move_folder_name + '/'
-          }
+            }
           const response = await folder(curData);
           console.log(response.data);
           this.$store.commit('setFolder', response.data.folders);
           this.$store.commit('setCur', response.data.cur);
           this.$store.commit('setParent', response.data.parentPath);
-        } catch (error) {
+          } catch (error) {
           console.log("에러");
           console.log(error.response.data);
+          }
+        },
+        async moveParent(){
+          try {
+            const cData = {
+              id : this.$store.state.id,
+              cur : this.$store.state.parent
+            };
+            const response= await folder(cData);
+            console.log(response.data);
+            this.$store.commit('setFolder', response.data.folders);
+            this.$store.commit('setCur', response.data.cur);
+            this.$store.commit('setParent', response.data.parentPath);
+          } catch (error) {
+            console.log("에러");
+            console.log(error.response.data);
+          }
+        },
+        async deleteF(folderName){
+          try {
+            const cData = {
+              id: this.$store.state.id,
+              cur : this.$store.state.cur,
+              folder_name: folderName
+            }
+            const reponse = await deleteFolder(cData);
+            console.log(response.data);
+            this.$store.commit('setFolder', response.data.folders);
+            this.$store.commit('setCur', response.data.cur);
+          } catch (error) {
+            console.log("에러");
+            console.log(error.response.data);
+          }
         }
-         }
     }
   }
 </script>

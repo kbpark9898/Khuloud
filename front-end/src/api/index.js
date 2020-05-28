@@ -27,4 +27,8 @@ function makeFolder(folderData) {
     return axios.post('/api/folder/makefolder', folderData);
 }
 
-export { registerUser, loginUser, folder, makeFolder };
+function deleteFolder(folderData){
+    return axios.post('/api/folder/delfolder', folderData);
+}
+
+export { registerUser, loginUser, folder, makeFolder, deleteFolder };
