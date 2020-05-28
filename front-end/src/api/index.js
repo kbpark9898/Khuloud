@@ -27,6 +27,7 @@ function makeFolder(folderData) {
     return axios.post('/api/folder/makefolder', folderData);
 }
 
+<<<<<<< HEAD
 function file(userData){
     return axios.get('/api/file', userData, {
         params: {
@@ -44,3 +45,6 @@ function dropbox(userData){
 }
 
 //  export { registerUser, loginUser, dropbox, makeFolder };
+=======
+export { registerUser, loginUser, folder, makeFolder };
+>>>>>>> ec5658f978ed2a5a94bba39bcb9aecf9edc70c36

@@ -17,7 +17,7 @@
       <v-list-item
         v-for="item in this.$store.getters.folderL"
         :key="item.title"
-        @click="$router.push({name: 'Folder'})"
+        @click="moveF(item.folder_name)"
       >
         <v-list-item-avatar>
           <v-icon>mdi-folder</v-icon>
@@ -28,6 +28,9 @@
         <v-list-item-action>
           <v-btn icon>
             <v-icon color="grey lighten-1">mdi-information</v-icon>
+          </v-btn>
+          <v-btn icon>
+            <v-icon color="grey lighten-1">mdi-delete</v-icon>
           </v-btn>
         </v-list-item-action>
       </v-list-item>
@@ -46,6 +49,9 @@
         <v-list-item-action>
           <v-btn icon>
             <v-icon color="grey lighten-1">mdi-information</v-icon>
+          </v-btn>
+          <v-btn icon>
+            <v-icon color="grey lighten-1">mdi-delted</v-icon>
           </v-btn>
         </v-list-item-action>
       </v-list-item>
@@ -101,7 +107,11 @@
         <v-container>
           <div>
             <v-icon>mdi-folder</v-icon>
+<<<<<<< HEAD
             <v-text-field placeholder="name" id="foldername" type="text" v-model="foldername" ></v-text-field>
+=======
+            <v-text-field placeholder="name" id="foldername" type="text" v-model="foldername"></v-text-field>
+>>>>>>> ec5658f978ed2a5a94bba39bcb9aecf9edc70c36
           </div>
         </v-container>
         <v-card-actions>
@@ -120,12 +130,11 @@
     </v-dialog>
   </div>
 </template>
-
 <script>
 import { folder, makeFolder } from '../api/index';
   export default {
     data() {
-      return {  
+      return {
         foldername:'',
         folders: [],
         files: [],
@@ -138,11 +147,19 @@ import { folder, makeFolder } from '../api/index';
         try {
           const curData = {
             id : this.$store.state.id,
-            cur: this.$store.state.cur
+            cur: '/'
           }
+<<<<<<< HEAD
           const response = await dropbox(userData);
           this.$store.commit('setFolder', response.data.folders);
           this.$store.commit('setFile', response.data.files);
+=======
+          const response = await folder(curData);
+          console.log(response.data);
+          this.$store.commit('setFolder', response.data.folders);
+          this.$store.commit('setCur', response.data.cur);
+          this.$store.commit('setParent', response.data.parentPath);
+>>>>>>> ec5658f978ed2a5a94bba39bcb9aecf9edc70c36
         } catch (error) {
           console.log("에러");
           console.log(error.response.data);
@@ -159,10 +176,10 @@ import { folder, makeFolder } from '../api/index';
                cur : this.$store.state.cur,
                folder_name : this.foldername
              };
-             const response = await makeFolder(folderData); 
-             console.log(response.data)
-             console.log("폴더 생성 완료");
-             this.$store.commit('setFolder', response.data.folders);
+             const response = await makeFolder(folderData);
+            console.log(response.data)
+            console.log("폴더 생성 완료");
+            this.$store.commit('setFolder', response.data.folders);
            } catch (error) {
              console.log("에러");
              console.log(error.response.data);
@@ -170,8 +187,29 @@ import { folder, makeFolder } from '../api/index';
              this.initFolderName();
              this.dialog = false;
            }
+<<<<<<< HEAD
          }
 
   }
+=======
+         },
+         async moveF(move_folder_name){
+           try {
+          const curData = {
+            id : this.$store.state.id,
+            cur: this.$store.state.cur + move_folder_name + '/'
+          }
+          const response = await folder(curData);
+          console.log(response.data);
+          this.$store.commit('setFolder', response.data.folders);
+          this.$store.commit('setCur', response.data.cur);
+          this.$store.commit('setParent', response.data.parentPath);
+        } catch (error) {
+          console.log("에러");
+          console.log(error.response.data);
+        }
+         }
+    }
+>>>>>>> ec5658f978ed2a5a94bba39bcb9aecf9edc70c36
   }
 </script>

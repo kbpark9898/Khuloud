@@ -6,6 +6,7 @@ const moment = require("moment");
 const BUCKET_NAME = "hong-s3-cloud";
 let curPath = "";
 let user_id = "";
+let parentPath = "";
 
 const s3 = new AWS.S3({
     accessKeyId: process.env.AWS_ACCESS_KEY_ID,
@@ -17,16 +18,37 @@ router.get('/show', function(req, res, next) {
     console.log(req.query);
     user_id = req.query.id;
     curPath = req.query.cur;
+    if (curPath == '/') {
+        parentPath = '/';
+    } else {
+        let pathSplit = curPath.split('/')
+        console.log(pathSplit);
+        parentPath = '/';
+        for (let i = 1; i < pathSplit.length - 2; i++) {
+            parentPath += pathSplit[i];
+            parentPath += '/';
+        }
+    }
     folders = {}
     let checkfolder = 'SELECT * FROM folders WHERE location = ? AND user_id = ?;';
     connection.query(checkfolder, [curPath, user_id], function(err, rows, fields) {
-        if (rows.length != 0) {
-            res.status(200).send({
-                folders: rows,
-                cur: curPath
-            })
+        if (err) {
+            console.log('select error');
+            res.status(404).send()
         } else {
-            res.send({ error: "Does not exist" });
+            if (rows.length != 0) {
+                res.status(200).send({
+                    folders: rows,
+                    cur: curPath,
+                    parentPath: parentPath
+                })
+            } else {
+                res.status(200).send({
+                    folders: rows,
+                    cur: curPath,
+                    parentPath: parentPath
+                })
+            }
         }
     });
 });
@@ -69,8 +91,7 @@ router.post('/makefolder', function(req, res, next) {
                     connection.query(checkfolder, [cur, user_id], function(err, rows, fields) {
                         if (rows.length != 0) {
                             res.status(200).send({
-                                folders: rows,
-                                cur: curPath
+                                folders: rows
                             })
                         } else {
                             res.send({ error: "Does not exist" });
