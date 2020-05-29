@@ -67,14 +67,10 @@ export default new VueRouter ({
         name:'Feedback',
         component: () => import('../views/Feedback.vue')
       },
-<<<<<<< HEAD
       {
         path: '/folder',
         name: 'Folder',
         component: () => import('../views/FolderPage.vue')
       },
-=======
-
->>>>>>> ec5658f978ed2a5a94bba39bcb9aecf9edc70c36
     ]
 })

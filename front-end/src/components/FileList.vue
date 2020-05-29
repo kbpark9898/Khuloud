@@ -107,11 +107,7 @@
         <v-container>
           <div>
             <v-icon>mdi-folder</v-icon>
-<<<<<<< HEAD
             <v-text-field placeholder="name" id="foldername" type="text" v-model="foldername" ></v-text-field>
-=======
-            <v-text-field placeholder="name" id="foldername" type="text" v-model="foldername"></v-text-field>
->>>>>>> ec5658f978ed2a5a94bba39bcb9aecf9edc70c36
           </div>
         </v-container>
         <v-card-actions>
@@ -149,17 +145,11 @@ import { folder, makeFolder } from '../api/index';
             id : this.$store.state.id,
             cur: '/'
           }
-<<<<<<< HEAD
-          const response = await dropbox(userData);
-          this.$store.commit('setFolder', response.data.folders);
-          this.$store.commit('setFile', response.data.files);
-=======
           const response = await folder(curData);
           console.log(response.data);
           this.$store.commit('setFolder', response.data.folders);
           this.$store.commit('setCur', response.data.cur);
           this.$store.commit('setParent', response.data.parentPath);
->>>>>>> ec5658f978ed2a5a94bba39bcb9aecf9edc70c36
         } catch (error) {
           console.log("에러");
           console.log(error.response.data);
@@ -187,11 +177,6 @@ import { folder, makeFolder } from '../api/index';
              this.initFolderName();
              this.dialog = false;
            }
-<<<<<<< HEAD
-         }
-
-  }
-=======
          },
          async moveF(move_folder_name){
            try {
@@ -210,6 +195,5 @@ import { folder, makeFolder } from '../api/index';
         }
          }
     }
->>>>>>> ec5658f978ed2a5a94bba39bcb9aecf9edc70c36
   }
 </script>

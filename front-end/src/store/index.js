@@ -9,10 +9,7 @@ export default new Vuex.Store({
         folders: {},
         files: {},
         cur: '/',
-<<<<<<< HEAD
-=======
         parent: '/'
->>>>>>> ec5658f978ed2a5a94bba39bcb9aecf9edc70c36
     },
     mutations: {
         setId(state, userid) {
@@ -49,7 +46,6 @@ export default new Vuex.Store({
         },
         cur(state) {
             return state.cur;
-<<<<<<< HEAD
         },        
         setFolder(state, folderlist){
           state.folders  = folderlist;
@@ -58,11 +54,4 @@ export default new Vuex.Store({
           state.files = filelist;
         },
   },
-=======
-        },
-        parent(state) {
-            return state.parent;
-        }
-    }
->>>>>>> ec5658f978ed2a5a94bba39bcb9aecf9edc70c36
 })
