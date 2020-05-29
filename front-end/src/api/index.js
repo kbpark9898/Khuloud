@@ -27,20 +27,14 @@ function makeFolder(folderData) {
     return axios.post('/api/folder/makefolder', folderData);
 }
 
-function file(userData){
-    return axios.get('/api/file', userData, {
-        params: {
-            user_id: userData.user_id
-        }
-    })
+function deleteFolder(folderData) {
+    return axios.post('/api/folder/delfolder', folderData);
+}
+
+function moveFolder(folderData) {
+    return axios.post('/api/folder/move', folderData);
 }
 
 
-export { registerUser, loginUser, folder, makeFolder, file};
 
-  
-function dropbox(userData){
-  return axios.get(`/api/folder/show/${userData}`);
-}
-
-//  export { registerUser, loginUser, dropbox, makeFolder };
+export { registerUser, loginUser, folder, makeFolder, deleteFolder, moveFolder };

@@ -14,26 +14,76 @@
     </v-toolbar>
     <v-list two-line subheader>
       <v-subheader inset>Folders</v-subheader>
+      <v-btn @click="moveParent">...</v-btn>
       <v-list-item
         v-for="item in this.$store.getters.folderL"
         :key="item.title"
-        @click="moveF(item.folder_name)"
+        :search="search"
+        @click.right="show(item.folder_name,$event)"
+        @click.left="moveF(item.folder_name)"
       >
-        <v-list-item-avatar>
+        <v-list-item-avatar >
           <v-icon>mdi-folder</v-icon>
         </v-list-item-avatar>
-        <v-list-item-content>
+        <v-list-item-content >
           <v-list-item-title v-text="item.folder_name"></v-list-item-title>
         </v-list-item-content>
-        <v-list-item-action>
-          <v-btn icon>
-            <v-icon color="grey lighten-1">mdi-information</v-icon>
-          </v-btn>
-          <v-btn icon>
-            <v-icon color="grey lighten-1">mdi-delete</v-icon>
-          </v-btn>
-        </v-list-item-action>
+
+              
+
+        <v-menu
+      v-model="showMenu"
+      :position-x="x"
+      :position-y="y"
+      absolute
+      offset-y
+    >
+      <v-list dense>
+        <v-list-item @click.prevent="dialog2 = !dialog2">
+          <v-list-item-title>이동</v-list-item-title>
+        </v-list-item>
+        <v-list-item @click.prevent="deleteF">
+          <v-list-item-title>삭제</v-list-item-title>
+        </v-list-item>
+      </v-list>
+    </v-menu>
       </v-list-item>
+<v-dialog
+      v-model="dialog2"
+      width="500px"
+      >
+      <v-card>
+        <v-card-title class="grey darken-2">
+          Move Folder
+        </v-card-title>
+        <v-container>
+          <v-list-item-group
+          v-for="item2 in folders"
+          :key="item2.folder_id"
+          >
+            <template v-if="!(item2.folder_name === curfName)">
+              <v-hover @click.left="transferF(item2.folder_name)">
+              <v-list-item-avatar>
+                <v-icon>mdi-folder</v-icon>
+              </v-list-item-avatar>
+              <v-list-item-content>
+                <v-list-item-title v-text="item2.folder_name"></v-list-item-title>
+              </v-list-item-content>
+              </v-hover>
+            </template>
+            <!-- <template v-else></template> -->
+          </v-list-item-group>
+        </v-container>
+        <v-card-actions>
+          <v-spacer></v-spacer>
+          <v-btn
+            text
+            color="primary"
+            @click="cancelMove"
+          >Cancel</v-btn>
+        </v-card-actions>
+      </v-card>
+    </v-dialog>
       <v-divider inset></v-divider>
       <v-subheader inset>Files</v-subheader>
       <v-list-item
@@ -98,7 +148,7 @@
     </v-btn>
     <v-dialog
       v-model="dialog"
-      width="800px"
+      width="500px"
     >
       <v-card>
         <v-card-title class="grey darken-2">
@@ -127,16 +177,24 @@
   </div>
 </template>
 <script>
-import { folder, makeFolder } from '../api/index';
+import { folder, makeFolder, deleteFolder, moveFolder } from '../api/index';
+import Axios from 'axios';
   export default {
     data() {
       return {
         foldername:'',
+        curfName:'',
         folders: [],
         files: [],
         search:'',
         id: '',
-        dialog:false
+        dialog:false,
+        search: '',
+        howMenu: false,
+        showMenu: false,
+        x: 0,
+        y: 0,
+        dialog2:false
       }
     },
     async created(){
@@ -150,6 +208,7 @@ import { folder, makeFolder } from '../api/index';
           this.$store.commit('setFolder', response.data.folders);
           this.$store.commit('setCur', response.data.cur);
           this.$store.commit('setParent', response.data.parentPath);
+          this.folders = this.$store.getters.folderL;
         } catch (error) {
           console.log("에러");
           console.log(error.response.data);
@@ -158,6 +217,10 @@ import { folder, makeFolder } from '../api/index';
        methods: {
          initFolderName(){
            this.foldername = '';
+         },
+         cancelMove(){
+            this.curfName = '';
+            this.dialog2 = false;
          },
          async makeF(){
            try {
@@ -170,6 +233,7 @@ import { folder, makeFolder } from '../api/index';
             console.log(response.data)
             console.log("폴더 생성 완료");
             this.$store.commit('setFolder', response.data.folders);
+            this.folders = respons.data.folders;
            } catch (error) {
              console.log("에러");
              console.log(error.response.data);
@@ -183,17 +247,85 @@ import { folder, makeFolder } from '../api/index';
           const curData = {
             id : this.$store.state.id,
             cur: this.$store.state.cur + move_folder_name + '/'
-          }
+            }
           const response = await folder(curData);
           console.log(response.data);
           this.$store.commit('setFolder', response.data.folders);
           this.$store.commit('setCur', response.data.cur);
           this.$store.commit('setParent', response.data.parentPath);
-        } catch (error) {
+          this.folders = this.$store.getters.folderL;
+          } catch (error) {
           console.log("에러");
           console.log(error.response.data);
-        }
-         }
+          }
+        },
+        async moveParent(){
+          try {
+            const cData = {
+              id : this.$store.state.id,
+              cur : this.$store.state.parent
+            };
+            const response= await folder(cData);
+            console.log(response.data);
+            this.$store.commit('setFolder', response.data.folders);
+            this.$store.commit('setCur', response.data.cur);
+            this.$store.commit('setParent', response.data.parentPath);
+            this.folders = this.$store.getters.folderL;
+          } catch (error) {
+            console.log("에러");
+            console.log(error.response.data);
+          }
+        },
+        async deleteF(){
+          try {
+            const cData = {
+              id: this.$store.state.id,
+              cur : this.$store.state.cur,
+              folder_name: this.curfName
+            }
+            const response = await deleteFolder(cData);
+            console.log(response);
+            this.$store.commit('setFolder', response.data.folders);
+            this.folders = this.$store.getters.folderL;
+          } catch (error) {
+            console.log("에러");
+            console.log(error.response.data);
+          } finally{
+             this.curfName = '';
+           }
+        },
+        async transferF(folderName){
+          try {
+            const cData = {
+              id: this.$store.state.id,
+              cur : this.$store.state.cur,
+              folder_name: this.curfName,
+              isfolder: true,
+              newPath: this.$store.state.cur + folderName   + '/'
+            }
+            const response = await moveFolder(cData);
+            console.log(response);
+            this.$store.commit('setFolder', response.data.folders);
+            this.folders = this.$store.getters.folderL;
+          } catch (error) {
+            console.log("에러");
+            console.log(error.response.data);
+          } finally{
+             this.initFolderName();
+             this.curfName = '';
+             this.dialog2 = false;
+           }
+        },
+        show (folderN, e) {
+          e.preventDefault()
+          this.curfName = folderN;
+          this.showMenu = false
+          this.x = e.clientX
+          this.y = e.clientY
+          this.$nextTick(() => {
+          this.showMenu = true
+        })
+      }
     }
   }
 </script>
