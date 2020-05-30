@@ -29,7 +29,7 @@
           <v-list-item-title v-text="item.folder_name"></v-list-item-title>
         </v-list-item-content>
 
-              
+
 
         <v-menu
       v-model="showMenu"
@@ -134,7 +134,9 @@
          +{{ files.length - 2 }} File(s)
        </span>
      </template>
+
    </v-file-input>
+   <v-btn color="blue" @click = "upload_file">upload</v-btn>
       <v-btn
         bottom
         color="blue"
@@ -177,7 +179,7 @@
   </div>
 </template>
 <script>
-import { folder, makeFolder, deleteFolder, moveFolder } from '../api/index';
+import { folder, makeFolder, deleteFolder, moveFolder, file, uploadFile, deleteFile, downloadFile } from '../api/index';
 import Axios from 'axios';
   export default {
     data() {
@@ -203,12 +205,17 @@ import Axios from 'axios';
             id : this.$store.state.id,
             cur: '/'
           }
+          console.log(curData);
           const response = await folder(curData);
+          const {file_response} = await file(curData);
           console.log(response.data);
+          console.log(file_response);
           this.$store.commit('setFolder', response.data.folders);
           this.$store.commit('setCur', response.data.cur);
           this.$store.commit('setParent', response.data.parentPath);
           this.folders = this.$store.getters.folderL;
+          this.$store.commit('setFile', file_response.data.files);
+          this.files = this.$store.getters.fileL;
         } catch (error) {
           console.log("에러");
           console.log(error.response.data);
@@ -315,6 +322,30 @@ import Axios from 'axios';
              this.curfName = '';
              this.dialog2 = false;
            }
+        },
+        async upload_file(){
+          try{
+            const fileData={
+              file: this.files,
+              user_id: this.$store.state.id,
+              cur: this.$store.state.cur
+            }
+            console.log(fileData)
+            const response = await uploadFile(fileData);
+            const filelist = await file(fileData.user_id);
+            console.log(response.message);
+            this.$store.commit('setFile', filelist.data.files);
+            this.files = this.$store.getters.fileL;
+          }catch(error){
+            const fileData={
+              file: this.files,
+              user_id: this.$store.state.id,
+              cur: this.$store.state.cur
+            }
+            console.log(fileData);
+            console.log("에러");
+            console.log(error.reponse.err);
+          }
         },
         show (folderN, e) {
           e.preventDefault()
