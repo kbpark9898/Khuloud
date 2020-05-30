@@ -52,8 +52,6 @@ var S3 = {
     },
 
     copyFile2: function (bucketName, userId, sourceFile, targetFile, callback) {
-        // sourceFile => folder1/folder2/test.txt
-        // targetFile => trashcan/folder1/folder2/test.txt
         var copyParams = {
             Bucket: bucketName,
             CopySource: bucketName + '/drive/' + userId + '/' + sourceFile,
@@ -74,7 +72,6 @@ var S3 = {
     },
 
     deleteFile: function (bucketName, userId, targetFile, callback) {
-        // targetFile => folder1/folder2/test.txt
         var deleteParams = {
             Bucket: bucketName,
             Key: 'drive/' + userId + '/' + targetFile
@@ -98,7 +95,7 @@ var S3 = {
             Bucket: bucketName,
             Key: 'drive/' + userId + '/' + targetFile
         };
-        console.log('drive/' + userId + '/' + targetFile);
+
         s3.getObject(downloadParams, function (err, data) {
             if (err) {
                 console.log("Download File Error", err);
@@ -106,51 +103,8 @@ var S3 = {
             } else {
                 if (data) {
                     console.log("Get File Success");
-                    callback(true, data.body);
+                    callback(1, data.Body);
                 }
-            }
-        })
-    },
-
-    // /routes/modules/s3/download에 저장
-    downloadFile2: function(bucketName, userId, targetFile, callback){
-        tempDownloadDir = __dirname + '/download/' + userId + '/' + targetFile;
-        S3.downloadFile(bucketName, userId, targetFile, function(result, data){
-            if (result) {
-                makeFolder(tempDownloadDir, function(result){
-                    if (result) {
-                        fs.writeFileSync(tempDownloadDir, data);
-                        callback(true, tempDownloadDir);
-                    }
-                })
-            }else{
-                console.log('Download File Error');
-                callback(false);
-            }
-        })
-    },
-
-    // 최종
-    downloadFile3: function(bucketName, userId, targetFile, callback){
-        // targetFile 예1 => test.txt
-        // targetFile 예2 => folder1/folder2/test.txt
-        var tempDownloadDir = __dirname + '/download/' + userId + '/' + targetFile;
-        makeFolder(tempDownloadDir, function(result){
-            if (result){
-                var file = fs.createWriteStream(tempDownloadDir);
-                var params = {
-                    Bucket: bucketName,
-                    Key: 'drive/' + userId + '/' + targetFile
-                };
-                try {
-                    s3.getObject(params).createReadStream().pipe(file);
-                    callback(true, tempDownloadDir);
-                }catch(err){
-                    console.log('no such file');
-                    callback(false);
-                }
-            }else{
-                callback(false);
             }
         })
     },
@@ -220,20 +174,6 @@ var S3 = {
         })
     },
 
-    // 중복된 파일 버전 만들기(test.txt -> text(1).txt)
-    makeVersion: function (bucketName, userId, sourceFile, lvNum, callback) {
-        var sourceFile;
-        var splited = sourceFile.split('(').join(',').split(')').join(',').split(',');
-        if (splited.length != 3) {
-            sourceFile = sourceFile.split('.')[0] + '(' + lvNum.toString() + ').' + sourceFile.split('.')[1];
-        } else {
-            sourceFile = sourceFile.split('(')[0] + '(' + lvNum.toString() + ')' + sourceFile.split(')')[1];
-        }
-        console.log('makeVersion ', sourceFile);
-        
-        callback(true, sourceFile);
-    },
-
     // sourceFile이 단순히 filename과 같은 경우
     moveFile: function (bucketName, userId, sourceFile, targetPath, callback) {
         S3.copyFile(bucketName, userId, sourceFile, targetPath, function (res) {
@@ -254,10 +194,25 @@ var S3 = {
         })
     },
 
+    makeVersion: function(bucketName, userId, sourceFile, lvNum, callback){
+        var sourceFile;
+        var splited = sourceFile.split('(').join(',').split(')').join(',').split(',');
+        if (splited.length != 3){
+            sourceFile = sourceFile.split('.')[0] + '(' + lvNum.toString() + ')' + sourceFile.split('.')[1];
+        }else{
+            sourceFile = sourceFile.split('(')[0] + '(' + lvNum.toString() + ')' + sourceFile.split(')')[1];
+        }
+        console.log('makeVersion ', sourceFile);
+        callback(true, sourceFile);
+    },
+
     // sourceFile에 임의의 경로가 포함된 경우
     moveFile2: function (bucketName, userId, sourceFile, targetPath, callback) {
-        // sourceFile => folder1/folder2/test.txt
-        var targetFile = targetPath + '/' + sourceFile;
+        var paths = sourceFile.split('/');
+        var filename = paths[paths.length - 1];
+        console.log('paths = ' + paths);
+        console.log('filename = ' + filename);
+        var targetFile = targetPath + filename;
 
         S3.copyFile2(bucketName, userId, sourceFile, targetFile, function (res) {
             if (!res) {
@@ -280,11 +235,10 @@ var S3 = {
     uploadFile: function (bucketName, userId, sourceFile, targetPath, body, callback) {
         var pathbody = fs.createReadStream(body);
 
-        if (targetPath!='' && targetPath[targetPath.length-1]!='/') {
+        if (targetPath != '') {
             targetPath = targetPath + '/';
         }
         var targetFile = targetPath + sourceFile;
-        console.log('targetFile', targetFile);
 
         var uploadParams = {
             Bucket: bucketName,
@@ -343,25 +297,6 @@ var S3 = {
             }
         }
     },
-}
-
-var makeFolder = function(dir, callback){
-    var paths = dir.substring(__dirname.length+1);     // download/userId/folder1/folder2/test.txt
-    paths = paths.split('/');
-    
-    var folders = __dirname;
-    for(var i=0; i<paths.length-1; i++){
-        folders += '/'+paths[i];
-        if(!fs.existsSync(folders)){
-            fs.mkdirSync(folders)
-        }
-    }
-
-    if (fs.existsSync(folders)){
-        callback(true);
-    }else{
-        callback(false);
-    }
 }
 
 module.exports = S3;

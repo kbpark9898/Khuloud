@@ -205,9 +205,11 @@ import Axios from 'axios';
             id : this.$store.state.id,
             cur: '/'
           }
+          console.log(curData);
           const response = await folder(curData);
           const file_response = await file(curData);
           console.log(response.data);
+          console.log(file_response);
           this.$store.commit('setFolder', response.data.folders);
           this.$store.commit('setCur', response.data.cur);
           this.$store.commit('setParent', response.data.parentPath);
@@ -334,8 +336,14 @@ import Axios from 'axios';
             this.$store.commit('setFile', filelist.data.files);
             this.files = this.$store.getters.fileL;
           }catch(error){
+            const fileData={
+              file: this.files,
+              user_id: this.$store.state.id,
+              cur: this.$store.state.cur
+            }
+            console.log(fileData);
             console.log("에러");
-            console.log(error.reponse.err)
+            console.log(error.reponse.err);
           }
         },
         show (folderN, e) {
