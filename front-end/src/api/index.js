@@ -49,6 +49,14 @@ function uploadFile(fileData){
     return axios.post('/api/file/upload', fileData);
 }
 
+function detailFile(fileData){
+    return axios.get(`/api/file/${fileData.name}`, {
+      params:{
+        id: fileData.id,
+        cur: fileData.cur
+      }
+    })
+}
 function deleteFile(fileData){
     return axios.get('/api/file/delete', {
       params:{

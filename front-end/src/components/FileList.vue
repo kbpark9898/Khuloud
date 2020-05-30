@@ -207,7 +207,7 @@ import Axios from 'axios';
           }
           console.log(curData);
           const response = await folder(curData);
-          const file_response = await file(curData);
+          const {file_response} = await file(curData);
           console.log(response.data);
           console.log(file_response);
           this.$store.commit('setFolder', response.data.folders);
