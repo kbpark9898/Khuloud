@@ -330,6 +330,7 @@ import Axios from 'axios';
               user_id: this.$store.state.id,
               cur: this.$store.state.cur
             }
+            console.log(fileData)
             const response = await uploadFile(fileData);
             const filelist = await file(fileData.user_id);
             console.log(response.message);
