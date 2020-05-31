@@ -9,6 +9,25 @@ var S3 = require('../modules/s3/s3');
 
 
 
+router.get('/:name', function (req, res, next) {
+    var file_name = req.params.name;    // test.txt
+    var user_id = req.query.id;
+    var curPath = req.query.cur;    // /folder1/folder2/
+
+    var targetFile = (curPath + file_name).substring(1);  // folder1/folder2/test.txt
+
+    var s3 = new AWS.S3();
+    var params = {
+        Bucket: S3.BUCKET_NAME,
+        Key: 'drive/' + user_id + '/' + targetFile,
+    };
+
+    res.attachment(file_name);
+    var fileStream = s3.getObject(params).createReadStream();
+    fileStream.pipe(res);
+});
+
+/*
 // /file/download/:name
 router.get('/:name', function (req, res) {
     var file_name = req.params.name;    // test.txt
@@ -20,14 +39,18 @@ router.get('/:name', function (req, res) {
     S3.downloadFile2(S3.BUCKET_NAME, user_id, targetFile, function (result, downloadDir) {
         if (result){
             res.download(downloadDir, function (err) {
-                fs.unlink(downloadDir, function (err) {
+                if (err){
+                    console.log(err);
+                }else{
                     console.log('download success');
-                });
+                }
             });
         }else{
-            res.status(404).send({error: 'download error'});
+            res.send({error: 'download error'});
         }
     });
 });
+*/
+
 
 module.exports = router;

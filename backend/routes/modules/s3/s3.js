@@ -106,7 +106,7 @@ var S3 = {
             } else {
                 if (data) {
                     console.log("Get File Success");
-                    callback(true, data.body);
+                    callback(true, data.body.toString());
                 }
             }
         })
