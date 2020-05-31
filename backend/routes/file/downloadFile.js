@@ -9,6 +9,24 @@ var S3 = require('../modules/s3/s3');
 
 
 
+router.get('/:name', function (req, res) {
+    var file_name = req.params.name;
+    var curPath = req.query.cur;    // /folder1/folder2/
+    var user_id = req.query.id;
+
+    var targetFile = curPath.substring(1) + file_name;  // folder1/folder2/test.txt
+
+
+    S3.downloadFile3(S3.BUCKET_NAME, user_id, targetFile, function (result, downloadDir) {
+        if (result) {
+            res.send({ src: downloadDir })
+        }else{
+            res.send({ err: 'download error'})
+        }
+    })
+}); 
+
+/*
 router.get('/:name', function (req, res, next) {
     var file_name = req.params.name;    // test.txt
     var user_id = req.query.id;
@@ -26,6 +44,7 @@ router.get('/:name', function (req, res, next) {
     var fileStream = s3.getObject(params).createReadStream();
     fileStream.pipe(res);
 });
+*/
 
 /*
 // /file/download/:name
