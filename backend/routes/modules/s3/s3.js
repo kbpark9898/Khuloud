@@ -17,7 +17,7 @@
 var AWS = require('aws-sdk');
 AWS.config.update({ region: 'ap-northeast-2' });
 
-var BUCKET_NAME = 'dkhuloud';
+var BUCKET_NAME = 'qkrrlqja-test';
 
 var s3 = new AWS.S3();
 var fs = require('fs');
@@ -230,7 +230,7 @@ var S3 = {
             sourceFile = sourceFile.split('(')[0] + '(' + lvNum.toString() + ')' + sourceFile.split(')')[1];
         }
         console.log('makeVersion ', sourceFile);
-        
+
         callback(true, sourceFile);
     },
 
@@ -348,7 +348,7 @@ var S3 = {
 var makeFolder = function(dir, callback){
     var paths = dir.substring(__dirname.length+1);     // download/userId/folder1/folder2/test.txt
     paths = paths.split('/');
-    
+
     var folders = __dirname;
     for(var i=0; i<paths.length-1; i++){
         folders += '/'+paths[i];
