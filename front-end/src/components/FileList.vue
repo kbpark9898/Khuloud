@@ -98,10 +98,10 @@
         </v-list-item-content>
         <v-list-item-action>
           <v-btn icon @click="download_file(item.file_name)">
-            <v-icon color="grey lighten-1">mdi-information</v-icon>
+            <v-icon color="grey lighten-1">mdi-download</v-icon>
           </v-btn>
           <v-btn icon @click="delete_file(item.file_name)">
-            <v-icon color="grey lighten-1">mdi-deleted</v-icon>
+            <v-icon color="grey lighten-1">mdi-delete</v-icon>
           </v-btn>
         </v-list-item-action>
       </v-list-item>
