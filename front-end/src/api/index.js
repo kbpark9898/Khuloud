@@ -46,7 +46,11 @@ function file(curData){
 
 
 function uploadFile(fileData){
-    return axios.post('/api/file/upload', fileData);
+    return axios.post('/api/file/upload', fileData, {
+      headers :{
+        'Content-Type' : 'multipart/form-data'
+      }
+    });
 }
 
 function detailFile(fileData){
@@ -58,21 +62,19 @@ function detailFile(fileData){
     })
 }
 function deleteFile(fileData){
-    return axios.get('/api/file/delete', {
+    return axios.get(`/api/file/delete/${fileData.fileName}`, {
       params:{
         //현재 접속한 사람의 id와 삭제할 파일의 이름, 현재 폴더위치를 파라미터로 넘긴다.
-        id: fileData.id,
-        name: fileData.fileName,
+        id: fileData.user_id,
         cur: fileData.cur
       }
     });
 }
 function downloadFile(fileData){
-    return axios.get('api/file/download', {
+    return axios.get(`api/file/download/${fileData.fileName}`, {
       params:{
         //현재 접속한 사람의 id와 다운로드를 위해 선택한 파일의 이름을 파라미터로 넘긴다.
         id: fileData.id,
-        name: fileData.fileName,
         cur: fileData.cur
       }
     });
