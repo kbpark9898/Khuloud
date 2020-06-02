@@ -20,15 +20,13 @@ router.post('/update', function(req, res, next) {
             console.log("updating user failed");
             next(err);
           } else {
-            console.log("user updated successfully");
-			      res.redirect('back');
+            res.status(200).send('update');
           }
         });
   }
   else
   {
-    console.log("password not match");
-    res.redirect('back');
+    res.status(404).send(err);
   }
 });
 
