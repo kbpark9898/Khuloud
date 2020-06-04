@@ -8,37 +8,32 @@ var S3 = require('../modules/s3/s3');
 
 // /file/delete/:name
 router.get('/:name', function (req, res) {
-    var user_id = req.session.user_id;
+    var file_name = req.params.name;
+    var user_id = req.query.id;
+    var curPath = req.query.cur;
 
-    var sourceFile = req.params.name;
     var targetPath = 'trashcan';
-
-    var paths = sourceFile.split('/');
-    var index = sourceFile.length - (paths[paths.length - 1].length + 1);
-    var file_name = paths[paths.length - 1];
-    var location = sourceFile.substring(6 + user_id.length, index);
+    var sourceFile = curPath.substring(1) + file_name;
 
     var sql1 = 'DELETE FROM files WHERE file_name = (?) AND location=(?) AND user_Id = (?)';
     var sql2 = 'INSERT INTO trashcan (trash_name, location, user_Id) VALUES (?, ?, ?)';
 
-
-    connection.query(sql1, [file_name, location, user_id], function (err) {
+    connection.query(sql1, [file_name, curPath, user_id], function (err) {
         if (err) {
             console.log('delete db error');
-            throw err;
+            res.send({erorr: 'db delete error'});
         }
         else {
-            connection.query(sql2, [file_name, location, user_id], function (err) {
+            connection.query(sql2, [file_name, '/trashcan'+curPath, user_id], function (err) {
                 if (err) {
                     console.log('insert in trashcan db error');
-                    throw err;
+                    res.send({error: 'db insert error'});
                 }
                 else {
                     // /drive/user_id/sourceFile --> /drive/user_id/trashcan/sourceFile
-                    S3.moveFile(S3.BUCKET_NAME, user_id, sourceFile, targetPath, function (result) {
+                    S3.moveFile2(S3.BUCKET_NAME, user_id, sourceFile, targetPath, function (result) {
                         if (result) {
-                            console.log("file move to trashcan success");
-                            res.send("Upload Success");
+                            res.send("move to trashcan success");
                         }
                     })
                 }

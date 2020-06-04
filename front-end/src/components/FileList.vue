@@ -29,7 +29,7 @@
           <v-list-item-title v-text="item.folder_name"></v-list-item-title>
         </v-list-item-content>
 
-              
+
 
         <v-menu
       v-model="showMenu"
@@ -94,18 +94,22 @@
           <v-icon> mdi-file</v-icon>
         </v-list-item-avatar>
         <v-list-item-content>
-          <v-list-item-title v-text="item"></v-list-item-title>
+          <v-list-item-title v-text="item.file_name"></v-list-item-title>
         </v-list-item-content>
         <v-list-item-action>
-          <v-btn icon>
-            <v-icon color="grey lighten-1">mdi-information</v-icon>
+          <v-btn icon @click="download_file(item.file_name)">
+            <v-icon color="grey lighten-1">mdi-download</v-icon>
           </v-btn>
-          <v-btn icon>
-            <v-icon color="grey lighten-1">mdi-delted</v-icon>
+          <v-btn icon @click="delete_file(item.file_name)">
+            <v-icon color="grey lighten-1">mdi-delete</v-icon>
           </v-btn>
         </v-list-item-action>
       </v-list-item>
     </v-list>
+    <input id = "file-selector" ref='uploadedfile' type="file"
+    v-on:change="handleFileUpload()">
+    <br>
+  <!--
     <v-file-input
      v-model="files"
      color="deep-purple accent-4"
@@ -134,7 +138,10 @@
          +{{ files.length - 2 }} File(s)
        </span>
      </template>
+
    </v-file-input>
+-->
+   <v-btn color="blue" @click = "upload_file">upload</v-btn>
       <v-btn
         bottom
         color="blue"
@@ -177,11 +184,12 @@
   </div>
 </template>
 <script>
-import { folder, makeFolder, deleteFolder, moveFolder } from '../api/index';
+import { folder, makeFolder, deleteFolder, moveFolder, file, uploadFile, deleteFile, downloadFile } from '../api/index';
 import Axios from 'axios';
   export default {
     data() {
       return {
+        uploadedfile:null,
         foldername:'',
         curfName:'',
         folders: [],
@@ -189,12 +197,18 @@ import Axios from 'axios';
         search:'',
         id: '',
         dialog:false,
-        search: '',
         howMenu: false,
         showMenu: false,
         x: 0,
         y: 0,
-        dialog2:false
+        dialog2:false,
+        detail : {
+          dataname: null,
+          date: null,
+          owner_id:null,
+          datasize:null,
+          datatype:null
+        }
       }
     },
     async created(){
@@ -203,18 +217,28 @@ import Axios from 'axios';
             id : this.$store.state.id,
             cur: '/'
           }
+          console.log(curData);
           const response = await folder(curData);
-          console.log(response.data);
+          const file_response = await file(curData);
           this.$store.commit('setFolder', response.data.folders);
           this.$store.commit('setCur', response.data.cur);
           this.$store.commit('setParent', response.data.parentPath);
           this.folders = this.$store.getters.folderL;
+          this.$store.commit('setFile', file_response.data.files);
+          this.folders = this.$store.getters.folderL;
+          console.log(this.$store.getters.fileL);
+          this.files = this.$store.getters.fileL;
+
         } catch (error) {
           console.log("에러");
-          console.log(error.response.data);
+          console.log(error);
         }
       },
        methods: {
+         handleFileUpload(){
+            this.uploadedfile= this.$refs.uploadedfile.files[0]
+            console.log(this.uploadedfile)
+         },
          initFolderName(){
            this.foldername = '';
          },
@@ -316,6 +340,80 @@ import Axios from 'axios';
              this.dialog2 = false;
            }
         },
+        async upload_file(){
+          try{
+            const formData = new FormData();
+            formData.append('file', this.uploadedfile);
+            formData.append('user_id', this.$store.state.id);
+            formData.append('cur', this.$store.state.cur);
+            const currentData={
+              id: this.$store.state.id,
+              cur: this.$store.state.cur
+            }
+            console.log(currentData)
+            const response = await uploadFile(formData);
+            const filelist = await file(currentData);
+            console.log(filelist.data.files);
+            this.$store.commit('setFile', filelist.data.files);
+            console.log(this.$store.getters.fileL);
+            this.files = this.$store.getters.fileL;;
+
+          }catch(error){
+            console.log("에러");
+            console.log(error);
+          }
+        },
+        async delete_file(itemName){
+          try{
+            var itemlist = this.$store.getters.fileL;
+            console.log(itemlist)
+            console.log(itemName)
+            const currentData={
+              fileName : null,
+              user_id: null,
+              cur: this.$store.state.cur
+            }
+
+            for(var i=0; i<itemlist.length; i++){
+              console.log(itemlist[i].file_name)
+              if(itemlist[i].file_name == itemName){
+                currentData.fileName = itemlist[i].file_name;
+                currentData.user_id = itemlist[i].user_id;
+              }
+            }
+            const filelistData={
+                id:  currentData.user_id,
+                cur: currentData.cur
+            }
+            console.log(currentData)
+            const response = await deleteFile(currentData);
+            setTimeout(function(){}, 500);
+            const filelist = await file(filelistData);
+            console.log(filelist.data.files);
+            this.$store.commit('setFile', filelist.data.files);
+            console.log(this.$store.getters.fileL);
+            this.files = this.$store.getters.fileL;;
+          }catch(error){
+            console.log("에러");
+            console.log(error);
+          }
+        },
+        async download_file(namedata){
+          try{
+            const currentData={
+              fileName : namedata,
+              id: this.$store.state.id,
+              cur: this.$store.state.cur
+            }
+            const result = await downloadFile(currentData);
+            console.log(result)
+
+          }catch(error){
+            console.log("에러");
+            console.log(error);
+          }
+        }
+      },
         show (folderN, e) {
           e.preventDefault()
           this.curfName = folderN;
@@ -326,6 +424,6 @@ import Axios from 'axios';
           this.showMenu = true
         })
       }
-    }
+
   }
 </script>

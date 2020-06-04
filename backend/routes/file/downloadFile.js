@@ -8,23 +8,68 @@ AWS.config.loadFromPath(__dirname + "/../modules/awsconfig.json");
 var S3 = require('../modules/s3/s3');
 
 
-// /file/download/:name
+
 router.get('/:name', function (req, res) {
     var file_name = req.params.name;
-    var user_id = req.session.user_id;
+    var curPath = req.query.cur;    // /folder1/folder2/
+    var user_id = req.query.id;
 
-    var sourceFile = file_name;
-    var tempDownloadDir = __dirname + '/../modules/s3/download/' + user_id + '/' + file_name;
+    var targetFile = curPath.substring(1) + file_name;  // folder1/folder2/test.txt
 
-    S3.downloadFile(S3.BUCKET_NAME, user_id, sourceFile, function (result, data) {
-        !fs.existsSync(tempDownloadDir + '/../') && fs.mkdirSync(tempDownloadDir + '/../');
-        fs.writeFileSync(tempDownloadDir, data);
-        res.download(tempDownloadDir, function (err) {
-            fs.unlink(tempDownloadDir, function (err) {
-                console.log("Download Success");
+
+    S3.downloadFile3(S3.BUCKET_NAME, user_id, targetFile, function (result, downloadDir) {
+        if (result) {
+            res.send({ src: downloadDir })
+        }else{
+            res.send({ err: 'download error'})
+        }
+    })
+}); 
+
+/*
+router.get('/:name', function (req, res, next) {
+    var file_name = req.params.name;    // test.txt
+    var user_id = req.query.id;
+    var curPath = req.query.cur;    // /folder1/folder2/
+
+    var targetFile = (curPath + file_name).substring(1);  // folder1/folder2/test.txt
+
+    var s3 = new AWS.S3();
+    var params = {
+        Bucket: S3.BUCKET_NAME,
+        Key: 'drive/' + user_id + '/' + targetFile,
+    };
+
+    res.attachment(file_name);
+    var fileStream = s3.getObject(params).createReadStream();
+    fileStream.pipe(res);
+});
+*/
+
+/*
+// /file/download/:name
+router.get('/:name', function (req, res) {
+    var file_name = req.params.name;    // test.txt
+    var user_id = req.query.id;
+    var curPath = req.query.cur;    // /folder1/folder2/
+
+    var targetFile = (curPath + file_name).substring(1);  // folder1/folder2/test.txt
+
+    S3.downloadFile2(S3.BUCKET_NAME, user_id, targetFile, function (result, downloadDir) {
+        if (result){
+            res.download(downloadDir, function (err) {
+                if (err){
+                    console.log(err);
+                }else{
+                    console.log('download success');
+                }
             });
-        });
+        }else{
+            res.send({error: 'download error'});
+        }
     });
 });
+*/
+
 
 module.exports = router;
