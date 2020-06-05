@@ -43,6 +43,7 @@ router.post('/', function (req, res) {
             }else{
                 sourceFiles.push(files.file.name);
                 bodies.push(files.file.path);
+                console.log('bodies', bodies);
             }
         }else{
             for (var file of files.file) {  // 파일 여러개일 때

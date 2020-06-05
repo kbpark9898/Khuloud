@@ -35,13 +35,20 @@ router.get('/:name', function (req, res) {
     var extension = targetFile.split('.')[1].toLowerCase();
 
 
-    S3.downloadFile3(S3.BUCKET_NAME, user_id, targetFile, function(result, downloadDir){
+    S3.downloadFile2(S3.BUCKET_NAME, user_id, targetFile, function(result, downloadDir){
         if (result){
-            if (extension == 'jpg' || extension == 'jpeg' || extension == 'png') {
-                res.status(200).send({ type: 'image', src: downloadDir})
-            }else{
-                res.status(200).send({type: 'text', src: downloadDir})
-            }
+            var content;
+            content = fs.readFileSync(downloadDir, 'utf8');
+            res.send({file_name: file_name, content: content});
+            
+            //if (extension == 'jpg' || extension == 'jpeg' || extension == 'png') {
+            //    res.send({ type: 'image', src: downloadDir})
+            //}else{
+            //    var content;
+            //    content = fs.readFileSync(downloadDir, 'utf8');
+            //    res.send({file_name: file_name, content: content});
+            //    //res.status(200).send({type: 'text', src: downloadDir})
+            //}
         }
     })
 }); 

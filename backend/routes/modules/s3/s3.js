@@ -13,7 +13,6 @@
 // targetFile: folder2/file.txt
 
 
-
 var AWS = require('aws-sdk');
 AWS.config.update({ region: 'ap-northeast-2' });
 
@@ -73,6 +72,32 @@ var S3 = {
         })
     },
 
+    // 파일 덮어쓰기
+    coverFile: function(bucketName, userId, sourceFile, targetPath, body, callback) {
+        var pathbody = fs.createReadStream(body);
+
+        if (targetPath != '' && targetPath[targetPath.length - 1] != '/') {
+            targetPath = targetPath + '/';
+        }
+        var targetFile = targetPath + sourceFile;
+
+        var coverParams = {
+            Bucket: bucketName,
+            Key: 'drive/' + userId + '/' + targetFile,
+            Body: pathbody
+        };
+
+        s3.upload(coverParams, function (err, data) {
+            if (err) {
+                console.log("Upload Error" + err);
+                callback(false);
+            } else {
+                console.log("Upload Success");
+                callback(true);
+            }
+        })
+    },
+
     deleteFile: function (bucketName, userId, targetFile, callback) {
         // targetFile => folder1/folder2/test.txt
         var deleteParams = {
@@ -104,10 +129,8 @@ var S3 = {
                 console.log("Download File Error", err);
                 callback(false);
             } else {
-                if (data) {
-                    console.log("Get File Success");
-                    callback(true, data.body.toString());
-                }
+                console.log("Get File Success");
+                callback(true, data.Body.toString());
             }
         })
     },
@@ -119,8 +142,10 @@ var S3 = {
             if (result) {
                 makeFolder(tempDownloadDir, function(result){
                     if (result) {
-                        fs.writeFileSync(tempDownloadDir, data);
-                        callback(true, tempDownloadDir);
+                        if (data){
+                            fs.writeFileSync(tempDownloadDir, data);
+                            callback(true, tempDownloadDir);
+                        }
                     }
                 })
             }else{
@@ -143,10 +168,13 @@ var S3 = {
                     Key: 'drive/' + userId + '/' + targetFile
                 };
                 try {
-                    s3.getObject(params).createReadStream().pipe(file);
-                    callback(true, tempDownloadDir);
+                    var stream = s3.getObject(params).createReadStream().pipe(file);
+                    stream.on('end', function(){
+                        console.log('end!');
+                        callback(true, tempDownloadDir);
+                    });
                 }catch(err){
-                    console.log('no such file');
+                    console.log('no such file', err);
                     callback(false);
                 }
             }else{

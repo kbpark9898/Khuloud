@@ -12,6 +12,7 @@ var registerRouter = require('./routes/userlogin/register');
 var fileRouter = require('./routes/file/router');
 //var trashcanRouter = require('./routes/trashcan/router');
 var folderRouter = require('./routes/folders');
+var quickRouter = require('./routes/quick');
 
 
 var passport = require('passport');
@@ -61,7 +62,7 @@ app.use('/api/RegistUser', registerRouter);
 app.use('/api/folder', folderRouter);
 //app.use('/users', usersRouter);
 app.use('/api/file', fileRouter);
-//app.use('/api/trashcan', trashcanRouter);
+app.use('/api/quick', quickRouter);
 
 // catch 404 and forward to error handler
 app.use(function(req, res, next) {
