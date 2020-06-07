@@ -152,9 +152,9 @@ router.post('/move', function(req, res, next) {
     user_id = req.body.id;
     let cur = req.body.cur;
     curPath = user_id + cur;
-    let name = req.body.folder_name;
+    let name = req.body.name;
     let newPath = user_id + req.body.newPath;
-    if (req.body.isfolder) {
+    if (req.body.isfolder == 'true') {
         let checkfolder = 'SELECT * FROM folders WHERE location = ? AND folder_name = ? AND user_id = ?;';
         connection.query(checkfolder, [cur, name, user_id], function(err1, rows, fields) {
             console.log(rows);
@@ -200,22 +200,22 @@ router.post('/move', function(req, res, next) {
                     }
                 });
             } else {
-                console.log("Does not exist");
+                console.log("Does not exist folder");
                 res.status(304).send({ error: "Does not exist" });
             }
         });
     } else {
-        let checkfile = 'SELECT * FROM files WHERE location = ? AND file_name = ? AND user_id = ?';
-        connection.query(checkfile, [curPath, name, user_id], function(err1, rows, fields) {
+        let checkfile = 'SELECT * FROM files WHERE location = ? AND file_name = ? AND user_id = ?;';
+        connection.query(checkfile, [cur, name, user_id], function(err1, rows, fields) {
             if (rows.length != 0) {
                 let copy_params = {
                     Bucket: BUCKET_NAME,
-                    CopySource: BUCKET_NAME + '/drive/' + curPath + file,
-                    Key: 'drive/' + newPath + file
+                    CopySource: BUCKET_NAME + '/drive/' + curPath + name,
+                    Key: 'drive/' + newPath + name
                 };
                 let del_params = {
                     Bucket: BUCKET_NAME,
-                    Key: 'drive/' + curPath + file
+                    Key: 'drive/' + curPath + name
                 };
                 s3.copyObject(copy_params, function(err, data) {
                     if (err) {
@@ -227,7 +227,7 @@ router.post('/move', function(req, res, next) {
                                 console.log(err, data);
                                 res.status(304).send({ error: "delete error" });
                             } else {
-                                let values = [newPath, cur, name, user_id];
+                                let values = [req.body.newPath, cur, name, user_id];
                                 let updatesql = 'UPDATE files SET location = ? WHERE location = ? AND file_name = ? AND user_id = ?;';
                                 connection.query(updatesql, values, function(err3, result, field) {
                                     if (err3) {
@@ -246,6 +246,7 @@ router.post('/move', function(req, res, next) {
                     }
                 });
             } else {
+                console.log("Does not exist file");
                 res.status(304).send({ error: "Does not exist" });
             }
         });
