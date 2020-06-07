@@ -80,8 +80,12 @@ function downloadFile(fileData) {
 	});
 }
 
-function changeFavorite() {
-	return axios.post();
+function delFavorite(folderData) {
+	return axios.post('api/favorites/delfolder', folderData);
+}
+
+function addFavorite(folderData) {
+	return axios.post('api/favorites/addfolder', folderData);
 }
 
 export {
@@ -95,5 +99,6 @@ export {
 	uploadFile,
 	deleteFile,
 	downloadFile,
-	changeFavorite,
+	delFavorite,
+	addFavorite,
 };

@@ -28,12 +28,12 @@
 					<v-list-item-title v-text="item.folder_name"></v-list-item-title>
 				</v-list-item-content>
 				<v-list-item-action>
-					<v-icon v-if="item.favorite === 'false'" color="grey lighten-1">
-						star_border
+					<v-icon v-if="item.favorite === 0" color="grey lighten-1">
+						mdi-star-border
 					</v-icon>
 
 					<v-icon v-else color="yellow">
-						star
+						mdi-star
 					</v-icon>
 				</v-list-item-action>
 			</v-list-item>
@@ -103,16 +103,12 @@
 				<v-list-item @click.prevent="deleteF">
 					<v-list-item-title>삭제</v-list-item-title>
 				</v-list-item>
-				<template v-if="curfName.favorite === 'true'" @click="change_favorite">
-					<v-list-item>
-						<v-list-item-title>즐겨 찾기 삭제</v-list-item-title>
-					</v-list-item>
-				</template>
-				<template v-if="curfName.favorite === 'false'" @click="change_favorite">
-					<v-list-item>
-						<v-list-item-title>즐겨 찾기 추가</v-list-item-title>
-					</v-list-item>
-				</template>
+				<v-list-item v-if="curfName.favorite === 1" @click="delete_favorite">
+					<v-list-item-title>즐겨 찾기 삭제</v-list-item-title>
+				</v-list-item>
+				<v-list-item v-if="curfName.favorite === 0" @click="add_favorite">
+					<v-list-item-title>즐겨 찾기 추가</v-list-item-title>
+				</v-list-item>
 			</v-list>
 		</v-menu>
 
@@ -162,6 +158,8 @@ import {
 	uploadFile,
 	deleteFile,
 	downloadFile,
+	delFavorite,
+	addFavorite,
 } from '../api/index';
 import Axios from 'axios';
 
@@ -388,7 +386,34 @@ export default {
 				console.log(error);
 			}
 		},
-		async change_favorite() {},
+		async delete_favorite() {
+			try {
+				const cData = {
+					id: this.$store.state.id,
+					cur: this.$store.state.cur,
+					name: this.curfName.folder_name,
+				};
+				console.log(cData);
+				const response = await delFavorite(cData);
+				this.$store.commit('setFolder', response.data.folders);
+			} catch (error) {
+				console.log('에러');
+			}
+		},
+		async add_favorite() {
+			try {
+				const cData = {
+					id: this.$store.state.id,
+					cur: this.$store.state.cur,
+					name: this.curfName.folder_name,
+				};
+				console.log(cData);
+				const response = await addFavorite(cData);
+				this.$store.commit('setFolder', response.data.folders);
+			} catch (error) {
+				console.log('에러');
+			}
+		},
 		show(folderObj, e) {
 			e.preventDefault();
 			this.curfName = folderObj;
