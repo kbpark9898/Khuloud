@@ -254,20 +254,89 @@ router.post('/move', function(req, res, next) {
 });
 
 
-router.post('/search/:target', function(req, res, next) {
-    user_id = req.params.id;
-    let cur = req.params.cur;
-    folders = {}
-    let checkfolder = 'SELECT * FROM folders WHERE location = ? AND user_id = ?;';
-    connection.query(checkfolder, [cur, user_id], function(err, rows, fields) {
+router.post('/modify', function(req, res, next) {
+    console.log(req.body);
+    user_id = req.body.id;
+    let cur = req.body.cur;
+    curPath = user_id + cur;
+    let name = req.body.folder_name;
+    let newName = req.body.newName;
+
+    let checkfolder = 'SELECT * FROM folders WHERE location = ? AND folder_name = ? AND user_id = ?;';
+    connection.query(checkfolder, [cur, name, user_id], function(err1, rows, fields) {
+        console.log(rows);
         if (rows.length != 0) {
-            res.status(200).send({
-                folders: folders
-            })
+            let copy_params = {
+                Bucket: BUCKET_NAME,
+                CopySource: BUCKET_NAME + '/' + curPath + name + '/',
+                Key: curPath + newName + '/'
+            };
+            let del_params = {
+                Bucket: BUCKET_NAME,
+                Key: curPath + name + '/'
+            };
+            s3.copyObject(copy_params, function(err, data) {
+                if (err) {
+                    console.log(err, data);
+                    console.log("copy error");
+                    res.status(304).send({ error: "copy error" });
+                } else {
+                    s3.deleteObject(del_params, function(err, data) {
+                        if (err) {
+                            console.log(err, data);
+                            console.log("delete error");
+                            res.status(304).send({ error: "delete error" });
+                        } else {
+                            let date = moment().format();
+                            let values = [newName, date, cur, name, user_id];
+                            let updatesql = 'UPDATE folders SET folder_name = ? AND modify = ? WHERE location = ? AND folder_name = ? AND user_id = ?;';
+                            connection.query(updatesql, values, function(err3, result, field) {
+                                if (err3) {
+                                    console.log("updatesql error");
+                                    res.status(304).send({ error: "updatesql error" });
+                                } else {
+                                    let resultsql = 'SELECT * FROM folders WHERE location = ? AND user_id = ?;';
+                                    connection.query(resultsql, [cur, user_id], function(err, rows, fields) {
+                                        res.status(200).send({
+                                            folders: rows
+                                        });
+                                    });
+                                }
+                            });
+                        }
+                    });
+                }
+            });
         } else {
-            res.send({ error: "Does not exist" });
+            console.log("Does not exist");
+            res.status(304).send({ error: "Does not exist" });
         }
     });
+
+});
+
+router.get('/search', function(req, res, next) {
+    console.log(req.query);
+    user_id = req.query.id;
+    let target = connection.escape('%' + req.query.target + '%');
+    console.log(target);
+    let folders = []
+    let files = []
+    let checkfolder = 'SELECT * FROM folders WHERE folder_name LIKE ' + target + ' AND user_id = ?;';
+    connection.query(checkfolder, [user_id], function(err, folder, fields) {
+        console.log(folder);
+        folders.push(folder)
+        let checkfile = 'SELECT * FROM files WHERE file_name LIKE ' + target + ' AND user_id = ?;';
+        connection.query(checkfile, [user_id], function(err, file, fields) {
+            console.log(file);
+            files.push(file)
+            res.status(200).send({
+                folders: folders,
+                files: files
+            })
+        });
+    });
+
 });
 
 module.exports = router;
