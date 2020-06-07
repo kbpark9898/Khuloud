@@ -430,7 +430,7 @@ export default {
 				const cData = {
 					id: this.$store.state.id,
 					cur: this.$store.state.cur,
-					folder_name: this.curfName.folder_name,
+					name: this.curfName.folder_name,
 					isfolder: true,
 					newPath: this.$store.state.cur + folderName + '/',
 				};

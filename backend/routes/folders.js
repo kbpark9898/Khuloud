@@ -154,7 +154,7 @@ router.post('/move', function(req, res, next) {
     curPath = user_id + cur;
     let name = req.body.name;
     let newPath = user_id + req.body.newPath;
-    if (req.body.isfolder == 'true') {
+    if (req.body.isfolder) {
         let checkfolder = 'SELECT * FROM folders WHERE location = ? AND folder_name = ? AND user_id = ?;';
         connection.query(checkfolder, [cur, name, user_id], function(err1, rows, fields) {
             console.log(rows);

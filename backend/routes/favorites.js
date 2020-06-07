@@ -139,7 +139,7 @@ router.post('/delfile', function(req, res, next) {
     let cur = req.body.cur;
     let checkfile = 'SELECT * FROM files WHERE location = ? AND user_id = ? AND file_name = ? AND favorite = 1;';
 
-    connection.query(checkfile, [cur,user_id, file_name], function(err, rows, fields) {
+    connection.query(checkfile, [cur, user_id, file_name], function(err, rows, fields) {
         if (err) {
             console.log('select error');
             res.status(400).send({ error: err });
@@ -151,8 +151,8 @@ router.post('/delfile', function(req, res, next) {
                         console.log('update error');
                         res.status(400).send({ error: err });
                     } else {
-                        let getfolder = 'SELECT * FROM files WHERE location = ? AND user_id = ?;';
-                        connection.query(getfolder, [cur, user_id], function(err, files, fields) {
+                        let getfile = 'SELECT * FROM files WHERE location = ? AND user_id = ?;';
+                        connection.query(getfile, [cur, user_id], function(err, files, fields) {
                             res.status(200).send({
                                 files: files
                             })
