@@ -27,52 +27,8 @@
 				<v-list-item-content>
 					<v-list-item-title v-text="item.folder_name"></v-list-item-title>
 				</v-list-item-content>
-
-				<v-menu
-					v-model="showMenu"
-					:position-x="x"
-					:position-y="y"
-					absolute
-					offset-y
-				>
-					<v-list dense>
-						<v-list-item @click.prevent="dialog2 = !dialog2">
-							<v-list-item-title>이동</v-list-item-title>
-						</v-list-item>
-						<v-list-item @click.prevent="deleteF">
-							<v-list-item-title>삭제</v-list-item-title>
-						</v-list-item>
-					</v-list>
-				</v-menu>
 			</v-list-item>
-			<v-dialog v-model="dialog2" width="500px">
-				<v-card>
-					<v-card-title class="grey darken-2">
-						Move Folder
-					</v-card-title>
-					<v-container>
-						<v-list-item-group v-for="item2 in folders" :key="item2.folder_id">
-							<template v-if="!(item2.folder_name === curfName)">
-								<v-hover @click.left="transferF(item2.folder_name)">
-									<v-list-item-avatar>
-										<v-icon>mdi-folder</v-icon>
-									</v-list-item-avatar>
-									<v-list-item-content>
-										<v-list-item-title
-											v-text="item2.folder_name"
-										></v-list-item-title>
-									</v-list-item-content>
-								</v-hover>
-							</template>
-							<!-- <template v-else></template> -->
-						</v-list-item-group>
-					</v-container>
-					<v-card-actions>
-						<v-spacer></v-spacer>
-						<v-btn text color="primary" @click="cancelMove">Cancel</v-btn>
-					</v-card-actions>
-				</v-card>
-			</v-dialog>
+
 			<v-divider inset></v-divider>
 			<v-subheader inset>Files</v-subheader>
 			<v-list-item v-for="item in this.$store.getters.fileL" :key="item.title">
@@ -92,6 +48,55 @@
 				</v-list-item-action>
 			</v-list-item>
 		</v-list>
+
+		<v-dialog v-model="dialog2" width="500px">
+			<v-card>
+				<v-card-title class="grey darken-2">
+					Move Folder
+				</v-card-title>
+				<v-container>
+					<v-list>
+						<v-list-item
+							v-for="item2 in folders"
+							:key="item2.folder_id"
+							@click.left="transferF(item2.folder_name)"
+							v-if="item2.folder_name !== curfName"
+						>
+							<v-list-item-avatar>
+								<v-icon>mdi-folder</v-icon>
+							</v-list-item-avatar>
+							<v-list-item-content>
+								<v-list-item-title
+									v-text="item2.folder_name"
+								></v-list-item-title>
+							</v-list-item-content>
+						</v-list-item>
+					</v-list>
+				</v-container>
+				<v-card-actions>
+					<v-spacer></v-spacer>
+					<v-btn text color="primary" @click="cancelMove">Cancel</v-btn>
+				</v-card-actions>
+			</v-card>
+		</v-dialog>
+
+		<v-menu
+			v-model="showMenu"
+			:position-x="x"
+			:position-y="y"
+			absolute
+			offset-y
+		>
+			<v-list dense>
+				<v-list-item @click.prevent="dialog2 = !dialog2">
+					<v-list-item-title>이동</v-list-item-title>
+				</v-list-item>
+				<v-list-item @click.prevent="deleteF">
+					<v-list-item-title>삭제</v-list-item-title>
+				</v-list-item>
+			</v-list>
+		</v-menu>
+
 		<input
 			id="file-selector"
 			ref="uploadedfile"
@@ -99,38 +104,6 @@
 			v-on:change="handleFileUpload()"
 		/>
 		<br />
-		<!--
-    <v-file-input
-     v-model="files"
-     color="deep-purple accent-4"
-     counter
-     label="업로드"
-     multiple
-     placeholder="파일을 화면으로 드래그앤 드롭 하거나, 이곳을 클릭하세요."
-     prepend-icon="mdi-paperclip"
-     outlined
-     :show-size="1000"
-     >
-     <template v-slot:selection="{ index, text }">
-       <v-chip
-         v-if="index < 2"
-         color="deep-purple accent-4"
-         dark
-         label
-         small
-       >
-         {{ text }}
-       </v-chip>
-       <span
-         v-else-if="index === 2"
-         class="overline grey--text text--darken-3 mx-2"
-       >
-         +{{ files.length - 2 }} File(s)
-       </span>
-     </template>
-
-   </v-file-input>
--->
 		<v-btn color="blue" @click="upload_file">upload</v-btn>
 		<v-btn bottom color="blue" dark fab fixed right @click="dialog = !dialog">
 			<v-icon>mdi-plus</v-icon>
@@ -210,7 +183,6 @@ export default {
 			this.$store.commit('setFolder', response.data.folders);
 			this.$store.commit('setCur', response.data.cur);
 			this.$store.commit('setParent', response.data.parentPath);
-			this.folders = this.$store.getters.folderL;
 			this.$store.commit('setFile', file_response.data.files);
 			this.folders = this.$store.getters.folderL;
 			console.log(this.$store.getters.fileL);
@@ -397,16 +369,16 @@ export default {
 				console.log(error);
 			}
 		},
-	},
-	show(folderN, e) {
-		e.preventDefault();
-		this.curfName = folderN;
-		this.showMenu = false;
-		this.x = e.clientX;
-		this.y = e.clientY;
-		this.$nextTick(() => {
-			this.showMenu = true;
-		});
+		show(folderN, e) {
+			e.preventDefault();
+			this.curfName = folderN;
+			this.showMenu = false;
+			this.x = e.clientX;
+			this.y = e.clientY;
+			this.$nextTick(() => {
+				this.showMenu = true;
+			});
+		},
 	},
 };
 </script>
