@@ -13,7 +13,9 @@
 		</v-toolbar>
 		<v-list two-line subheader>
 			<v-subheader inset>Folders</v-subheader>
-			<v-btn @click="moveParent">...</v-btn>
+			<v-list-item v-if="this.$store.state.cur !== '/'" @click="moveParent"
+				>...</v-list-item
+			>
 			<v-list-item
 				v-for="item in this.$store.getters.folderL"
 				:key="item.title"
