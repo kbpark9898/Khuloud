@@ -1,18 +1,19 @@
 <template>
 	<div>
 		<v-toolbar flat>
-			<v-toolbar-title>파일 </v-toolbar-title>
+			<v-toolbar-title>내 드라이브</v-toolbar-title>
 			<v-spacer></v-spacer>
 			<v-text-field
 				v-model="search"
 				append-icon="mdi-magnify"
-				label="파일 검색"
+				label="검색"
 				single-line
 				hide-details
 			></v-text-field>
 		</v-toolbar>
 		<v-list two-line subheader>
-			<v-subheader inset>Folders</v-subheader>
+			<!-- <v-subheader inset>Folders</v-subheader> -->
+			<!-- Folder view -->
 			<v-list-item v-if="this.$store.state.cur !== '/'" @click="moveParent"
 				>...</v-list-item
 			>
@@ -21,7 +22,8 @@
 				:key="item.title"
 				:search="search"
 				@click.right="show(item, $event)"
-				@click.left="moveF(item.folder_name)"
+				@click=""
+				@dblclick="moveF(item.folder_name)"
 			>
 				<v-list-item-avatar>
 					<v-icon>mdi-folder</v-icon>
@@ -30,19 +32,22 @@
 					<v-list-item-title v-text="item.folder_name"></v-list-item-title>
 				</v-list-item-content>
 				<v-list-item-action>
-					<v-icon v-if="item.favorite === 0" color="grey lighten-1">
-						mdi-star-border
+					<v-icon v-if="item.favorite === 0">
+						mdi-star-outline
 					</v-icon>
 
-					<v-icon v-else color="yellow">
+					<v-icon v-else>
 						mdi-star
 					</v-icon>
 				</v-list-item-action>
 			</v-list-item>
-
-			<v-divider inset></v-divider>
-			<v-subheader inset>Files</v-subheader>
-			<v-list-item v-for="item in this.$store.getters.fileL" :key="item.title">
+			<!-- File view -->
+			<v-list-item
+				v-for="item in this.$store.getters.fileL"
+				:key="item.title"
+				@click.right="showF(item, $event)"
+				@click=""
+			>
 				<v-list-item-avatar>
 					<v-icon> mdi-file</v-icon>
 				</v-list-item-avatar>
@@ -50,16 +55,18 @@
 					<v-list-item-title v-text="item.file_name"></v-list-item-title>
 				</v-list-item-content>
 				<v-list-item-action>
-					<v-btn icon @click="download_file(item.file_name)">
-						<v-icon color="grey lighten-1">mdi-download</v-icon>
-					</v-btn>
-					<v-btn icon @click="delete_file(item.file_name)">
-						<v-icon color="grey lighten-1">mdi-delete</v-icon>
-					</v-btn>
+					<v-icon v-if="item.favorite === 0">
+						mdi-star-outline
+					</v-icon>
+
+					<v-icon v-else>
+						mdi-star
+					</v-icon>
 				</v-list-item-action>
 			</v-list-item>
 		</v-list>
 
+		<!-- Move Folder -->
 		<v-dialog v-model="dialog2" width="500px">
 			<v-card>
 				<v-card-title class="grey darken-2">
@@ -91,6 +98,7 @@
 			</v-card>
 		</v-dialog>
 
+		<!-- sub menu for folder -->
 		<v-menu
 			v-model="showMenu"
 			:position-x="x"
@@ -100,16 +108,122 @@
 		>
 			<v-list dense>
 				<v-list-item @click.prevent="dialog2 = !dialog2">
-					<v-list-item-title>이동</v-list-item-title>
+					<v-list-item-icon>
+						<v-icon>mdi-send</v-icon>
+					</v-list-item-icon>
+					<v-list-item-content>
+						<v-list-item-title>이동</v-list-item-title>
+					</v-list-item-content>
 				</v-list-item>
 				<v-list-item @click.prevent="deleteF">
-					<v-list-item-title>삭제</v-list-item-title>
+					<v-list-item-icon>
+						<v-icon>mdi-delete</v-icon>
+					</v-list-item-icon>
+					<v-list-item-content>
+						<v-list-item-title>삭제</v-list-item-title>
+					</v-list-item-content>
 				</v-list-item>
 				<v-list-item v-if="curfName.favorite === 1" @click="delete_favorite">
-					<v-list-item-title>즐겨 찾기 삭제</v-list-item-title>
+					<v-list-item-icon>
+						<v-icon>mdi-star-outline</v-icon>
+					</v-list-item-icon>
+					<v-list-item-content>
+						<v-list-item-title>즐겨 찾기 삭제</v-list-item-title>
+					</v-list-item-content>
 				</v-list-item>
 				<v-list-item v-if="curfName.favorite === 0" @click="add_favorite">
-					<v-list-item-title>즐겨 찾기 추가</v-list-item-title>
+					<v-list-item-icon>
+						<v-icon>mdi-star</v-icon>
+					</v-list-item-icon>
+					<v-list-item-content>
+						<v-list-item-title>즐겨 찾기 추가</v-list-item-title>
+					</v-list-item-content>
+				</v-list-item>
+			</v-list>
+		</v-menu>
+		<!--  -->
+		<!-- Move File -->
+		<v-dialog v-model="dialog3" width="500px">
+			<v-card>
+				<v-card-title class="grey darken-2">
+					Move File
+				</v-card-title>
+				<v-container>
+					<v-list>
+						<v-list-item
+							v-for="item2 in folders"
+							:key="item2.folder_id"
+							@click.left="transferFile(item2.folder_name)"
+						>
+							<v-list-item-avatar>
+								<v-icon>mdi-folder</v-icon>
+							</v-list-item-avatar>
+							<v-list-item-content>
+								<v-list-item-title
+									v-text="item2.folder_name"
+								></v-list-item-title>
+							</v-list-item-content>
+						</v-list-item>
+					</v-list>
+				</v-container>
+				<v-card-actions>
+					<v-spacer></v-spacer>
+					<v-btn text color="primary" @click="cancelMove">Cancel</v-btn>
+				</v-card-actions>
+			</v-card>
+		</v-dialog>
+
+		<!-- sub menu for file -->
+		<v-menu
+			v-model="showMenuF"
+			:position-x="x"
+			:position-y="y"
+			absolute
+			offset-y
+		>
+			<v-list dense>
+				<v-list-item @click.prevent="dialog3 = !dialog3">
+					<v-list-item-icon>
+						<v-icon>mdi-send</v-icon>
+					</v-list-item-icon>
+					<v-list-item-content>
+						<v-list-item-title>이동</v-list-item-title>
+					</v-list-item-content>
+				</v-list-item>
+				<v-list-item @click.prevent="deleteF">
+					<v-list-item-icon>
+						<v-icon>mdi-delete</v-icon>
+					</v-list-item-icon>
+					<v-list-item-content>
+						<v-list-item-title>삭제</v-list-item-title>
+					</v-list-item-content>
+				</v-list-item>
+				<v-list-item @click.prevent="deleteF">
+					<v-list-item-icon>
+						<v-icon>mdi-download</v-icon>
+					</v-list-item-icon>
+					<v-list-item-content>
+						<v-list-item-title>다운로드</v-list-item-title>
+					</v-list-item-content>
+				</v-list-item>
+				<v-list-item
+					v-if="cfilename.favorite === 1"
+					@click="delete_favorite_file"
+				>
+					<v-list-item-icon>
+						<v-icon>mdi-star-outline</v-icon>
+					</v-list-item-icon>
+					<v-list-item-content>
+						<v-list-item-title>즐겨 찾기 삭제</v-list-item-title>
+					</v-list-item-content>
+				</v-list-item>
+				<v-list-item v-if="cfilename.favorite === 0" @click="add_favorite_file">
+					<v-list-item-icon>
+						<v-icon>mdi-star</v-icon>
+					</v-list-item-icon>
+					<v-list-item-content>
+						<v-list-item-title>즐겨 찾기 추가</v-list-item-title>
+					</v-list-item-content>
 				</v-list-item>
 			</v-list>
 		</v-menu>
@@ -125,6 +239,8 @@
 		<v-btn bottom color="blue" dark fab fixed right @click="dialog = !dialog">
 			<v-icon>mdi-plus</v-icon>
 		</v-btn>
+
+		<!-- Create Folder -->
 		<v-dialog v-model="dialog" width="500px">
 			<v-card>
 				<v-card-title class="grey darken-2">
@@ -162,6 +278,9 @@ import {
 	downloadFile,
 	delFavorite,
 	addFavorite,
+	moveFile,
+	delFavoriteFile,
+	addFavoriteFile,
 } from '../api/index';
 import Axios from 'axios';
 
@@ -171,6 +290,7 @@ export default {
 			uploadedfile: null,
 			foldername: '',
 			curfName: {},
+			cfilename: {},
 			folders: [],
 			files: [],
 			search: '',
@@ -178,9 +298,11 @@ export default {
 			dialog: false,
 			howMenu: false,
 			showMenu: false,
+			showMenuF: false, //파일 관련 메뉴
 			x: 0,
 			y: 0,
 			dialog2: false,
+			dialog3: false, //파일 관련 메뉴
 			detail: {
 				dataname: null,
 				date: null,
@@ -221,7 +343,9 @@ export default {
 		},
 		cancelMove() {
 			this.curfName = {};
+			this.cfilename = {};
 			this.dialog2 = false;
+			this.dialog3 = false;
 		},
 		async makeF() {
 			try {
@@ -318,7 +442,6 @@ export default {
 				console.log('에러');
 				console.log(error.response.data);
 			} finally {
-				this.initFolderName();
 				this.curfName = {};
 				this.dialog2 = false;
 			}
@@ -422,6 +545,55 @@ export default {
 				console.log('에러');
 			}
 		},
+		async delete_favorite_file() {
+			try {
+				const fData = {
+					id: this.$store.state.id,
+					cur: this.$store.state.cur,
+					name: this.cfilename.file_name,
+				};
+				console.log(fData);
+				const response = await delFavoriteFile(fData);
+				this.$store.commit('setFile', response.data.files);
+			} catch (error) {
+				console.log('에러');
+			}
+		},
+		async add_favorite_file() {
+			try {
+				const fData = {
+					id: this.$store.state.id,
+					cur: this.$store.state.cur,
+					name: this.cfilename.file_name,
+				};
+				console.log(fData);
+				const response = await addFavoriteFile(fData);
+				this.$store.commit('setFile', response.data.files);
+			} catch (error) {
+				console.log('에러');
+			}
+		},
+		async transferFile(folderName) {
+			try {
+				const fData = {
+					id: this.$store.state.id,
+					cur: this.$store.state.cur,
+					name: this.cfilename.file_name,
+					isfolder: false,
+					newPath: this.$store.state.cur + folderName + '/',
+				};
+				const response = await moveFile(fData);
+				console.log(response);
+				this.$store.commit('setFile', response.data.files);
+				this.files = this.$store.getters.fileL;
+			} catch (error) {
+				console.log('에러');
+				console.log(error.response.data);
+			} finally {
+				this.cfilename = {};
+				this.dialog3 = false;
+			}
+		},
 		show(folderObj, e) {
 			e.preventDefault();
 			this.curfName = folderObj;
@@ -430,6 +602,16 @@ export default {
 			this.y = e.clientY;
 			this.$nextTick(() => {
 				this.showMenu = true;
+			});
+		},
+		showF(fileObj, e) {
+			e.preventDefault();
+			this.cfilename = fileObj;
+			this.showMenuF = false;
+			this.x = e.clientX;
+			this.y = e.clientY;
+			this.$nextTick(() => {
+				this.showMenuF = true;
 			});
 		},
 	},

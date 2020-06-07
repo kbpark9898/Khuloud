@@ -88,6 +88,18 @@ function addFavorite(folderData) {
 	return axios.post('api/favorites/addfolder', folderData);
 }
 
+function moveFile(fileData) {
+	return axios.post('/api/folder/move', fileData);
+}
+
+function delFavoriteFile(fileData) {
+	return axios.post('api/favorites/delfile', fileData);
+}
+
+function addFavoriteFile(fileData) {
+	return axios.post('api/favorites/addfile', fileData);
+}
+
 export {
 	registerUser,
 	loginUser,
@@ -101,4 +113,7 @@ export {
 	downloadFile,
 	delFavorite,
 	addFavorite,
+	moveFile,
+	delFavoriteFile,
+	addFavoriteFile,
 };
