@@ -54,7 +54,7 @@ router.post('/makefolder', function(req, res, next) {
     let date = moment().format();
     let params = {
         Bucket: BUCKET_NAME,
-        Key: curPath + folder_name + '/',
+        Key: 'drive/' + curPath + folder_name + '/',
         Body: "",
         ACL: "public-read-write"
     };
@@ -104,7 +104,7 @@ router.post('/delfolder', function(req, res, next) {
     let folder_name = req.body.folder_name;
     let params = {
         Bucket: BUCKET_NAME,
-        Key: curPath + folder_name + '/'
+        Key: 'drive/' + curPath + folder_name + '/'
     };
     let checksql = 'SELECT * FROM folders WHERE location = ? AND folder_name = ? AND user_id = ?;';
     let values = [cur, folder_name, user_id];
@@ -160,12 +160,12 @@ router.post('/move', function(req, res, next) {
             if (rows.length != 0) {
                 let copy_params = {
                     Bucket: BUCKET_NAME,
-                    CopySource: BUCKET_NAME + '/' + curPath + name + '/',
-                    Key: newPath + name + '/'
+                    CopySource: BUCKET_NAME + '/drive/' + curPath + name + '/',
+                    Key: 'drive/' + newPath + name + '/'
                 };
                 let del_params = {
                     Bucket: BUCKET_NAME,
-                    Key: curPath + name + '/'
+                    Key: 'drive/' + curPath + name + '/'
                 };
                 s3.copyObject(copy_params, function(err, data) {
                     if (err) {
@@ -209,12 +209,12 @@ router.post('/move', function(req, res, next) {
             if (rows.length != 0) {
                 let copy_params = {
                     Bucket: BUCKET_NAME,
-                    CopySource: BUCKET_NAME + '/' + curPath + file,
-                    Key: newPath + file
+                    CopySource: BUCKET_NAME + '/drive/' + curPath + file,
+                    Key: 'drive/' + newPath + file
                 };
                 let del_params = {
                     Bucket: BUCKET_NAME,
-                    Key: curPath + file
+                    Key: 'drive/' + curPath + file
                 };
                 s3.copyObject(copy_params, function(err, data) {
                     if (err) {
@@ -267,12 +267,12 @@ router.post('/modify', function(req, res, next) {
         if (rows.length != 0) {
             let copy_params = {
                 Bucket: BUCKET_NAME,
-                CopySource: BUCKET_NAME + '/' + curPath + name + '/',
-                Key: curPath + newName + '/'
+                CopySource: BUCKET_NAME + '/drive/' + curPath + name + '/',
+                Key: 'drive/' + curPath + newName + '/'
             };
             let del_params = {
                 Bucket: BUCKET_NAME,
-                Key: curPath + name + '/'
+                Key: 'drive/' + curPath + name + '/'
             };
             s3.copyObject(copy_params, function(err, data) {
                 if (err) {
