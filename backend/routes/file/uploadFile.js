@@ -2,6 +2,7 @@ var express = require('express');
 var router = express.Router();
 
 var formidable = require('formidable');
+var moment = require('moment');
 
 var AWS = require('aws-sdk');
 AWS.config.loadFromPath(__dirname + "/../modules/awsconfig.json");
@@ -66,8 +67,8 @@ router.post('/', function (req, res) {
                 }
             }
             for (var sourceFile of noErrSourceFiles) {
-                var sql = 'INSERT INTO files (file_name, user_id, location) VALUES (?, ?, ?)';
-                connection.query(sql, [sourceFile, user_id, curPath], function (err, result) {
+                var sql = 'INSERT INTO files (file_name, user_id, location, recent_access) VALUES (?, ?, ?, ?)';
+                connection.query(sql, [sourceFile, user_id, curPath, moment().format()], function (err, result) {
                     if (err) {
                         console.log('insert error');
                         res.send({error: 'insert error'});

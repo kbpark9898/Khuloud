@@ -43,8 +43,8 @@ router.post('/:name', function(req, res){
 
                     S3.coverFile(S3.BUCKET_NAME, user_id, modified_name, targetPath, tempDownloadDir, function (result) {
                         if (result) {
-                            var sql = 'UPDATE files SET file_name=(?), updated=(?) WHERE user_id=(?) AND location=(?) AND file_name=(?)';
-                            connection.query(sql, [modified_name, moment().format(), user_id, curPath, file_name], function (err) {
+                            var sql = 'UPDATE files SET file_name=(?), updated=(?), recent_access=(?) WHERE user_id=(?) AND location=(?) AND file_name=(?)';
+                            connection.query(sql, [modified_name, moment().format(), moment().format(), user_id, curPath, file_name], function (err) {
                                 if (err) {
                                     console.log(err);
                                     res.send({ error: 'update error' });
