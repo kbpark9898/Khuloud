@@ -9,7 +9,8 @@ export default new Vuex.Store({
         folders: [],
         files: [],
         cur: '/',
-        parent: '/'
+        parent: '/',
+        recentList:[]
     },
     mutations: {
         setId(state, userid) {
@@ -29,6 +30,9 @@ export default new Vuex.Store({
         },
         setParent(state, parent) {
             state.parent = parent;
+        },
+        setRecentList(state, list){
+            state.recentList = list;
         }
     },
     getters: {
@@ -44,9 +48,12 @@ export default new Vuex.Store({
         fileL(state) {
             return state.files;
         },
+        recentL(state){
+            return state.recentList;
+        },
         cur(state) {
             return state.cur;
-        },        
+        },
         setFolder(state, folderlist){
           state.folders  = folderlist;
         },
