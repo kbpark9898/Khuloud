@@ -27,6 +27,10 @@
             <v-toolbar-title>빠른 액세스</v-toolbar-title>
             <v-spacer></v-spacer>
           </v-toolbar>
+          <v-container>
+            <accessList></accessList>
+          </v-container>
+          <!--
           <v-simple-table>
             <template v-slot:default>
               <thead>
@@ -43,6 +47,7 @@
               </tbody>
             </template>
           </v-simple-table>
+        -->
           <v-divider></v-divider>
         </v-flex>
       </v-layout>
@@ -52,6 +57,7 @@
 
 
 <script>
+  import accessList from '@/components/accessList.vue'
   import FileList from '@/components/FileList'
   import Favlist from '@/components/Fav_list'
   import Filecard from '@/components/FileCardlist.vue'
@@ -59,7 +65,8 @@
     components:{
       FileList,
       Favlist,
-      Filecard
+      Filecard,
+      accessList
     },
     data () {
       return {

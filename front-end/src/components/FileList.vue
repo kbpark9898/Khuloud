@@ -75,7 +75,7 @@
 			</v-dialog>
 			<v-divider inset></v-divider>
 			<v-subheader inset>Files</v-subheader>
-			<v-list-item v-for="item in this.$store.getters.fileL" :key="item.title">
+			<v-list-item v-for="item in this.$store.getters.fileL" :key="item.title" @click.stop="dialog_file = true; file_detail(item)">
 				<v-list-item-avatar>
 					<v-icon> mdi-file</v-icon>
 				</v-list-item-avatar>
@@ -83,14 +83,35 @@
 					<v-list-item-title v-text="item.file_name"></v-list-item-title>
 				</v-list-item-content>
 				<v-list-item-action>
-					<v-btn icon @click="download_file(item.file_name)">
-						<v-icon color="grey lighten-1">mdi-download</v-icon>
-					</v-btn>
-					<v-btn icon @click="delete_file(item.file_name)">
-						<v-icon color="grey lighten-1">mdi-delete</v-icon>
-					</v-btn>
-				</v-list-item-action>
-			</v-list-item>
+			 </v-list-item-action>
+			 <v-dialog
+				 v-model="dialog_file"
+				 max-width="290"
+				>
+				 <v-card>
+					 <v-card-title class="headline">
+						 <v-text-field  v-model="current_filename" v-text="current_filename"></v-text-field>
+					 </v-card-title>
+					 <v-card-text v-model="current_filedata" v-text="current_filedata"></v-card-text>
+					 <v-card-actions>
+						 <v-spacer></v-spacer>
+						 <v-btn
+							 color="green darken-1"
+							 text
+							 @click="dialog_file = false; modify_file(item);"
+						 >
+							 save
+						 </v-btn>
+					 </v-card-actions>
+				 </v-card>
+			 </v-dialog>
+			 <v-btn icon @click="download_file(item.file_name)">
+				 <v-icon color="grey lighten-1">mdi-download</v-icon>
+			 </v-btn>
+			 <v-btn icon @click="delete_file(item.file_name)">
+				 <v-icon color="grey lighten-1">mdi-delete</v-icon>
+			 </v-btn>
+		 </v-list-item>
 		</v-list>
 		<input
 			id="file-selector"
@@ -170,8 +191,11 @@ import {
 	uploadFile,
 	deleteFile,
 	downloadFile,
+	detailFile,
+	modifyFile
 } from '../api/index';
 import Axios from 'axios';
+
 
 export default {
 	data() {
@@ -189,6 +213,9 @@ export default {
 			x: 0,
 			y: 0,
 			dialog2: false,
+			dialog_file: false,
+			current_filename: null,
+			current_filedata: null,
 			detail: {
 				dataname: null,
 				date: null,
@@ -397,6 +424,45 @@ export default {
 				console.log(error);
 			}
 		},
+		async file_detail(fileData){
+			try{
+				const currentData = {
+					id: fileData.user_id,
+					cur: fileData.location,
+					fileName: fileData.file_name
+				}
+				const detailData = await detailFile(currentData)
+				console.log(detailData)
+				this.current_filename = detailData.file_name;
+				this.current_filedata = detailFile.content;
+			}catch(error){
+				console.log('에러');
+				console.log(error);
+			}
+		},
+	 async modify_file(fileData){
+		 try{
+			 const modifyData = {
+				 user_id: fileData.user_id,
+				 cur: fileData.location,
+				 name: this.current_filename,
+				 content: this.current_filedata
+			 }
+
+			 const result = await modifyFile(modifyData);
+			 const after_data={
+				 id: fileData.user_id,
+				 cur: fileData.location,
+				 fileName: this.current_filename
+			 }
+			 const detailData = await detailFile(after_data)
+			 this.current_filename = detailData.file_name;
+			 this.current_filedata = detailData.content;
+		 }catch(error){
+			 console.log('에러');
+			 console.log(error);
+		 }
+	 }
 	},
 	show(folderN, e) {
 		e.preventDefault();

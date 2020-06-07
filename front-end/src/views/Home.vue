@@ -21,7 +21,7 @@
               </v-flex>
               <v-flex><br><v-divider></v-divider><br></v-flex>
               <v-container>
-
+                <accessList></accessList>
               </v-container>
             </v-flex>
             <v-flex><br><v-divider></v-divider><br></v-flex>
@@ -55,7 +55,7 @@
 
 
 <script>
-  import Filecard from '@/components/accessList.vue'
+  import accessList from '@/components/accessList.vue'
   export default {
     data () {
       return {

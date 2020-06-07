@@ -24,12 +24,12 @@
 </template>
 
 <script>
-  import { accessed_list } from '../api/index';
+  import { accessedList } from '../api/index';
   import Axios from 'axios';
   export default {
     data() {
       return {
-        recent_list = []
+        recent_list : []
       }
     },
     async created(){
@@ -38,9 +38,9 @@
             id : this.$store.state.id,
           }
           console.log(curData);
-          const list_reponse = await accessed_list(curData);
+          const list_reponse = await accessedList(curData);
           this.$store.commit('setRecentList', list_reponse.data)
-          this.recent_list = this.$stroe.getters.recentL;
+          this.recent_list = this.$store.getters.recentL;
           console.log(this.$store.getters.recentL);
         } catch (error) {
           console.log("에러");
