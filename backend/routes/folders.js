@@ -68,7 +68,6 @@ router.post('/makefolder', function(req, res, next) {
                 s3.putObject(params, function(err, data) {
                     if (err) {
                         console.log('s3 error');
-                        throw err;
                     } else {
                         console.log(data);
                         let sql = 'INSERT INTO folders (folder_name,location,user_id,created) values (?,?,?,?);';
