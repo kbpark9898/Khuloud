@@ -4,74 +4,62 @@ const router = express.Router();
 router.get('/show', function(req, res, next) {
     console.log(req.query);
     user_id = req.query.id;
-    folders = [];
-    files = [];
+    let folders = [];
+    let files = [];
 
-    let checkfolder = 'SELECT * FROM Folder_Favorites WHERE user_id = ?;';
-    let checkfiles = 'SELECT * FROM File_Favorites WHERE user_id = ?;';
-    connection.query(checkfolder, [user_id], function(err, rows, fields) {
+    let checkfolder = 'SELECT * FROM folders WHERE user_id = ? AND favorite = 1;';
+    let checkfiles = 'SELECT * FROM files WHERE user_id = ? AND favorite = 1;';
+    connection.query(checkfolder, [user_id], function(err, folder, fields) {
         if (err) {
             console.log('select error');
             res.status(404).send();
         } else {
-            folders.push(rows);
+            folders.push(folder);
+            connection.query(checkfiles, [user_id], function(err, file, fields) {
+                if (err) {
+                    console.log('select error');
+                    res.status(404).send();
+                } else {
+                    files.push(file);
+                    res.status(200).send({
+                        folders: folders,
+                        files: files
+                    });
+                }
+            });
         }
-    });
-    connection.query(checkfiles, [user_id], function(err, rows, fields) {
-        if (err) {
-            console.log('select error');
-            res.status(404).send();
-        } else {
-            files.push(rows);
-        }
-    });
-    res.status(200).send({
-        folders: folders,
-        files: files
     });
 });
 
 router.post('/addfolder', function(req, res, next) {
     let user_id = req.body.id;
     let folder_name = req.body.name;
+    let cur = req.body.cur;
     console.log(req.body);
-    let getid = 'SELECT folder_id FROM folders WHERE user_id = ? AND folder_name = ?;';
-    connection.query(getid, [user_id, folder_name], function(err, folder, fields) {
+    let checkfolder = 'SELECT * FROM folders WHERE location = ? AND user_id = ? AND folder_name = ? AND favorite = 1;';
+    connection.query(checkfolder, [cur, user_id, folder_name], function(err, rows, fields) {
         if (err) {
-            console.log('getid error');
+            console.log('select error');
             res.status(400).send({ error: err });
         } else {
-            if (folder.length == 0) {
-                console.log('dont exist error');
-                res.status(400).send({ error: err });
-            } else {
-                let folder_id = folder[0].folder_id;
-                console.log(folder_id);
-                let checkfolder = 'SELECT * FROM Folder_Favorites WHERE user_id = ? AND folder_id = ?;';
-                connection.query(checkfolder, [user_id, folder_id], function(err, rows, fields) {
+            if (rows.length == 0) {
+                let sql = 'UPDATE folders SET favorite = 1 WHERE location = ? AND folder_name = ? AND user_id = ?;';
+                connection.query(sql, [cur, folder_name, user_id], function(err, result, fields) {
                     if (err) {
-                        console.log('select error');
+                        console.log('update error');
                         res.status(400).send({ error: err });
                     } else {
-                        if (rows.length == 0) {
-                            let sql = 'INSERT INTO Folder_Favorites (folder_id,user_id) values (?,?);';
-                            connection.query(sql, [folder_id, user_id], function(err, result, fields) {
-                                if (err) {
-                                    console.log('insert error');
-                                    res.status(400).send({ error: err });
-                                } else {
-                                    res.status(200).send({
-                                        success: 'success',
-                                        error: ''
-                                    });
-                                }
-                            });
-                        } else {
-                            console.log('already exist error');
-                            res.status(400).send({ error: err });
-                        }
+                        let getfolder = 'SELECT * FROM folders WHERE location = ? AND user_id = ?;';
+                        connection.query(getfolder, [cur, user_id], function(err, folders, fields) {
+                            res.status(200).send({
+                                folders: folders
+                            })
+                        });
                     }
                 });
+            } else {
+                console.log('already exist error');
+                res.status(400).send({ error: err });
             }
         }
     });
@@ -80,39 +68,33 @@ router.post('/addfolder', function(req, res, next) {
 router.post('/addfile', function(req, res, next) {
     let user_id = req.body.id;
     let file_name = req.body.name;
-
-    let getid = 'SELECT file_id FROM files WHERE user_id = ? AND file_name = ?;';
-    connection.query(getid, [user_id, file_name], function(err, file, fields) {
+    let cur = req.body.cur;
+    console.log(req.body);
+    let checkfolder = 'SELECT * FROM files WHERE location = ? AND user_id = ? AND file_name = ? AND favorite = 1;';
+    connection.query(checkfolder, [cur, user_id, file_name], function(err, rows, fields) {
         if (err) {
-            console.log('getid error');
+            console.log('select error');
             res.status(400).send({ error: err });
         } else {
-            let file_id = file[0].file_id;
-            let checkfile = 'SELECT * FROM File_Favorites WHERE user_id = ? AND file_id = ?;';
-            connection.query(checkfile, [user_id, file_id], function(err, rows, fields) {
-                if (err) {
-                    console.log('select error');
-                    res.status(400).send({ error: err });
-                } else {
-                    if (rows.length == 0) {
-                        let sql = 'INSERT INTO File_Favorites (file_id,user_id) values (?,?);';
-                        connection.query(sql, [file_id, user_id], function(err, result, fields) {
-                            if (err) {
-                                console.log('insert error');
-                                res.status(400).send({ error: err });
-                            } else {
-                                res.status(200).send({
-                                    success: 'success',
-                                    error: ''
-                                });
-                            }
-                        });
-                    } else {
-                        console.log('already exist error');
+            if (rows.length == 0) {
+                let sql = 'UPDATE files SET favorite = 1 WHERE location = ? AND file_name = ? AND user_id = ?;';
+                connection.query(sql, [cur, file_name, user_id], function(err, result, fields) {
+                    if (err) {
+                        console.log('update error');
                         res.status(400).send({ error: err });
+                    } else {
+                        let getfolder = 'SELECT * FROM files WHERE location = ? AND user_id = ?;';
+                        connection.query(getfolder, [cur, user_id], function(err, files, fields) {
+                            res.status(200).send({
+                                files: files
+                            })
+                        });
                     }
-                }
-            });
+                });
+            } else {
+                console.log('already exist error');
+                res.status(400).send({ error: err });
+            }
         }
     });
 });
@@ -120,7 +102,7 @@ router.post('/addfile', function(req, res, next) {
 router.post('/delfolder', function(req, res, next) {
     let user_id = req.body.id;
     let folder_name = req.body.name;
-    let checkfolder = 'SELECT * FROM Folder_Favorites JOIN folders ON (Folder_Favorites.folder_id = folders.folder_id AND Folder_Favorites.user_id = ? AND folders.folder_name = ?);';
+    let checkfolder = 'SELECT * FROM folders WHERE location = ? AND user_id = ? AND folder_name = ? AND favorite = 1;';
 
     connection.query(checkfolder, [user_id, folder_name], function(err, rows, fields) {
         if (err) {
@@ -128,19 +110,20 @@ router.post('/delfolder', function(req, res, next) {
             res.status(400).send({ error: err });
         } else {
             if (rows.length != 0) {
-                let folder_id = rows[0].folder_id;
-                let sql = 'DELETE Folder_Favorites WHERE folder_id = ? AND user_id = ?;';
-                connection.query(sql, [folder_id, user_id], function(err, result, fields) {
+                let sql = 'UPDATE folders SET favorite = 0 WHERE location = ? AND folder_name = ? AND user_id = ?;';
+                connection.query(sql, [cur, folder_name, user_id], function(err, result, fields) {
                     if (err) {
-                        console.log('delete error');
+                        console.log('update error');
                         res.status(400).send({ error: err });
                     } else {
-                        res.status(200).send({
-                            success: 'success',
-                            error: ''
+                        let getfolder = 'SELECT * FROM folders WHERE location = ? AND user_id = ?;';
+                        connection.query(getfolder, [cur, user_id], function(err, folders, fields) {
+                            res.status(200).send({
+                                folders: folders
+                            })
                         });
                     }
-                })
+                });
             } else {
                 console.log('dont exist error');
                 res.status(400).send({ error: err });
@@ -152,7 +135,7 @@ router.post('/delfolder', function(req, res, next) {
 router.post('/delfile', function(req, res, next) {
     let user_id = req.body.id;
     let file_name = req.body.name;
-    let checkfile = 'SELECT * FROM File_Favorites JOIN files ON (File_Favorites.file_id = files.file_id AND File_Favorites.user_id = ? AND files.file_name = ?);';
+    let checkfile = 'SELECT * FROM files WHERE location = ? AND user_id = ? AND file_name = ? AND favorite = 1;';
 
     connection.query(checkfile, [user_id, file_name], function(err, rows, fields) {
         if (err) {
@@ -160,19 +143,20 @@ router.post('/delfile', function(req, res, next) {
             res.status(400).send({ error: err });
         } else {
             if (rows.length != 0) {
-                let file_id = rows[0].file_id;
-                let sql = 'DELETE File_Favorites WHERE file_id = ? AND user_id = ?;';
-                connection.query(sql, [file_id, user_id], function(err, result, fields) {
+                let sql = 'UPDATE files SET favorite = 0 WHERE location = ? AND file_name = ? AND user_id = ?;';
+                connection.query(sql, [cur, file_name, user_id], function(err, result, fields) {
                     if (err) {
-                        console.log('insert error');
+                        console.log('update error');
                         res.status(400).send({ error: err });
                     } else {
-                        res.status(200).send({
-                            success: 'success',
-                            error: ''
+                        let getfolder = 'SELECT * FROM files WHERE location = ? AND user_id = ?;';
+                        connection.query(getfolder, [cur, user_id], function(err, files, fields) {
+                            res.status(200).send({
+                                files: files
+                            })
                         });
                     }
-                })
+                });
             } else {
                 console.log('dont exist error');
                 res.status(400).send({ error: err });

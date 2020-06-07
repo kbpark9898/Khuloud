@@ -2,16 +2,11 @@ var express = require('express');
 var request = require('request');
 var async = require('async');
 const AWS = require("aws-sdk");
-
+AWS.config.loadFromPath(__dirname + "/../modules/awsconfig.json");
 var cryptoM = require('./../../routes/modules/cryptoM.js');
 
 const BUCKET_NAME = "hong-s3-cloud";
-
-const s3 = new AWS.S3({
-    accessKeyId: process.env.AWS_ACCESS_KEY_ID,
-    secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY,
-    region: "ap-northeast-2"
-});
+const s3 = new AWS.S3();
 
 var router = express.Router();
 
@@ -43,7 +38,7 @@ router.post('/', function(req, res, next) {
                 } else {
                     let params = {
                         Bucket: BUCKET_NAME,
-                        Key: user_id + '/',
+                        Key: 'drive/' + user_id + '/',
                         Body: "",
                         ACL: "public-read-write"
                     };
@@ -53,7 +48,7 @@ router.post('/', function(req, res, next) {
                         } else {
                             let params2 = {
                                 Bucket: BUCKET_NAME,
-                                Key: user_id + '/share/',
+                                Key: 'drive/' + user_id + '/share/',
                                 Body: "",
                                 ACL: "public-read-write"
                             };
@@ -63,7 +58,7 @@ router.post('/', function(req, res, next) {
                                 } else {
                                     let params3 = {
                                         Bucket: BUCKET_NAME,
-                                        Key: user_id + '/trashcan/',
+                                        Key: 'drive/' + user_id + '/trashcan/',
                                         Body: "",
                                         ACL: "public-read-write"
                                     };
