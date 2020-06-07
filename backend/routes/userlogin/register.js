@@ -4,6 +4,7 @@ var async = require('async');
 const AWS = require("aws-sdk");
 AWS.config.loadFromPath(__dirname + "/../modules/awsconfig.json");
 var cryptoM = require('./../../routes/modules/cryptoM.js');
+const moment = require("moment");
 
 const BUCKET_NAME = "hong-s3-cloud";
 const s3 = new AWS.S3();
@@ -34,7 +35,7 @@ router.post('/', function(req, res, next) {
             connection.query(sql, values, function(err) {
                 if (err) {
                     console.log("inserting user failed");
-                    throw err;
+                    res.status(400).send({ err: err });
                 } else {
                     let params = {
                         Bucket: BUCKET_NAME,
@@ -45,6 +46,7 @@ router.post('/', function(req, res, next) {
                     s3.putObject(params, function(err, data) {
                         if (err) {
                             console.log('s3 error');
+                            res.status(400).send({ err: err });
                         } else {
                             let params2 = {
                                 Bucket: BUCKET_NAME,
@@ -55,6 +57,7 @@ router.post('/', function(req, res, next) {
                             s3.putObject(params2, function(err, data) {
                                 if (err) {
                                     console.log('s3 error');
+                                    res.status(400).send({ err: err });
                                 } else {
                                     let params3 = {
                                         Bucket: BUCKET_NAME,
@@ -65,8 +68,27 @@ router.post('/', function(req, res, next) {
                                     s3.putObject(params3, function(err, data) {
                                         if (err) {
                                             console.log('s3 error');
+                                            res.status(400).send({ err: err });
                                         } else {
-                                            res.status(200).send('saved');
+                                            let date = moment().format();
+                                            let root = '/';
+                                            let sql = "INSERT INTO folders (folder_name,location,user_id,created) values (?,?,?,?);";
+                                            connection.query(sql, ['share', root, user_id, date], function(err, result, field) {
+                                                if (err) {
+                                                    console.log('insert1 error');
+                                                    res.status(400).send({ err: err });
+                                                } else {
+                                                    let sql = "INSERT INTO folders (folder_name,location,user_id,created) values (?,?,?,?);";
+                                                    connection.query(sql, ['trashcan', root, user_id, date], function(err, result, field) {
+                                                        if (err) {
+                                                            console.log('insert2 error');
+                                                            res.status(400).send({ err: err });
+                                                        } else {
+                                                            res.status(200).send('saved');
+                                                        }
+                                                    });
+                                                }
+                                            });
                                         }
                                     });
                                 }
