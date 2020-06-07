@@ -33,7 +33,7 @@ router.get('/show', function(req, res, next) {
     connection.query(checkfolder, [curPath, user_id], function(err, rows, fields) {
         if (err) {
             console.log('select error');
-            res.status(404).send()
+            res.status(400).send({ err: err });
         } else {
             res.status(200).send({
                 folders: rows,
@@ -62,12 +62,13 @@ router.post('/makefolder', function(req, res, next) {
     console.log(req.body)
     connection.query(checksql, [cur, folder_name], function(err, rows, fields) {
         if (err) {
-
+            res.status(400).send({ err: err });
         } else {
             if (rows.length == 0) {
                 s3.putObject(params, function(err, data) {
                     if (err) {
                         console.log('s3 error');
+                        res.status(400).send({ err: err });
                     } else {
                         console.log(data);
                         let sql = 'INSERT INTO folders (folder_name,location,user_id,created) values (?,?,?,?);';
@@ -75,7 +76,7 @@ router.post('/makefolder', function(req, res, next) {
                         connection.query(sql, values, function(err, result, field) {
                             if (err) {
                                 console.log('insert error');
-                                throw err;
+                                res.status(400).send({ err: err });
                             } else {
                                 let checkfolder = 'SELECT * FROM folders WHERE location = ? AND user_id = ?;';
                                 connection.query(checkfolder, [cur, user_id], function(err, rows, fields) {
@@ -116,13 +117,13 @@ router.post('/delfolder', function(req, res, next) {
                 s3.deleteObject(params, function(err, data) {
                     if (err) {
                         console.log('s3 error');
-                        //throw err;
+                        res.status(400).send({ err: err });
                     } else {
                         console.log(data);
                         let sql = 'DELETE FROM folders WHERE location = ? AND folder_name = ? AND user_id = ?;';
                         connection.query(sql, values, function(err, result, field) {
                             if (err) {
-                                //throw err;
+                                res.status(400).send({ err: err });
                             } else {
                                 console.log(cur);
                                 console.log(user_id);
