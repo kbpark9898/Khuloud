@@ -20,26 +20,9 @@
                 <v-spacer></v-spacer>
               </v-flex>
               <v-flex><br><v-divider></v-divider><br></v-flex>
-              <v-flex>
-                <h1>빠른액세스</h1>
-                <v-simple-table>
-                  <template v-slot:default>
-                    <thead>
-                      <tr>
-                        <th class="text-left">Name</th>
-                        <th class="text-left">Date</th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      <tr v-for="item in favorite" :key="item.name">
-                        <td>{{ item.name }}</td>
-                        <td>{{ item.date }}</td>
-                      </tr>
-                    </tbody>
-                  </template>
-                </v-simple-table>
-                <v-divider></v-divider>
-              </v-flex>
+              <v-container>
+
+              </v-container>
             </v-flex>
             <v-flex><br><v-divider></v-divider><br></v-flex>
             <v-flex xs6>
@@ -72,6 +55,7 @@
 
 
 <script>
+  import Filecard from '@/components/accessList.vue'
   export default {
     data () {
       return {
