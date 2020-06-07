@@ -250,11 +250,14 @@ export default {
 					cur: this.$store.state.cur + move_folder_name + '/',
 				};
 				const response = await folder(curData);
+				const file_response = await file(curData);
 				console.log(response.data);
 				this.$store.commit('setFolder', response.data.folders);
+				this.$store.commit('setFile', file_response.data.files);
 				this.$store.commit('setCur', response.data.cur);
 				this.$store.commit('setParent', response.data.parentPath);
 				this.folders = this.$store.getters.folderL;
+				this.files = this.$store.getters.fileL;
 			} catch (error) {
 				console.log('에러');
 				console.log(error.response.data);
@@ -267,11 +270,14 @@ export default {
 					cur: this.$store.state.parent,
 				};
 				const response = await folder(cData);
+				const file_response = await file(cData);
 				console.log(response.data);
 				this.$store.commit('setFolder', response.data.folders);
+				this.$store.commit('setFile', file_response.data.files);
 				this.$store.commit('setCur', response.data.cur);
 				this.$store.commit('setParent', response.data.parentPath);
 				this.folders = this.$store.getters.folderL;
+				this.files = this.$store.getters.fileL;
 			} catch (error) {
 				console.log('에러');
 				console.log(error.response.data);
