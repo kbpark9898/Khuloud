@@ -18,7 +18,7 @@
 				v-for="item in this.$store.getters.folderL"
 				:key="item.title"
 				:search="search"
-				@click.right="show(item.folder_name, $event)"
+				@click.right="show(item, $event)"
 				@click.left="moveF(item.folder_name)"
 			>
 				<v-list-item-avatar>
@@ -27,6 +27,15 @@
 				<v-list-item-content>
 					<v-list-item-title v-text="item.folder_name"></v-list-item-title>
 				</v-list-item-content>
+				<v-list-item-action>
+					<v-icon v-if="item.favorite === 'false'" color="grey lighten-1">
+						star_border
+					</v-icon>
+
+					<v-icon v-else color="yellow">
+						star
+					</v-icon>
+				</v-list-item-action>
 			</v-list-item>
 
 			<v-divider inset></v-divider>
@@ -60,7 +69,7 @@
 							v-for="item2 in folders"
 							:key="item2.folder_id"
 							@click.left="transferF(item2.folder_name)"
-							v-if="item2.folder_name !== curfName"
+							v-if="item2.folder_name !== curfName.folder_name"
 						>
 							<v-list-item-avatar>
 								<v-icon>mdi-folder</v-icon>
@@ -94,6 +103,16 @@
 				<v-list-item @click.prevent="deleteF">
 					<v-list-item-title>삭제</v-list-item-title>
 				</v-list-item>
+				<template v-if="curfName.favorite === 'true'" @click="change_favorite">
+					<v-list-item>
+						<v-list-item-title>즐겨 찾기 삭제</v-list-item-title>
+					</v-list-item>
+				</template>
+				<template v-if="curfName.favorite === 'false'" @click="change_favorite">
+					<v-list-item>
+						<v-list-item-title>즐겨 찾기 추가</v-list-item-title>
+					</v-list-item>
+				</template>
 			</v-list>
 		</v-menu>
 
@@ -151,7 +170,7 @@ export default {
 		return {
 			uploadedfile: null,
 			foldername: '',
-			curfName: '',
+			curfName: {},
 			folders: [],
 			files: [],
 			search: '',
@@ -201,7 +220,7 @@ export default {
 			this.foldername = '';
 		},
 		cancelMove() {
-			this.curfName = '';
+			this.curfName = {};
 			this.dialog2 = false;
 		},
 		async makeF() {
@@ -263,7 +282,7 @@ export default {
 				const cData = {
 					id: this.$store.state.id,
 					cur: this.$store.state.cur,
-					folder_name: this.curfName,
+					folder_name: this.curfName.folder_name,
 				};
 				const response = await deleteFolder(cData);
 				console.log(response);
@@ -281,7 +300,7 @@ export default {
 				const cData = {
 					id: this.$store.state.id,
 					cur: this.$store.state.cur,
-					folder_name: this.curfName,
+					folder_name: this.curfName.folder_name,
 					isfolder: true,
 					newPath: this.$store.state.cur + folderName + '/',
 				};
@@ -294,7 +313,7 @@ export default {
 				console.log(error.response.data);
 			} finally {
 				this.initFolderName();
-				this.curfName = '';
+				this.curfName = {};
 				this.dialog2 = false;
 			}
 		},
@@ -369,9 +388,10 @@ export default {
 				console.log(error);
 			}
 		},
-		show(folderN, e) {
+		async change_favorite() {},
+		show(folderObj, e) {
 			e.preventDefault();
-			this.curfName = folderN;
+			this.curfName = folderObj;
 			this.showMenu = false;
 			this.x = e.clientX;
 			this.y = e.clientY;

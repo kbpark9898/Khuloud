@@ -80,6 +80,10 @@ function downloadFile(fileData) {
 	});
 }
 
+function changeFavorite() {
+	return axios.post();
+}
+
 export {
 	registerUser,
 	loginUser,
@@ -91,4 +95,5 @@ export {
 	uploadFile,
 	deleteFile,
 	downloadFile,
+	changeFavorite,
 };
