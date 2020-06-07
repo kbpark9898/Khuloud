@@ -42,7 +42,37 @@ contact_search : 연락처 검색 모듈
 input : 사용자가 이름, 전화번호, 이메일 중 하나를 검색
 output : 검색을 요청한 데이터에 부합하는 연락처를 찾았다면 출력
 */
-router.get('/contact_search', function(req, res, next) {
+router.post('/contact_search', function(req, res, next) {
+    console.log("req.query",req.query);
+    var user_id = req.query.id;
+    var type = req.query.type;
+    var info = "";
+    if(type == "name")
+    {
+      info = req.query.name;
+      var sqlquery = "SELECT  * FROM contact WHERE user_id = ? and name = ?";
+    }
+    else if(type == "phone")
+    {
+      info = req.query.phone;
+      var sqlquery = "SELECT  * FROM contact WHERE user_id = ? and phone = ?";
+    }
+    else if(type == "email")
+    {
+      info = req.query.email;
+      var sqlquery = "SELECT  * FROM contact WHERE user_id = ? and email = ?";
+    }
+    console.log(sqlquery);
+    connection.query(sqlquery, [user_id,info], function (err, rows) {
+      if (err) {
+          console.log("search contact failed");
+          throw err;
+      } else {
+          console.log(rows);
+           res.status(200).send({contact_list : rows});
+      }
+
+    });
 });
 
 /*
