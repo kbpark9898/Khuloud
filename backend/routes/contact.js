@@ -1,5 +1,23 @@
 var express = require('express');
 var router = express.Router();
+const XLSX = require('xlsx');
+var multer = require('multer');
+var fs = require('fs');
+// var pool = require('./../routes/modules/database');
+
+//파일 저장위치와 파일이름 설정
+var storage = multer.diskStorage({
+    destination: function (req, file, cb) {
+        cb(null, 'public/upload');
+    },
+    //파일이름 설정
+    filename: function (req, file, cb) {
+    cb(null, file.originalname);
+  }
+})
+
+//파일 업로드 모듈
+var upload = multer({ storage: storage })
 
 // 연락처 백업, 삭제, 검색
 /*
@@ -7,8 +25,62 @@ contact_upload : 연락처 파일 업로드 모듈
 input : 사용자가 연락처를 저장해놓은 csv 혹은 xlsx 파일
 output : 연락처 저장 성공 여부
 */
-router.get('/contact_upload', function(req, res, next) {
-  console.log("login");
+router.post('/contact_upload', upload.single('file'), function(req, res, next) {
+    // console.log(req);
+    var user_id = req.query.id;
+    var file = req.file;
+    var workbook = XLSX.readFile('public/upload/contact.xlsx');
+    var firstWSheetName = workbook.SheetNames[0];
+    var firstWSheet = workbook.Sheets[firstWSheetName];
+    var name = [];
+    var phone = [];
+    var email = [];
+    var added_date = [];
+    var length = firstWSheet['!ref'][4];
+    var temp ="";
+
+    var sqlquery = "insert into contact(user_id,name,email,phone,added_date) values";
+    for(var i=1;i<length;i++)
+    {
+      for(var j=0;j<4;j++)
+      {
+        if(j==0){
+          temp = "A" + (i+1);
+          name.push(firstWSheet[temp].v);
+          sqlquery += ' ("' + user_id + '","'+name[i-1];
+          }
+        else if(j==1){
+          temp = "B" + (i+1);
+          phone.push(firstWSheet[temp].v);
+          sqlquery += '","' + phone[i-1];
+          }
+        else if(j==2){
+          temp = "C" + (i+1);
+          email.push(firstWSheet[temp].v);
+          sqlquery += '","' + email[i-1];
+          }
+        else if(j==3){
+          temp = "D" + (i+1);
+          added_date.push(firstWSheet[temp].v);
+          sqlquery += '","' + added_date[i-1] + '"),';
+          }
+      }
+    }
+    sqlquery = sqlquery.substring(0,sqlquery.length-1);
+      connection.query(sqlquery, function (err, rows) {
+        if (err) {
+            console.log("upload contact failed");
+            throw err;
+        } else {
+            console.log(rows);
+            var filename = 'public/upload/contact.xlsx';
+            fs.unlink(filename, function (err) {
+                  if (err) throw err;
+                  console.log('file deleted');
+                })
+              res.status(200).send('upload');
+        }
+      });
 });
 
 /*
