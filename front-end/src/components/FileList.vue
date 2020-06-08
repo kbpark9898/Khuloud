@@ -190,7 +190,7 @@
 						<v-list-item-title>이동</v-list-item-title>
 					</v-list-item-content>
 				</v-list-item>
-				<v-list-item @click.prevent="deleteF">
+				<v-list-item @click.prevent="delete_file">
 					<v-list-item-icon>
 						<v-icon>mdi-delete</v-icon>
 					</v-list-item-icon>
@@ -198,7 +198,7 @@
 						<v-list-item-title>삭제</v-list-item-title>
 					</v-list-item-content>
 				</v-list-item>
-				<v-list-item @click.prevent="deleteF">
+				<v-list-item @click.prevent="download_file">
 					<v-list-item-icon>
 						<v-icon>mdi-download</v-icon>
 					</v-list-item-icon>
@@ -468,20 +468,16 @@ export default {
 				console.log(error);
 			}
 		},
-		async delete_file(itemName) {
+		async delete_file() {
 			try {
 				var itemlist = this.$store.getters.fileL;
-				console.log(itemlist);
-				console.log(itemName);
 				const currentData = {
 					fileName: null,
 					user_id: null,
 					cur: this.$store.state.cur,
 				};
-
 				for (var i = 0; i < itemlist.length; i++) {
-					console.log(itemlist[i].file_name);
-					if (itemlist[i].file_name == itemName) {
+					if (itemlist[i].file_name == this.cfilename.file_name) {
 						currentData.fileName = itemlist[i].file_name;
 						currentData.user_id = itemlist[i].user_id;
 					}
@@ -490,23 +486,20 @@ export default {
 					id: currentData.user_id,
 					cur: currentData.cur,
 				};
-				console.log(currentData);
 				const response = await deleteFile(currentData);
 				setTimeout(function() {}, 500);
 				const filelist = await file(filelistData);
-				console.log(filelist.data.files);
 				this.$store.commit('setFile', filelist.data.files);
-				console.log(this.$store.getters.fileL);
 				this.files = this.$store.getters.fileL;
 			} catch (error) {
 				console.log('에러');
 				console.log(error);
 			}
 		},
-		async download_file(namedata) {
+		async download_file() {
 			try {
 				const currentData = {
-					fileName: namedata,
+					fileName: this.cfilename.file_name,
 					id: this.$store.state.id,
 					cur: this.$store.state.cur,
 				};

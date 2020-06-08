@@ -3,7 +3,7 @@ const router = express.Router();
 const AWS = require("aws-sdk");
 const moment = require("moment");
 
-const BUCKET_NAME = "hong-s3-cloud";
+const BUCKET_NAME = "qkrrlqja-test";
 let curPath = "";
 let user_id = "";
 let parentPath = "";
