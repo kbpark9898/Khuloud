@@ -2,6 +2,7 @@ var express = require('express');
 var router = express.Router();
 
 var fs = require('fs');
+var moment = require('moment');
 
 var AWS = require('aws-sdk');
 AWS.config.loadFromPath(__dirname + "/../modules/awsconfig.json");
@@ -19,7 +20,14 @@ router.get('/:name', function (req, res) {
 
     S3.downloadFile3(S3.BUCKET_NAME, user_id, targetFile, function (result, downloadDir) {
         if (result) {
-            res.send({ src: downloadDir })
+            var sql = 'UPDATE files SET recent_access=(?) WHERE user_id=(?) AND location=(?) AND file_name=(?)';
+            connection.query(sql, [moment().format(), user_id, curPath, file_name], function(err){
+                if (err){
+                    res.send({err: 'update error'});
+                }else{
+                    res.send({ src: downloadDir })
+                }
+            })
         }else{
             res.send({ err: 'download error'})
         }
