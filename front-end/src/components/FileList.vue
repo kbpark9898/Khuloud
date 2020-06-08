@@ -629,18 +629,18 @@ export default {
 		async modify_file(){
 	 		 try{
 	 			 const modifyData = {
-	 				 user_id: cfilename.user_id,
-	 				 cur: cfilename.location,
+	 				 user_id: this.cfilename.user_id,
+	 				 cur: this.cfilename.location,
 	 				 name: this.current_filename,
 	 				 content: this.current_filedata
 	 			 }
 	 			 const result = await modifyFile(modifyData);
 	 			 const after_data={
-	 				 id: cfilename.user_id,
-	 				 cur: cfilename.location,
+	 				 id: this.cfilename.user_id,
+	 				 cur: this.cfilename.location,
 	 				 fileName: this.current_filename
 	 			 }
-	 			 const detailData = await detailFile()
+	 			 const detailData = await detailFile(after_data)
 	 		 }catch(error){
 	 			 console.log('에러');
 	 			 console.log(error);
