@@ -79,25 +79,35 @@ function downloadFile(fileData) {
 		},
 	});
 }
-function accessedList(curData) {
-	return axios.get(`api/quick`, {
-		params: {
-			//현재 접속한 사람의 id와 다운로드를 위해 선택한 파일의 이름을 파라미터로 넘긴다.
+function accessedList(curData){
+	return axios.get('api/quick', {
+		params:{
 			id: curData.id
 		},
 	});
 }
 function modifyFile(fileData){
-	return axios.post(`/api/file/modify/${fileName}`, {
-		params: {
-			user_id: fileData.id,
-			cur: fileData.cur,
-			name: fileData.rename,
-			content: fileData.content
-		},
-	});
+	return axios.post(`/api/file/modify/${fileData.name}`, fileData)
+}
+function delFavorite(folderData) {
+	return axios.post('api/favorites/delfolder', folderData);
 }
 
+function addFavorite(folderData) {
+	return axios.post('api/favorites/addfolder', folderData);
+}
+
+function moveFile(fileData) {
+	return axios.post('/api/folder/move', fileData);
+}
+
+function delFavoriteFile(fileData) {
+	return axios.post('api/favorites/delfile', fileData);
+}
+
+function addFavoriteFile(fileData) {
+	return axios.post('api/favorites/addfile', fileData);
+}
 
 export {
 	registerUser,
@@ -110,6 +120,11 @@ export {
 	uploadFile,
 	deleteFile,
 	downloadFile,
+	delFavorite,
+	addFavorite,
+	moveFile,
+	delFavoriteFile,
+	addFavoriteFile,
 	accessedList,
 	detailFile,
 	modifyFile

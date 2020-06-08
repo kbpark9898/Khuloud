@@ -5,7 +5,9 @@
       <template v-slot:default>
         <thead>
           <tr>
+            <th class="text-left">File ID</th>
             <th class="text-left">Name</th>
+            <th class="text-left">Dir</th>
             <th class="text-left">Date</th>
           </tr>
         </thead>
