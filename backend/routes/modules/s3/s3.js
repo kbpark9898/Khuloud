@@ -142,10 +142,8 @@ var S3 = {
             if (result) {
                 makeFolder(tempDownloadDir, function(result){
                     if (result) {
-                        if (data){
-                            fs.writeFileSync(tempDownloadDir, data);
-                            callback(true, tempDownloadDir);
-                        }
+                        fs.writeFileSync(tempDownloadDir, data);
+                        callback(true, tempDownloadDir);
                     }
                 })
             }else{
