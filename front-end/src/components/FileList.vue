@@ -46,6 +46,7 @@
 				v-for="item in this.$store.getters.fileL"
 				:key="item.title"
 				@click.right="showF(item, $event)"
+				@dblclick="detailF(item, $event); file_detail(item);"
 				@click=""
 			>
 				<v-list-item-avatar>
@@ -65,7 +66,30 @@
 				</v-list-item-action>
 			</v-list-item>
 		</v-list>
-
+		<!--file detial -->
+		<v-dialog
+				v-model="showdetailF"
+				max-width="290"
+			 >
+				<v-card>
+					<v-card-title class="headline">
+						<v-text-field  v-model="current_filename" ></v-text-field>
+					</v-card-title>
+					<v-card-text>
+					 <v-text-field v-model="current_filedata" ></v-text-field>
+					</v-card-text>
+					<v-card-actions>
+						<v-spacer></v-spacer>
+						<v-btn
+							color="green darken-1"
+							text
+							@click="showdetailF = false; modify_file();"
+						>
+							save
+						</v-btn>
+					</v-card-actions>
+				</v-card>
+			</v-dialog>
 		<!-- Move Folder -->
 		<v-dialog v-model="dialog2" width="500px">
 			<v-card>
@@ -281,6 +305,8 @@ import {
 	moveFile,
 	delFavoriteFile,
 	addFavoriteFile,
+	detailFile,
+	modifyFile
 } from '../api/index';
 import Axios from 'axios';
 
@@ -295,10 +321,13 @@ export default {
 			files: [],
 			search: '',
 			id: '',
+			current_filename: null, //파일 상세정보 (이름)
+			current_filedata: null, //파일 상세정보 (내용)
 			dialog: false,
 			howMenu: false,
 			showMenu: false,
 			showMenuF: false, //파일 관련 메뉴
+			showdetailF:false, //txt 파일 상세정보 및 수정
 			x: 0,
 			y: 0,
 			dialog2: false,
@@ -587,6 +616,44 @@ export default {
 				this.dialog3 = false;
 			}
 		},
+		async file_detail(){
+			try{
+				const currentData = {
+					id: this.cfilename.user_id,
+					cur: this.cfilename.location,
+					fileName: this.cfilename.file_name
+				}
+				const detailData = await detailFile(currentData)
+				this.current_filename = detailData.data.file_name;
+				this.current_filedata = detailData.data.content;
+				console.log(this.current_filename);
+				console.log(this.current_filedata);
+			}catch(error){
+				console.log('에러');
+				console.log(error);
+			}
+		},
+		async modify_file(){
+	 		 try{
+	 			 const modifyData = {
+	 				 user_id: cfilename.user_id,
+	 				 cur: cfilename.location,
+	 				 name: this.current_filename,
+	 				 content: this.current_filedata
+	 			 }
+
+	 			 const result = await modifyFile(modifyData);
+	 			 const after_data={
+	 				 id: cfilename.user_id,
+	 				 cur: cfilename.location,
+	 				 fileName: this.current_filename
+	 			 }
+	 			 const detailData = await detailFile()
+	 		 }catch(error){
+	 			 console.log('에러');
+	 			 console.log(error);
+	 		 }
+	 	 },
 		show(folderObj, e) {
 			e.preventDefault();
 			this.curfName = folderObj;
@@ -605,6 +672,16 @@ export default {
 			this.y = e.clientY;
 			this.$nextTick(() => {
 				this.showMenuF = true;
+			});
+		},
+		detailF(fileObj, e) {
+			e.preventDefault();
+			this.cfilename = fileObj;
+			this.showdetailF = false;
+			this.x = e.clientX;
+			this.y = e.clientY;
+			this.$nextTick(() => {
+				this.showdetailF = true;
 			});
 		},
 	},

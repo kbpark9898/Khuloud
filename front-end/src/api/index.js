@@ -53,7 +53,7 @@ function uploadFile(fileData) {
 }
 
 function detailFile(fileData) {
-	return axios.get(`/api/file/${fileData.name}`, {
+	return axios.get(`/api/file/${fileData.fileName}`, {
 		params: {
 			id: fileData.id,
 			cur: fileData.cur,
