@@ -16,7 +16,7 @@
 var AWS = require('aws-sdk');
 AWS.config.update({ region: 'ap-northeast-2' });
 
-var BUCKET_NAME = 'khuloud';
+var BUCKET_NAME = 'qkrrlqja-test';
 
 var s3 = new AWS.S3();
 var fs = require('fs');
@@ -327,7 +327,7 @@ var S3 = {
                 })
             }
         })
-    }, 
+    },
 
     renameFile: function(bucketName, userId, sourceFile, modiFile, targetPath, callback){
         // sourceFile = test.txt

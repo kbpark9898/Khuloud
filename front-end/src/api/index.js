@@ -53,7 +53,7 @@ function uploadFile(fileData) {
 }
 
 function detailFile(fileData) {
-	return axios.get(`/api/file/${fileData.name}`, {
+	return axios.get(`/api/file/${fileData.fileName}`, {
 		params: {
 			id: fileData.id,
 			cur: fileData.cur,
@@ -79,6 +79,25 @@ function downloadFile(fileData) {
 		},
 	});
 }
+function accessedList(curData) {
+	return axios.get(`api/quick`, {
+		params: {
+			//현재 접속한 사람의 id와 다운로드를 위해 선택한 파일의 이름을 파라미터로 넘긴다.
+			id: curData.id
+		},
+	});
+}
+function modifyFile(fileData){
+	return axios.post(`/api/file/modify/${fileName}`, {
+		params: {
+			user_id: fileData.id,
+			cur: fileData.cur,
+			name: fileData.rename,
+			content: fileData.content
+		},
+	});
+}
+
 
 export {
 	registerUser,
@@ -91,4 +110,7 @@ export {
 	uploadFile,
 	deleteFile,
 	downloadFile,
+	accessedList,
+	detailFile,
+	modifyFile
 };
