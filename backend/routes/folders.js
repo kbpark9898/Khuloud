@@ -4,43 +4,82 @@ const AWS = require("aws-sdk");
 const moment = require("moment");
 AWS.config.loadFromPath(__dirname + "/../modules/awsconfig.json");
 
-const BUCKET_NAME = "qkrrlqja-test";
+const BUCKET_NAME = "hong-s3-cloud";
 let curPath = "";
 let user_id = "";
 let parentPath = "";
 
 const s3 = new AWS.S3();
 
+// router.get('/show', function(req, res, next) {
+//     console.log(req.query);
+//     user_id = req.query.id;
+//     curPath = req.query.cur;
+//     if (curPath == '/') {
+//         parentPath = '/';
+//     } else {
+//         let pathSplit = curPath.split('/')
+//         console.log(pathSplit);
+//         parentPath = '/';
+//         for (let i = 1; i < pathSplit.length - 2; i++) {
+//             parentPath += pathSplit[i];
+//             parentPath += '/';
+//         }
+//     }
+//     let checkfolder = 'SELECT * FROM folders WHERE location = ? AND user_id = ?;';
+//     connection.query(checkfolder, [curPath, user_id], function(err, rows, fields) {
+//         if (err) {
+//             console.log('select error');
+//             res.status(400).send({ err: err });
+//         } else {
+//             res.status(200).send({
+//                 folders: rows,
+//                 cur: curPath,
+//                 parentPath: parentPath
+//             })
+//         }
+//     });
+// });
+
 router.get('/show', function(req, res, next) {
     console.log(req.query);
-    user_id = req.query.id;
-    curPath = req.query.cur;
-    if (curPath == '/') {
-        parentPath = '/';
-    } else {
-        let pathSplit = curPath.split('/')
-        console.log(pathSplit);
-        parentPath = '/';
-        for (let i = 1; i < pathSplit.length - 2; i++) {
-            parentPath += pathSplit[i];
-            parentPath += '/';
-        }
-    }
-    let checkfolder = 'SELECT * FROM folders WHERE location = ? AND user_id = ?;';
-    connection.query(checkfolder, [curPath, user_id], function(err, rows, fields) {
+    user_id = req.query.user_id;
+    folder_id = req.query.folder_id;
+    let checkfolder = 'SELECT * FROM folders WHERE folder_id = ? AND user_id = ?;';
+    connection.query(checkfolder, [curPath, user_id], function(err, rows) {
         if (err) {
-            console.log('select error');
+            console.log('select1 error');
             res.status(400).send({ err: err });
         } else {
-            res.status(200).send({
-                folders: rows,
-                cur: curPath,
-                parentPath: parentPath
-            })
+            let location = rows[0].location + rows[0].folder_name + '/';
+            if (rows.length == 0) {
+                console.log('does not exist');
+                res.status(400).send({ err: 'does not exist' });
+            } else {
+                let gerFolder = 'SELECT * FROM folders WHERE location = ? AND user_id = ?;';
+                connection.query(gerFolder, [location, user_id], function(err, folder) {
+                    if (err) {
+                        console.log('select2 error');
+                        res.status(400).send({ err: err });
+                    } else {
+                        let gerFile = 'SELECT * FROM files WHERE location = ? AND user_id = ?;';
+                        connection.query(gerFile, [location, user_id], function(err, folder) {
+                            if (err) {
+                                console.log('select3 error');
+                                res.status(400).send({ err: err });
+                            } else {
+                                res.status(200).send({
+                                    folders: folder,
+                                    files: file
+                                });
+                            }
+                        });
+                    }
+                });
+            }
         }
     });
 });
-
 
 router.post('/makefolder', function(req, res, next) {
 
