@@ -1,15 +1,14 @@
 <template lang="html">
-  <FileDetail></FileDetail>
+	<FileDetail></FileDetail>
 </template>
 
 <script>
-import FileDetail from '@/components/FileDetail'
+import FileDetail from '@/components/FileDetail';
 export default {
-  components:{
-    FileDetail
-  }
-}
+	components: {
+		FileDetail,
+	},
+};
 </script>
 
-<style lang="css" scoped>
-</style>
+<style lang="css" scoped></style>

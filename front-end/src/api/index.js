@@ -79,15 +79,15 @@ function downloadFile(fileData) {
 		},
 	});
 }
-function accessedList(curData){
+function accessedList(curData) {
 	return axios.get('api/quick', {
-		params:{
-			id: curData.id
+		params: {
+			id: curData.id,
 		},
 	});
 }
-function modifyFile(fileData){
-	return axios.post(`/api/file/modify/${fileData.name}`, fileData)
+function modifyFile(fileData) {
+	return axios.post(`/api/file/modify/${fileData.name}`, fileData);
 }
 function delFavorite(folderData) {
 	return axios.post('api/favorites/delfolder', folderData);
@@ -127,5 +127,5 @@ export {
 	addFavoriteFile,
 	accessedList,
 	detailFile,
-	modifyFile
+	modifyFile,
 };

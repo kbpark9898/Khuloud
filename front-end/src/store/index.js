@@ -10,7 +10,7 @@ export default new Vuex.Store({
 		files: [],
 		cur: '/',
 		parent: '/',
-		recentList:[]
+		recentList: [],
 	},
 	mutations: {
 		setId(state, userid) {
@@ -31,9 +31,9 @@ export default new Vuex.Store({
 		setParent(state, parent) {
 			state.parent = parent;
 		},
-		setRecentList(state, list){
+		setRecentList(state, list) {
 			state.recentList = list;
-		}
+		},
 	},
 	getters: {
 		isLogin(state) {
@@ -48,7 +48,7 @@ export default new Vuex.Store({
 		fileL(state) {
 			return state.files;
 		},
-		recentL(state){
+		recentL(state) {
 			return state.recentList;
 		},
 		cur(state) {
