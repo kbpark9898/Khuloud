@@ -259,7 +259,7 @@
 			v-on:change="handleFileUpload()"
 		/>
 		<br />
-		<v-btn color="blue" @click="upload_file">upload</v-btn>
+		<v-btn @click="upload_file"><v-icon>fas fa-upload</v-icon></v-btn>
 		<v-btn bottom color="blue" dark fab fixed right @click="dialog = !dialog">
 			<v-icon>mdi-plus</v-icon>
 		</v-btn>

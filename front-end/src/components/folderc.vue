@@ -14,10 +14,7 @@
 		<v-list two-line subheader>
 			<!-- <v-subheader inset>Folders</v-subheader> -->
 			<!-- Folder view -->
-			<v-list-item
-				@click=""
-				@dblclick="$router.go(-1)"
-			>...</v-list-item>
+			<v-list-item @click="" @dblclick="$router.go(-1)">...</v-list-item>
 			<v-list-item
 				v-for="item in this.$store.getters.folderL"
 				:key="item.folder_id"

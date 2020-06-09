@@ -3,19 +3,35 @@
 		<v-toolbar flat>
 			<v-toolbar-title>내 드라이브</v-toolbar-title>
 			<v-spacer></v-spacer>
+			<v-text-field
+				v-model="search"
+				append-icon="mdi-magnify"
+				label="검색"
+				single-line
+				hide-details
+			></v-text-field>
 		</v-toolbar>
 		<v-list two-line subheader>
 			<!-- <v-subheader inset>Folders</v-subheader> -->
 			<!-- Folder view -->
-			<v-list-item v-if="this.$store.state.cur !== '/'" @click="moveParent"
+			<v-list-item
+				v-if="this.$route.path !== '/fav'"
+				@click=""
+				@dblclick="$router.go(-1)"
 				>...</v-list-item
 			>
 			<v-list-item
 				v-for="item in this.$store.getters.favFolderL"
-				:key="item.title"
+				:key="item.folder_id"
+				:search="search"
 				@click.right="show(item, $event)"
 				@click=""
-				@dblclick="$router.push(`/file/${item.folder_id}`)"
+				@dblclick="
+					$router.push({
+						name: 'Folder',
+						params: { id: item.folder_id },
+					})
+				"
 			>
 				<v-list-item-avatar>
 					<v-icon>mdi-folder</v-icon>
@@ -34,7 +50,7 @@
 			</v-list-item>
 			<!-- File view -->
 			<v-list-item
-				v-for="item in this.$store.getters.favFileL"
+				v-for="item in this.$store.getters.faveFileL"
 				:key="item.title"
 				@click.right="showF(item, $event)"
 				@dblclick="
@@ -264,18 +280,21 @@ import {
 	getFavoriteList,
 } from '../api/index';
 import Axios from 'axios';
+
 export default {
 	props: {
-		folderId: Object,
+		folderId: Number,
 	},
 	data() {
 		return {
+			folder_id: this.$route.params.id,
 			uploadedfile: null,
 			foldername: '',
 			curfName: {},
 			cfilename: {},
 			folders: [],
 			files: [],
+			search: '',
 			id: '',
 			current_filename: null, //파일 상세정보 (이름)
 			current_filedata: null, //파일 상세정보 (내용)
@@ -297,18 +316,24 @@ export default {
 			},
 		};
 	},
-	async created() {
-		try {
-			const response = await getFavoriteList(this.$store.state.id);
-			console.log(response.data);
-			this.$store.commit('setfavFolderList', response.data.folders);
-			this.$store.commit('setfavFileList', response.data.files);
-		} catch (error) {
-			console.log('에러');
-			console.log(error);
-		}
+	created() {
+		this.fetchData();
+	},
+	watch: {
+		$route: 'fetchData',
 	},
 	methods: {
+		async fetchData() {
+			try {
+				const response = await getFavoriteList(this.$store.state.id);
+				console.log(response.data);
+				this.$store.commit('setfavFolderList', response.data.folders);
+				this.$store.commit('setfavFileList', response.data.files);
+			} catch (error) {
+				console.log('에러');
+				console.log(error);
+			}
+		},
 		handleFileUpload() {
 			this.uploadedfile = this.$refs.uploadedfile.files[0];
 			console.log(this.uploadedfile);
@@ -322,18 +347,38 @@ export default {
 			this.dialog2 = false;
 			this.dialog3 = false;
 		},
-		async moveF(folder_name, location) {
+		async makeF() {
+			try {
+				const folderData = {
+					user_id: this.$store.state.id,
+					cur: this.$store.state.cur,
+					folder_name: this.foldername,
+				};
+				const response = await makeFolder(folderData);
+				console.log(response.data);
+				console.log('폴더 생성 완료');
+				this.$store.commit('setFolder', response.data.folders);
+				this.folders = response.data.folders;
+			} catch (error) {
+				console.log('에러');
+				console.log(error.response.data);
+			} finally {
+				this.initFolderName();
+				this.dialog = false;
+			}
+		},
+		async moveF(move_folder_name) {
 			try {
 				const curData = {
 					id: this.$store.state.id,
-					cur: location,
+					cur: this.$store.state.cur + move_folder_name + '/',
 				};
 				const response = await folder(curData);
 				const file_response = await file(curData);
 				console.log(response.data);
-				this.$store.commit('setfavFolderList', response.data.folders);
-				this.$store.commit('setfavFileList', file_response.data.files);
-				this.$store.commit('setCur', location);
+				this.$store.commit('setFolder', response.data.folders);
+				this.$store.commit('setFile', file_response.data.files);
+				this.$store.commit('setCur', response.data.cur);
 				this.$store.commit('setParent', response.data.parentPath);
 				this.folders = this.$store.getters.folderL;
 				this.files = this.$store.getters.fileL;
@@ -378,6 +423,77 @@ export default {
 				console.log(error.response.data);
 			} finally {
 				this.curfName = '';
+			}
+		},
+		async transferF(folderName) {
+			try {
+				const cData = {
+					id: this.$store.state.id,
+					cur: this.$store.state.cur,
+					name: this.curfName.folder_name,
+					isfolder: true,
+					newPath: this.$store.state.cur + folderName + '/',
+				};
+				const response = await moveFolder(cData);
+				console.log(response);
+				this.$store.commit('setFolder', response.data.folders);
+				this.folders = this.$store.getters.folderL;
+			} catch (error) {
+				console.log('에러');
+				console.log(error.response.data);
+			} finally {
+				this.curfName = {};
+				this.dialog2 = false;
+			}
+		},
+		async upload_file() {
+			try {
+				const formData = new FormData();
+				formData.append('file', this.uploadedfile);
+				formData.append('user_id', this.$store.state.id);
+				formData.append('cur', this.$store.state.cur);
+				const currentData = {
+					id: this.$store.state.id,
+					cur: this.$store.state.cur,
+				};
+				console.log(currentData);
+				const response = await uploadFile(formData);
+				const filelist = await file(currentData);
+				console.log(filelist.data.files);
+				this.$store.commit('setFile', filelist.data.files);
+				console.log(this.$store.getters.fileL);
+				this.files = this.$store.getters.fileL;
+			} catch (error) {
+				console.log('에러');
+				console.log(error);
+			}
+		},
+		async delete_file() {
+			try {
+				var itemlist = this.$store.getters.fileL;
+				const currentData = {
+					fileName: null,
+					user_id: null,
+					cur: this.$store.state.cur,
+				};
+				for (var i = 0; i < itemlist.length; i++) {
+					if (itemlist[i].file_name == this.cfilename.file_name) {
+						currentData.fileName = itemlist[i].file_name;
+						currentData.user_id = itemlist[i].user_id;
+					}
+				}
+				const filelistData = {
+					id: currentData.user_id,
+					cur: currentData.cur,
+				};
+				const response = await deleteFile(currentData);
+				setTimeout(function() {}, 500);
+				const filelist = await file(filelistData);
+				this.$store.commit('setFile', filelist.data.files);
+				this.files = this.$store.getters.fileL;
+			} catch (error) {
+				console.log('에러');
+				console.log(error);
 			}
 		},
 		async download_file() {

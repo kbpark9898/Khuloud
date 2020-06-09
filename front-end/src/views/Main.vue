@@ -1,25 +1,16 @@
 <template lang="html">
 	<v-container>
-		<div>
-			<h2>안녕하세요!</h2>
-			<br /><br />
-		</div>
 		<v-layout column>
 			<v-flex>
-				<v-layout row wrap>
-					<v-flex lg6>
-						<v-flex>
-							<Filecard></Filecard>
-						</v-flex>
-						<v-flex><br /><br /></v-flex>
-					</v-flex>
+				<v-layout column>
 					<v-flex><br /><br /></v-flex>
-					<v-flex lg6>
-						<Favlist></Favlist>
+					<v-flex>
+						<FileList></FileList>
 					</v-flex>
 				</v-layout>
 			</v-flex>
 		</v-layout>
+		<v-flex><br /><br /></v-flex>
 		<v-divider></v-divider>
 		<v-layout column>
 			<v-flex>

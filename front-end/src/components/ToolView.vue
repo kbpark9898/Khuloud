@@ -31,6 +31,14 @@
 						<v-list-item-title>즐겨찾기</v-list-item-title>
 					</v-list-item-content>
 				</v-list-item>
+				<v-list-item router :to="{ name: 'Fav' }" exact>
+					<v-list-item-action>
+						<v-icon>fas fa-share-alt</v-icon>
+					</v-list-item-action>
+					<v-list-item-content>
+						<v-list-item-title>공유</v-list-item-title>
+					</v-list-item-content>
+				</v-list-item>
 				<v-list-item router :to="{ name: 'Quick' }" exact>
 					<v-list-item-action>
 						<v-icon>mdi-history</v-icon>
@@ -45,14 +53,6 @@
 					</v-list-item-action>
 					<v-list-item-content>
 						<v-list-item-title>연락처</v-list-item-title>
-					</v-list-item-content>
-				</v-list-item>
-				<v-list-item router :to="{ name: 'Main' }" exact>
-					<v-list-item-action>
-						<v-icon>mdi-settings</v-icon>
-					</v-list-item-action>
-					<v-list-item-content>
-						<v-list-item-title>설정</v-list-item-title>
 					</v-list-item-content>
 				</v-list-item>
 				<v-list-item>
