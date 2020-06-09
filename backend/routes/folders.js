@@ -43,42 +43,68 @@ const s3 = new AWS.S3();
 
 router.get('/show', function(req, res, next) {
     console.log(req.query);
-    user_id = req.query.user_id;
+    user_id = req.query.id;
     folder_id = req.query.folder_id;
-    let checkfolder = 'SELECT * FROM folders WHERE folder_id = ? AND user_id = ?;';
-    connection.query(checkfolder, [curPath, user_id], function(err, rows) {
-        if (err) {
-            console.log('select1 error');
-            res.status(400).send({ err: err });
-        } else {
-            let location = rows[0].location + rows[0].folder_name + '/';
-            if (rows.length == 0) {
-                console.log('does not exist');
-                res.status(400).send({ err: 'does not exist' });
+    if (folder_id == -1) {
+        let location = '/';
+        let gerFolder = 'SELECT * FROM folders WHERE location = ? AND user_id = ?;';
+        connection.query(gerFolder, [location, user_id], function(err, folder) {
+            if (err) {
+                console.log('select2 error');
+                res.status(400).send({ err: err });
             } else {
-                let gerFolder = 'SELECT * FROM folders WHERE location = ? AND user_id = ?;';
-                connection.query(gerFolder, [location, user_id], function(err, folder) {
+                let gerFile = 'SELECT * FROM files WHERE location = ? AND user_id = ?;';
+                connection.query(gerFile, [location, user_id], function(err, file) {
                     if (err) {
-                        console.log('select2 error');
+                        console.log('select3 error');
                         res.status(400).send({ err: err });
                     } else {
-                        let gerFile = 'SELECT * FROM files WHERE location = ? AND user_id = ?;';
-                        connection.query(gerFile, [location, user_id], function(err, folder) {
-                            if (err) {
-                                console.log('select3 error');
-                                res.status(400).send({ err: err });
-                            } else {
-                                res.status(200).send({
-                                    folders: folder,
-                                    files: file
-                                });
-                            }
+                        res.status(200).send({
+                            folders: folder,
+                            files: file,
+                            cur: location
                         });
                     }
                 });
             }
-        }
-    });
+        });
+    } else {
+        let checkfolder = 'SELECT * FROM folders WHERE folder_id = ? AND user_id = ?;';
+        connection.query(checkfolder, [curPath, user_id], function(err, rows) {
+            if (err) {
+                console.log('select1 error');
+                res.status(400).send({ err: err });
+            } else {
+                if (rows.length == 0) {
+                    console.log('does not exist');
+                    res.status(400).send({ err: 'does not exist' });
+                } else {
+                    let location = rows[0].location + rows[0].folder_name + '/';
+                    let gerFolder = 'SELECT * FROM folders WHERE location = ? AND user_id = ?;';
+                    connection.query(gerFolder, [location, user_id], function(err, folder) {
+                        if (err) {
+                            console.log('select2 error');
+                            res.status(400).send({ err: err });
+                        } else {
+                            let gerFile = 'SELECT * FROM files WHERE location = ? AND user_id = ?;';
+                            connection.query(gerFile, [location, user_id], function(err, file) {
+                                if (err) {
+                                    console.log('select3 error');
+                                    res.status(400).send({ err: err });
+                                } else {
+                                    res.status(200).send({
+                                        folders: folder,
+                                        files: file,
+                                        cur: location
+                                    });
+                                }
+                            });
+                        }
+                    });
+                }
+            }
+        });
+    }
 });
 
 router.post('/makefolder', function(req, res, next) {
