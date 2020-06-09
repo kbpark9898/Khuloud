@@ -11,6 +11,8 @@ export default new Vuex.Store({
 		cur: '/',
 		parent: '/',
 		recentList: [],
+		favFolderList: [],
+		favFileList: [],
 	},
 	mutations: {
 		setId(state, userid) {
@@ -33,6 +35,12 @@ export default new Vuex.Store({
 		},
 		setRecentList(state, list) {
 			state.recentList = list;
+		},
+		setfavFolderList(state, fflist) {
+			state.favFolderList = fflist;
+		},
+		setfavFileList(state, fflist) {
+			state.favFileList = fflist;
 		},
 	},
 	getters: {
@@ -59,6 +67,12 @@ export default new Vuex.Store({
 		},
 		setFile(state, filelist) {
 			state.files = filelist;
+		},
+		favFolderL(state) {
+			return state.favFolderList;
+		},
+		favFileL(state) {
+			return state.favFileList;
 		},
 	},
 });

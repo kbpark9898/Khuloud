@@ -67,9 +67,10 @@ export default new VueRouter({
 			component: () => import('../views/Feedback.vue'),
 		},
 		{
-			path: '/folder',
+			path: '/file/:id',
 			name: 'Folder',
 			component: () => import('../views/FolderPage.vue'),
+			props: true,
 		},
 	],
 });

@@ -18,7 +18,7 @@ function folder(curData) {
 	return axios.get('/api/folder/show', {
 		params: {
 			id: curData.id,
-			cur: curData.cur,
+			folder_id: curData.folder_id,
 		},
 	});
 }
@@ -39,7 +39,7 @@ function file(curData) {
 	return axios.get('/api/file', {
 		params: {
 			id: curData.id,
-			cur: curData.cur,
+			folder_id: curData.cur,
 		},
 	});
 }
@@ -109,6 +109,14 @@ function addFavoriteFile(fileData) {
 	return axios.post('api/favorites/addfile', fileData);
 }
 
+function getFavoriteList(userId) {
+	return axios.get('api/favorites/show', {
+		params: {
+			id: userId,
+		},
+	});
+}
+
 export {
 	registerUser,
 	loginUser,
@@ -128,4 +136,5 @@ export {
 	accessedList,
 	detailFile,
 	modifyFile,
+	getFavoriteList,
 };

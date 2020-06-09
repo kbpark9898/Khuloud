@@ -27,7 +27,7 @@
 					$router.push({
 						name: 'Folder',
 						params: { id: item.folder_id },
-						props: { folderId: item.id },
+						props: { folderId: item.folder_name },
 					})
 				"
 			>
@@ -313,8 +313,12 @@ import {
 } from '../api/index';
 import Axios from 'axios';
 export default {
+	props: {
+		folderId: Number,
+	},
 	data() {
 		return {
+			folder_id: this.folderId,
 			uploadedfile: null,
 			foldername: '',
 			curfName: {},
@@ -347,15 +351,15 @@ export default {
 		try {
 			const curData = {
 				id: this.$store.state.id,
-				folder_id: -1,
+				folder_id: this.folder_id,
 			};
 			console.log(curData);
 			const response = await folder(curData);
-			const file_response = await file(curData);
+			// const file_response = await file(curData);
 			this.$store.commit('setFolder', response.data.folders);
 			this.$store.commit('setCur', response.data.cur);
 			this.$store.commit('setParent', response.data.parentPath);
-			this.$store.commit('setFile', file_response.data.files);
+			this.$store.commit('setFile', response.data.files);
 			this.folders = this.$store.getters.folderL;
 			console.log(this.$store.getters.fileL);
 			this.files = this.$store.getters.fileL;
