@@ -2,14 +2,11 @@ const express = require('express');
 const router = express.Router();
 const AWS = require("aws-sdk");
 const moment = require("moment");
+AWS.config.loadFromPath(__dirname + "/../modules/awsconfig.json");
 
 const BUCKET_NAME = "hong-s3-cloud";
 
-const s3 = new AWS.S3({
-    accessKeyId: process.env.AWS_ACCESS_KEY_ID,
-    secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY,
-    region: "ap-northeast-2"
-});
+const s3 = new AWS.S3();
 
 
 router.post('/', function(req, res, next) {
@@ -25,15 +22,15 @@ router.post('/', function(req, res, next) {
         if (rows.length != 0) {
             let copy_params = {
                 Bucket: BUCKET_NAME,
-                CopySource: BUCKET_NAME + '/' + curPath + name,
-                Key: target_id + '/share/' + name
+                CopySource: BUCKET_NAME + '/drive/' + curPath + name,
+                Key: 'drive/' + target_id + '/share/' + name
             };
             s3.copyObject(copy_params, function(err, data) {
                 if (err) {
                     console.log(err, data);
                     res.status(304).send({ error: "copy error" });
                 } else {
-                    let values = [name, cur, target_id];
+                    let values = [name, '/share/', target_id];
                     let sharesql = 'INSERT INTO files (file_name,location,user_id) values (?,?,?);';
                     connection.query(sharesql, values, function(err3, result, field) {
                         if (err3) {

@@ -116,3 +116,4 @@ dist
 .pnp.*
 
 backend/routes/modules/s3/download/*
+backend/routes/modules/awsconfig.json
