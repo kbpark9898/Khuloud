@@ -70,7 +70,7 @@ router.get('/show', function(req, res, next) {
         });
     } else {
         let checkfolder = 'SELECT * FROM folders WHERE folder_id = ? AND user_id = ?;';
-        connection.query(checkfolder, [curPath, user_id], function(err, rows) {
+        connection.query(checkfolder, [folder_id, user_id], function(err, rows) {
             if (err) {
                 console.log('select1 error');
                 res.status(400).send({ err: err });
@@ -169,7 +169,7 @@ router.post('/delfolder', function(req, res, next) {
         Bucket: BUCKET_NAME,
         Key: 'drive/' + curPath + folder_name + '/'
     };
-    let infolderpath = cur + name + '/';
+    let infolderpath = cur + folder_name + '/';
     let checkinfolder = 'SELECT location FROM folders WHERE location = ? AND user_id = ? UNION ALL SELECT location FROM files  WHERE location = ? AND user_id = ?;';
     connection.query(checkinfolder, [infolderpath, user_id, infolderpath, user_id], function(err, infolder) {
         if (err) {
