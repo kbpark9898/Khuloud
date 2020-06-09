@@ -349,9 +349,10 @@ export default {
 	},
 	async created() {
 		try {
+			console.log(this.$route.params.id);
 			const curData = {
 				id: this.$store.state.id,
-				folder_id: this.folder_id,
+				folder_id: this.$route.params.id,
 			};
 			console.log(curData);
 			const response = await folder(curData);
