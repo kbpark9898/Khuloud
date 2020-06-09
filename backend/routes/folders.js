@@ -2,17 +2,14 @@ const express = require('express');
 const router = express.Router();
 const AWS = require("aws-sdk");
 const moment = require("moment");
+AWS.config.loadFromPath(__dirname + "/../modules/awsconfig.json");
 
 const BUCKET_NAME = "qkrrlqja-test";
 let curPath = "";
 let user_id = "";
 let parentPath = "";
 
-const s3 = new AWS.S3({
-    accessKeyId: process.env.AWS_ACCESS_KEY_ID,
-    secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY,
-    region: "ap-northeast-2"
-});
+const s3 = new AWS.S3();
 
 router.get('/show', function(req, res, next) {
     console.log(req.query);
@@ -107,40 +104,53 @@ router.post('/delfolder', function(req, res, next) {
         Bucket: BUCKET_NAME,
         Key: 'drive/' + curPath + folder_name + '/'
     };
-    let checksql = 'SELECT * FROM folders WHERE location = ? AND folder_name = ? AND user_id = ?;';
-    let values = [cur, folder_name, user_id];
-    connection.query(checksql, values, function(err, rows, fields) {
+    let infolderpath = cur + name + '/';
+    let checkinfolder = 'SELECT location FROM folders WHERE location = ? AND user_id = ? UNION ALL SELECT location FROM files  WHERE location = ? AND user_id = ?;';
+    connection.query(checkinfolder, [infolderpath, user_id, infolderpath, user_id], function(err, infolder) {
         if (err) {
-            res.status(404).send({ error: "error" });
+            console.log("copy error");
+            res.status(304).send({ error: "checkinfolder error" });
         } else {
-            if (rows.length != 0) {
-                s3.deleteObject(params, function(err, data) {
+            if (infolder.length != 0) {
+                res.status(204).send({ error: "infolder exist!" })
+            } else {
+                let checksql = 'SELECT * FROM folders WHERE location = ? AND folder_name = ? AND user_id = ?;';
+                let values = [cur, folder_name, user_id];
+                connection.query(checksql, values, function(err, rows, fields) {
                     if (err) {
-                        console.log('s3 error');
-                        res.status(400).send({ err: err });
+                        res.status(404).send({ error: "error" });
                     } else {
-                        console.log(data);
-                        let sql = 'DELETE FROM folders WHERE location = ? AND folder_name = ? AND user_id = ?;';
-                        connection.query(sql, values, function(err, result, field) {
-                            if (err) {
-                                res.status(400).send({ err: err });
-                            } else {
-                                console.log(cur);
-                                console.log(user_id);
-                                let checkfolder = 'SELECT * FROM folders WHERE location = ? AND user_id = ?;';
-                                connection.query(checkfolder, [cur, user_id], function(err, rows, fields) {
-                                    res.status(200).send({
-                                        folders: rows
-                                    })
-                                });
+                        if (rows.length != 0) {
+                            s3.deleteObject(params, function(err, data) {
+                                if (err) {
+                                    console.log('s3 error');
+                                    res.status(400).send({ err: err });
+                                } else {
+                                    console.log(data);
+                                    let sql = 'DELETE FROM folders WHERE location = ? AND folder_name = ? AND user_id = ?;';
+                                    connection.query(sql, values, function(err, result, field) {
+                                        if (err) {
+                                            res.status(400).send({ err: err });
+                                        } else {
+                                            console.log(cur);
+                                            console.log(user_id);
+                                            let checkfolder = 'SELECT * FROM folders WHERE location = ? AND user_id = ?;';
+                                            connection.query(checkfolder, [cur, user_id], function(err, rows, fields) {
+                                                res.status(200).send({
+                                                    folders: rows
+                                                })
+                                            });
 
-                            }
-                        });
+                                        }
+                                    });
+                                }
+                            });
+                        } else {
+                            console.log(req.body);
+                            res.status(304).send({ error: "Does not exist" });
+                        }
                     }
                 });
-            } else {
-                console.log(req.body);
-                res.status(304).send({ error: "Does not exist" });
             }
         }
     });
@@ -155,53 +165,66 @@ router.post('/move', function(req, res, next) {
     let name = req.body.name;
     let newPath = user_id + req.body.newPath;
     if (req.body.isfolder) {
-        let checkfolder = 'SELECT * FROM folders WHERE location = ? AND folder_name = ? AND user_id = ?;';
-        connection.query(checkfolder, [cur, name, user_id], function(err1, rows, fields) {
-            console.log(rows);
-            if (rows.length != 0) {
-                let copy_params = {
-                    Bucket: BUCKET_NAME,
-                    CopySource: BUCKET_NAME + '/drive/' + curPath + name + '/',
-                    Key: 'drive/' + newPath + name + '/'
-                };
-                let del_params = {
-                    Bucket: BUCKET_NAME,
-                    Key: 'drive/' + curPath + name + '/'
-                };
-                s3.copyObject(copy_params, function(err, data) {
-                    if (err) {
-                        console.log(err, data);
-                        console.log("copy error");
-                        res.status(304).send({ error: "copy error" });
-                    } else {
-                        s3.deleteObject(del_params, function(err, data) {
-                            if (err) {
-                                console.log(err, data);
-                                console.log("delete error");
-                                res.status(304).send({ error: "delete error" });
-                            } else {
-                                let values = [req.body.newPath, cur, name, user_id];
-                                let updatesql = 'UPDATE folders SET location = ? WHERE location = ? AND folder_name = ? AND user_id = ?;';
-                                connection.query(updatesql, values, function(err3, result, field) {
-                                    if (err3) {
-                                        console.log("updatesql error");
-                                        res.status(304).send({ error: "updatesql error" });
-                                    } else {
-                                        let resultsql = 'SELECT * FROM folders WHERE location = ? AND user_id = ?;';
-                                        connection.query(resultsql, [cur, user_id], function(err, rows, fields) {
-                                            res.status(200).send({
-                                                folders: rows
-                                            });
-                                        });
-                                    }
-                                });
-                            }
-                        });
-                    }
-                });
+        let infolderpath = cur + name + '/';
+        let checkinfolder = 'SELECT location FROM folders WHERE location = ? AND user_id = ? UNION ALL SELECT location FROM files  WHERE location = ? AND user_id = ?;';
+        connection.query(checkinfolder, [infolderpath, user_id, infolderpath, user_id], function(err, infolder) {
+            if (err) {
+                console.log("copy error");
+                res.status(304).send({ error: "checkinfolder error" });
             } else {
-                console.log("Does not exist folder");
-                res.status(304).send({ error: "Does not exist" });
+                if (infolder.length != 0) {
+                    res.status(204).send({ error: "infolder exist!" })
+                } else {
+                    let checkfolder = 'SELECT * FROM folders WHERE location = ? AND folder_name = ? AND user_id = ?;';
+                    connection.query(checkfolder, [cur, name, user_id], function(err1, rows, fields) {
+                        console.log(rows);
+                        if (rows.length != 0) {
+                            let copy_params = {
+                                Bucket: BUCKET_NAME,
+                                CopySource: BUCKET_NAME + '/drive/' + curPath + name + '/',
+                                Key: 'drive/' + newPath + name + '/'
+                            };
+                            let del_params = {
+                                Bucket: BUCKET_NAME,
+                                Key: 'drive/' + curPath + name + '/'
+                            };
+                            s3.copyObject(copy_params, function(err, data) {
+                                if (err) {
+                                    console.log(err, data);
+                                    console.log("copy error");
+                                    res.status(304).send({ error: "copy error" });
+                                } else {
+                                    s3.deleteObject(del_params, function(err, data) {
+                                        if (err) {
+                                            console.log(err, data);
+                                            console.log("delete error");
+                                            res.status(304).send({ error: "delete error" });
+                                        } else {
+                                            let values = [req.body.newPath, cur, name, user_id];
+                                            let updatesql = 'UPDATE folders SET location = ? WHERE location = ? AND folder_name = ? AND user_id = ?;';
+                                            connection.query(updatesql, values, function(err3, result, field) {
+                                                if (err3) {
+                                                    console.log("updatesql error");
+                                                    res.status(304).send({ error: "updatesql error" });
+                                                } else {
+                                                    let resultsql = 'SELECT * FROM folders WHERE location = ? AND user_id = ?;';
+                                                    connection.query(resultsql, [cur, user_id], function(err, rows, fields) {
+                                                        res.status(200).send({
+                                                            folders: rows
+                                                        });
+                                                    });
+                                                }
+                                            });
+                                        }
+                                    });
+                                }
+                            });
+                        } else {
+                            console.log("Does not exist folder");
+                            res.status(304).send({ error: "Does not exist" });
+                        }
+                    });
+                }
             }
         });
     } else {
@@ -255,66 +278,66 @@ router.post('/move', function(req, res, next) {
 });
 
 
-router.post('/modify', function(req, res, next) {
-    console.log(req.body);
-    user_id = req.body.id;
-    let cur = req.body.cur;
-    curPath = user_id + cur;
-    let name = req.body.folder_name;
-    let newName = req.body.newName;
+// router.post('/modify', function(req, res, next) {
+//     console.log(req.body);
+//     user_id = req.body.id;
+//     let cur = req.body.cur;
+//     curPath = user_id + cur;
+//     let name = req.body.folder_name;
+//     let newName = req.body.newName;
 
-    let checkfolder = 'SELECT * FROM folders WHERE location = ? AND folder_name = ? AND user_id = ?;';
-    connection.query(checkfolder, [cur, name, user_id], function(err1, rows, fields) {
-        console.log(rows);
-        if (rows.length != 0) {
-            let copy_params = {
-                Bucket: BUCKET_NAME,
-                CopySource: BUCKET_NAME + '/drive/' + curPath + name + '/',
-                Key: 'drive/' + curPath + newName + '/'
-            };
-            let del_params = {
-                Bucket: BUCKET_NAME,
-                Key: 'drive/' + curPath + name + '/'
-            };
-            s3.copyObject(copy_params, function(err, data) {
-                if (err) {
-                    console.log(err, data);
-                    console.log("copy error");
-                    res.status(304).send({ error: "copy error" });
-                } else {
-                    s3.deleteObject(del_params, function(err, data) {
-                        if (err) {
-                            console.log(err, data);
-                            console.log("delete error");
-                            res.status(304).send({ error: "delete error" });
-                        } else {
-                            let date = moment().format();
-                            let values = [newName, date, cur, name, user_id];
-                            let updatesql = 'UPDATE folders SET folder_name = ? AND modify = ? WHERE location = ? AND folder_name = ? AND user_id = ?;';
-                            connection.query(updatesql, values, function(err3, result, field) {
-                                if (err3) {
-                                    console.log("updatesql error");
-                                    res.status(304).send({ error: "updatesql error" });
-                                } else {
-                                    let resultsql = 'SELECT * FROM folders WHERE location = ? AND user_id = ?;';
-                                    connection.query(resultsql, [cur, user_id], function(err, rows, fields) {
-                                        res.status(200).send({
-                                            folders: rows
-                                        });
-                                    });
-                                }
-                            });
-                        }
-                    });
-                }
-            });
-        } else {
-            console.log("Does not exist");
-            res.status(304).send({ error: "Does not exist" });
-        }
-    });
+//     let checkfolder = 'SELECT * FROM folders WHERE location = ? AND folder_name = ? AND user_id = ?;';
+//     connection.query(checkfolder, [cur, name, user_id], function(err1, rows, fields) {
+//         console.log(rows);
+//         if (rows.length != 0) {
+//             let copy_params = {
+//                 Bucket: BUCKET_NAME,
+//                 CopySource: BUCKET_NAME + '/drive/' + curPath + name + '/',
+//                 Key: 'drive/' + curPath + newName + '/'
+//             };
+//             let del_params = {
+//                 Bucket: BUCKET_NAME,
+//                 Key: 'drive/' + curPath + name + '/'
+//             };
+//             s3.copyObject(copy_params, function(err, data) {
+//                 if (err) {
+//                     console.log(err, data);
+//                     console.log("copy error");
+//                     res.status(304).send({ error: "copy error" });
+//                 } else {
+//                     s3.deleteObject(del_params, function(err, data) {
+//                         if (err) {
+//                             console.log(err, data);
+//                             console.log("delete error");
+//                             res.status(304).send({ error: "delete error" });
+//                         } else {
+//                             let date = moment().format();
+//                             let values = [newName, date, cur, name, user_id];
+//                             let updatesql = 'UPDATE folders SET folder_name = ? AND modify = ? WHERE location = ? AND folder_name = ? AND user_id = ?;';
+//                             connection.query(updatesql, values, function(err3, result, field) {
+//                                 if (err3) {
+//                                     console.log("updatesql error");
+//                                     res.status(304).send({ error: "updatesql error" });
+//                                 } else {
+//                                     let resultsql = 'SELECT * FROM folders WHERE location = ? AND user_id = ?;';
+//                                     connection.query(resultsql, [cur, user_id], function(err, rows, fields) {
+//                                         res.status(200).send({
+//                                             folders: rows
+//                                         });
+//                                     });
+//                                 }
+//                             });
+//                         }
+//                     });
+//                 }
+//             });
+//         } else {
+//             console.log("Does not exist");
+//             res.status(304).send({ error: "Does not exist" });
+//         }
+//     });
 
-});
+// });
 
 router.get('/search', function(req, res, next) {
     console.log(req.query);

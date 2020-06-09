@@ -4,9 +4,6 @@ const router = express.Router();
 router.get('/show', function(req, res, next) {
     console.log(req.query);
     user_id = req.query.id;
-    let folders = [];
-    let files = [];
-
     let checkfolder = 'SELECT * FROM folders WHERE user_id = ? AND favorite = 1;';
     let checkfiles = 'SELECT * FROM files WHERE user_id = ? AND favorite = 1;';
     connection.query(checkfolder, [user_id], function(err, folder, fields) {
@@ -14,16 +11,14 @@ router.get('/show', function(req, res, next) {
             console.log('select error');
             res.status(404).send();
         } else {
-            folders.push(folder);
             connection.query(checkfiles, [user_id], function(err, file, fields) {
                 if (err) {
                     console.log('select error');
                     res.status(404).send();
                 } else {
-                    files.push(file);
                     res.status(200).send({
-                        folders: folders,
-                        files: files
+                        folders: folder,
+                        files: file
                     });
                 }
             });
