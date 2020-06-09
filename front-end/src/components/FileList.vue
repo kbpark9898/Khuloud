@@ -14,9 +14,6 @@
 		<v-list two-line subheader>
 			<!-- <v-subheader inset>Folders</v-subheader> -->
 			<!-- Folder view -->
-			<v-list-item v-if="this.$store.state.cur !== '/'" @click="moveParent"
-				>...</v-list-item
-			>
 			<v-list-item
 				v-for="item in this.$store.getters.folderL"
 				:key="item.folder_id"
