@@ -2,7 +2,7 @@ const express = require('express');
 const router = express.Router();
 const AWS = require("aws-sdk");
 const moment = require("moment");
-AWS.config.loadFromPath(__dirname + "/../modules/awsconfig.json");
+AWS.config.loadFromPath(__dirname + "/modules/awsconfig.json");
 
 const BUCKET_NAME = "hong-s3-cloud";
 let curPath = "";
