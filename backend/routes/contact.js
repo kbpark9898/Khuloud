@@ -3,6 +3,7 @@ var router = express.Router();
 const XLSX = require('xlsx');
 var multer = require('multer');
 var fs = require('fs');
+var xl = require('excel4node');
 // var pool = require('./../routes/modules/database');
 
 //파일 저장위치와 파일이름 설정
@@ -88,7 +89,59 @@ contact_download : 연락처 파일 다운로드 모듈
 input : 사용자의 연락처 다운로드 요청
 output : 연락처 다운로드 성공 여부 및 csv, xlsx 파일
 */
-router.get('/contact_download', function(req, res, next) {
+router.post('/contact_download', function(req, res, next) {
+
+  var filename = 'public/upload/contactdownload.xlsx';
+  fs.exists(filename, function (exists) {
+    console.log(exists);
+    if(exists == true)
+    {
+      fs.unlink(filename, function (err) {
+            if (err) throw err;
+            console.log('file deleted');
+        });
+    }
+  });
+
+  // Create a new instance of a Workbook class
+  var wb = new xl.Workbook();
+
+  // Add Worksheets to the workbook
+  var ws = wb.addWorksheet('Sheet 1');
+
+  ws.cell(1, 1)
+    .string('name');
+  ws.cell(1, 2)
+    .string('phone');
+  ws.cell(1, 3)
+    .string('email');
+  ws.cell(1, 4)
+    .string('added_date');
+
+  var user_id = req.query.id;
+  var sqlquery = "SELECT  * FROM contact WHERE user_id = ?";
+      connection.query(sqlquery, [user_id], function (err, rows) {
+        if (err) {
+            console.log("download contact failed");
+            throw err;
+        } else {
+          if(rows.length != 0)
+          {
+            for(var i=0;i<rows.length;i++)
+            {
+              ws.cell(i+2, 1).string(rows[i].name);
+              ws.cell(i+2, 2).string(rows[i].phone);
+              ws.cell(i+2, 3).string(rows[i].email);
+              ws.cell(i+2, 4).string(rows[i].added_date);
+            }
+          }
+            wb.write('public/upload/contactdownload.xlsx');
+            var file = __dirname + '/public/upload/contactdownload.xlsx';
+            // console.log(file);
+            res.download(file);
+        }
+
+      });
 });
 
 /*
