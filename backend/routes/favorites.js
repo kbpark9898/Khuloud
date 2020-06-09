@@ -14,16 +14,16 @@ router.get('/show', function(req, res, next) {
             console.log('select error');
             res.status(404).send();
         } else {
-            folders.push(folder);
+            // folders.push(folder);
             connection.query(checkfiles, [user_id], function(err, file, fields) {
                 if (err) {
                     console.log('select error');
                     res.status(404).send();
                 } else {
-                    files.push(file);
+                    // files.push(file);
                     res.status(200).send({
-                        folders: folders,
-                        files: files
+                        folders: folder,
+                        files: file
                     });
                 }
             });
