@@ -14,9 +14,7 @@
 		<v-list two-line subheader>
 			<!-- <v-subheader inset>Folders</v-subheader> -->
 			<!-- Folder view -->
-			<v-list-item v-if="this.$store.state.cur !== '/'" @click="moveParent"
-				>...</v-list-item
-			>
+			<v-list-item @click="$router.go(-1)">...</v-list-item>
 			<v-list-item
 				v-for="item in this.$store.getters.folderL"
 				:key="item.folder_id"
@@ -27,7 +25,6 @@
 					$router.push({
 						name: 'Folder',
 						params: { id: item.folder_id },
-						props: { folderId: item.folder_name },
 					})
 				"
 			>
@@ -312,13 +309,14 @@ import {
 	modifyFile,
 } from '../api/index';
 import Axios from 'axios';
+
 export default {
 	props: {
 		folderId: Number,
 	},
 	data() {
 		return {
-			folder_id: this.folderId,
+			folder_id: this.$route.params.id,
 			uploadedfile: null,
 			foldername: '',
 			curfName: {},
@@ -347,29 +345,35 @@ export default {
 			},
 		};
 	},
-	async created() {
-		try {
-			console.log(this.$route.params.id);
-			const curData = {
-				id: this.$store.state.id,
-				folder_id: this.$route.params.id,
-			};
-			console.log(curData);
-			const response = await folder(curData);
-			// const file_response = await file(curData);
-			this.$store.commit('setFolder', response.data.folders);
-			this.$store.commit('setCur', response.data.cur);
-			this.$store.commit('setParent', response.data.parentPath);
-			this.$store.commit('setFile', response.data.files);
-			this.folders = this.$store.getters.folderL;
-			console.log(this.$store.getters.fileL);
-			this.files = this.$store.getters.fileL;
-		} catch (error) {
-			console.log('에러');
-			console.log(error);
-		}
+	created() {
+		this.fetchData();
+	},
+	watch: {
+		$route: 'fetchData',
 	},
 	methods: {
+		async fetchData() {
+			try {
+				console.log(this.$route.params.id);
+				const curData = {
+					id: this.$store.state.id,
+					folder_id: this.$route.params.id,
+				};
+				console.log(curData);
+				const response = await folder(curData);
+				// const file_response = await file(curData);
+				this.$store.commit('setFolder', response.data.folders);
+				this.$store.commit('setCur', response.data.cur);
+				this.$store.commit('setParent', response.data.parentPath);
+				this.$store.commit('setFile', response.data.files);
+				this.folders = this.$store.getters.folderL;
+				console.log(this.$store.getters.fileL);
+				this.files = this.$store.getters.fileL;
+			} catch (error) {
+				console.log('에러');
+				console.log(error);
+			}
+		},
 		handleFileUpload() {
 			this.uploadedfile = this.$refs.uploadedfile.files[0];
 			console.log(this.uploadedfile);

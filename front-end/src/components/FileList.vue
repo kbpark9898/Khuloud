@@ -27,7 +27,6 @@
 					$router.push({
 						name: 'Folder',
 						params: { id: item.folder_id },
-						props: { folderId: item.id },
 					})
 				"
 			>
@@ -343,28 +342,34 @@ export default {
 			},
 		};
 	},
-	async created() {
-		try {
-			const curData = {
-				id: this.$store.state.id,
-				folder_id: -1,
-			};
-			console.log(curData);
-			const response = await folder(curData);
-			const file_response = await file(curData);
-			this.$store.commit('setFolder', response.data.folders);
-			this.$store.commit('setCur', response.data.cur);
-			this.$store.commit('setParent', response.data.parentPath);
-			this.$store.commit('setFile', file_response.data.files);
-			this.folders = this.$store.getters.folderL;
-			console.log(this.$store.getters.fileL);
-			this.files = this.$store.getters.fileL;
-		} catch (error) {
-			console.log('에러');
-			console.log(error);
-		}
+	created() {
+		this.fetchData();
+	},
+	watch: {
+		$route: 'fetchData',
 	},
 	methods: {
+		async fetchData() {
+			try {
+				const curData = {
+					id: this.$store.state.id,
+					folder_id: -1,
+				};
+				console.log(curData);
+				const response = await folder(curData);
+				const file_response = await file(curData);
+				this.$store.commit('setFolder', response.data.folders);
+				this.$store.commit('setCur', response.data.cur);
+				this.$store.commit('setParent', response.data.parentPath);
+				this.$store.commit('setFile', file_response.data.files);
+				this.folders = this.$store.getters.folderL;
+				console.log(this.$store.getters.fileL);
+				this.files = this.$store.getters.fileL;
+			} catch (error) {
+				console.log('에러');
+				console.log(error);
+			}
+		},
 		handleFileUpload() {
 			this.uploadedfile = this.$refs.uploadedfile.files[0];
 			console.log(this.uploadedfile);
