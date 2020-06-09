@@ -106,7 +106,20 @@ contact_delete : 연락처 삭제 모듈
 input : 사용자의 연락처 삭제 요청
 output : 연락처 삭제 성공 여부
 */
-router.get('/contact_delete', function(req, res, next) {
+router.post('/contact_delete', function(req, res, next) {
+  // console.log("req.query",req.query);
+  var user_id = req.query.id;
+  var sqlquery = "DELETE FROM contact WHERE user_id = ?";
+      connection.query(sqlquery, [user_id], function (err, rows) {
+        if (err) {
+            console.log("delete contact failed");
+            throw err;
+        } else {
+            // console.log(rows);s
+             res.status(200).send("delete");
+        }
+
+      });
 });
 
 /*
