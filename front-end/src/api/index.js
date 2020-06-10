@@ -39,7 +39,7 @@ function file(curData) {
 	return axios.get('/api/file', {
 		params: {
 			id: curData.id,
-			folder_id: curData.cur,
+			cur: curData.cur,
 		},
 	});
 }
@@ -121,6 +121,10 @@ function getFavoriteList(userId) {
 	});
 }
 
+function shareFile(shareData) {
+	return axios.post('/api/share', shareData);
+}
+
 export {
 	registerUser,
 	loginUser,
@@ -141,4 +145,5 @@ export {
 	detailFile,
 	modifyFile,
 	getFavoriteList,
+	shareFile,
 };

@@ -94,6 +94,28 @@
 				</v-card-actions>
 			</v-card>
 		</v-dialog>
+		<!-- file share menu -->
+		<v-dialog v-model="showShareF">
+			<v-card>
+				<v-card-title>
+					Share File
+				</v-card-title>
+				<v-card-text>
+					<v-text-field v-model="this.cfilename.file_name"></v-text-field>
+				</v-card-text>
+				<v-card-text>
+					<v-text-field
+						v-model="targetUid"
+						label="target user id"
+					></v-text-field>
+				</v-card-text>
+				<v-card-cation>
+					<v-spacer></v-spacer>
+					<v-btn @click.prevent="file_share">ok</v-btn>
+					<v-btn @click="showShareF = false">cancle</v-btn>
+				</v-card-cation>
+			</v-card>
+		</v-dialog>
 		<!-- Move Folder -->
 		<v-dialog v-model="dialog2" width="500px">
 			<v-card>
@@ -164,6 +186,14 @@
 					</v-list-item-icon>
 					<v-list-item-content>
 						<v-list-item-title>즐겨 찾기 추가</v-list-item-title>
+					</v-list-item-content>
+				</v-list-item>
+				<v-list-item>
+					<v-list-item-icon>
+						<v-icon>fas fa-share-alt</v-icon>
+					</v-list-item-icon>
+					<v-list-item-content>
+						<v-list-item-title>공유 하기</v-list-item-title>
 					</v-list-item-content>
 				</v-list-item>
 			</v-list>
@@ -251,6 +281,14 @@
 						<v-list-item-title>즐겨 찾기 추가</v-list-item-title>
 					</v-list-item-content>
 				</v-list-item>
+				<v-list-item @click.prevent="showShareF != showShareF">
+					<v-list-item-icon>
+						<v-icon>fas fa-share-alt</v-icon>
+					</v-list-item-icon>
+					<v-list-item-content>
+						<v-list-item-title>공유 하기</v-list-item-title>
+					</v-list-item-content>
+				</v-list-item>
 			</v-list>
 		</v-menu>
 		<input
@@ -307,6 +345,7 @@ import {
 	addFavoriteFile,
 	detailFile,
 	modifyFile,
+	shareFile,
 } from '../api/index';
 import Axios from 'axios';
 
@@ -325,6 +364,9 @@ export default {
 			files: [],
 			search: '',
 			id: '',
+			share_file_name: '',
+			showShareF: false,
+			targetUid: '',
 			current_filename: null, //파일 상세정보 (이름)
 			current_filedata: null, //파일 상세정보 (내용)
 			dialog: false,
@@ -662,6 +704,25 @@ export default {
 			} catch (error) {
 				console.log('에러');
 				console.log(error);
+			}
+		},
+		async file_share() {
+			try {
+				const shareData = {
+					id: this.$store.state.id,
+					cur: this.$store.state.cur,
+					file_name: this.cfilename.file_name,
+					target_id: this.targetUid,
+				};
+				const response = await shareFile(shareData);
+				if (response.status == 200) {
+					alert('파일 공유 완료');
+				}
+			} catch (error) {
+				console.log('에러');
+				alert('존재 하지 않은 유저입니다.');
+			} finally {
+				this.showShareF = false;
 			}
 		},
 		show(folderObj, e) {
