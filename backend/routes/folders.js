@@ -47,14 +47,14 @@ router.get('/show', function(req, res, next) {
     folder_id = req.query.folder_id;
     if (folder_id == -1) {
         let location = '/';
-        let gerFolder = 'SELECT * FROM folders WHERE location = ? AND user_id = ?;';
-        connection.query(gerFolder, [location, user_id], function(err, folder) {
+        let gerFolder = 'SELECT * FROM folders WHERE location = ? AND user_id = ? AND folder_name != ?;';
+        connection.query(gerFolder, [location, user_id, 'trashcan'], function(err, folder) {
             if (err) {
                 console.log('select2 error');
                 res.status(400).send({ err: err });
             } else {
-                let gerFile = 'SELECT * FROM files WHERE location = ? AND user_id = ? AND folder_name != ?;';
-                connection.query(gerFile, [location, user_id, 'trashcan'], function(err, file) {
+                let gerFile = 'SELECT * FROM files WHERE location = ? AND user_id = ?;';
+                connection.query(gerFile, [location, user_id], function(err, file) {
                     if (err) {
                         console.log('select3 error');
                         res.status(400).send({ err: err });
@@ -80,8 +80,8 @@ router.get('/show', function(req, res, next) {
                     res.status(400).send({ err: 'does not exist' });
                 } else {
                     let location = rows[0].location + rows[0].folder_name + '/';
-                    let gerFolder = 'SELECT * FROM folders WHERE location = ? AND user_id = ?;';
-                    connection.query(gerFolder, [location, user_id], function(err, folder) {
+                    let gerFolder = 'SELECT * FROM folders WHERE location = ? AND user_id = ? AND folder_name != ?;';
+                    connection.query(gerFolder, [location, user_id, 'trashcan'], function(err, folder) {
                         if (err) {
                             console.log('select2 error');
                             res.status(400).send({ err: err });
