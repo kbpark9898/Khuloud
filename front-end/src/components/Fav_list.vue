@@ -514,12 +514,12 @@ export default {
 			try {
 				const cData = {
 					id: this.$store.state.id,
-					cur: this.$store.state.cur,
+					cur: this.curfName.location,
 					name: this.curfName.folder_name,
 				};
 				console.log(cData);
 				const response = await delFavorite(cData);
-				this.$store.commit('setFolder', response.data.folders);
+				this.$store.commit('setfavFolderList', response.data.folders);
 			} catch (error) {
 				console.log('에러');
 			}
@@ -542,12 +542,12 @@ export default {
 			try {
 				const fData = {
 					id: this.$store.state.id,
-					cur: this.$store.state.cur,
+					cur: this.cfilename.location,
 					name: this.cfilename.file_name,
 				};
 				console.log(fData);
 				const response = await delFavoriteFile(fData);
-				this.$store.commit('setFile', response.data.files);
+				this.$store.commit('setfavFileList', response.data.files);
 			} catch (error) {
 				console.log('에러');
 			}
