@@ -1,14 +1,12 @@
 <template>
-	<div>
-		<Fav_list></Fav_list>
-	</div>
+	<TrashList></TrashList>
 </template>
 
 <script>
-import Fav_list from '../components/Fav_list';
+import TrashList from '../components/TrashList';
 export default {
 	components: {
-		Fav_list,
+		TrashList,
 	},
 };
 </script>

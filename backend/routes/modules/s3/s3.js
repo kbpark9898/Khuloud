@@ -13,11 +13,10 @@
 // targetFile: folder2/file.txt
 
 
-
 var AWS = require('aws-sdk');
 AWS.config.update({ region: 'ap-northeast-2' });
 
-var BUCKET_NAME = 'khuloud';
+var BUCKET_NAME = 'qkrrlqja-test';
 
 var s3 = new AWS.S3();
 var fs = require('fs');
@@ -73,6 +72,32 @@ var S3 = {
         })
     },
 
+    // 파일 덮어쓰기
+    coverFile: function(bucketName, userId, sourceFile, targetPath, body, callback) {
+        var pathbody = fs.createReadStream(body);
+
+        if (targetPath != '' && targetPath[targetPath.length - 1] != '/') {
+            targetPath = targetPath + '/';
+        }
+        var targetFile = targetPath + sourceFile;
+
+        var coverParams = {
+            Bucket: bucketName,
+            Key: 'drive/' + userId + '/' + targetFile,
+            Body: pathbody
+        };
+
+        s3.upload(coverParams, function (err, data) {
+            if (err) {
+                console.log("Cover Error" + err);
+                callback(false);
+            } else {
+                console.log("Cover Success");
+                callback(true);
+            }
+        })
+    },
+
     deleteFile: function (bucketName, userId, targetFile, callback) {
         // targetFile => folder1/folder2/test.txt
         var deleteParams = {
@@ -104,10 +129,8 @@ var S3 = {
                 console.log("Download File Error", err);
                 callback(false);
             } else {
-                if (data) {
-                    console.log("Get File Success");
-                    callback(true, data.body.toString());
-                }
+                console.log("Get File Success");
+                callback(true, data.Body.toString());
             }
         })
     },
@@ -143,10 +166,13 @@ var S3 = {
                     Key: 'drive/' + userId + '/' + targetFile
                 };
                 try {
-                    s3.getObject(params).createReadStream().pipe(file);
-                    callback(true, tempDownloadDir);
+                    var stream = s3.getObject(params).createReadStream().pipe(file);
+                    stream.on('end', function(){
+                        console.log('end!');
+                        callback(true, tempDownloadDir);
+                    });
                 }catch(err){
-                    console.log('no such file');
+                    console.log('no such file', err);
                     callback(false);
                 }
             }else{
@@ -275,6 +301,75 @@ var S3 = {
                 })
             }
         })
+    },
+
+    // 파일 이름이 달라지는 경우
+    moveFile3: function (bucketName, userId, oldFile, newFile, targetPath, callback) {
+        if (targetPath != ''){
+            targetPath = targetPath + '/';
+        }
+        sourceFile = targetPath + oldFile;      // test.txt or folder1/test.txt
+        var targetFile = targetPath + newFile;
+
+        S3.copyFile2(bucketName, userId, sourceFile, targetFile, function(result){
+            if (!result){
+                console.log("Move Error on Copying File3");
+                callback(false);
+            }else{
+                S3.deleteFile(bucketName, userId, sourceFile, function (res) {
+                    if (!res) {
+                        console.log("Move Error on Deleting File");
+                        callback(false);
+                    } else {
+                        console.log("Move Success");
+                        callback(true);
+                    }
+                })
+            }
+        })
+    },
+
+    renameFile: function(bucketName, userId, sourceFile, modiFile, targetPath, callback){
+        // sourceFile = test.txt
+        // modiFile = test2.txt
+        // targetPath = '' or 'folder1/folder2'
+
+        if (sourceFile == modiFile){    // 이름 변경되지 않은 경우
+            callback(true, sourceFile);
+        }else{
+            if (targetPath != '') {
+                targetPath = targetpath + '/';
+            }
+            var targetFile = targetPath + modiFile;
+
+            S3.isFileOverlapped(bucketName, userId, targetFile, function (res, ans, lvNum) {
+                if (!res) {
+                    console.log("Overlap Check failed");
+                    callback(false, sourceFile);
+                } else {
+                    if (ans) {
+                        console.log("File Duplication");
+                        S3.makeVersion(bucketName, userId, targetFile, lvNum + 1, function (res, versionedSourceFile) {
+                            if (!res) {
+                                console.log("Make version failed");
+                                callback(false, sourceFile);
+                            } else {
+                                S3.renameFile(bucketName, userId, sourceFile, versionedSourceFile, targetPath, callback);
+                            }
+                        })
+                    } else {
+                        S3.moveFile3(bucketName, userId, sourceFile, modiFile, targetPath, function (result) {
+                            if (result) {
+                                callback(true, modiFile);
+                            } else {
+                                console.log('File Rename failed');
+                                callback(false);
+                            }
+                        })
+                    }
+                }
+            });
+        }
     },
 
     uploadFile: function (bucketName, userId, sourceFile, targetPath, body, callback) {

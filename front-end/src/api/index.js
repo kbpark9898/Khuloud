@@ -18,7 +18,7 @@ function folder(curData) {
 	return axios.get('/api/folder/show', {
 		params: {
 			id: curData.id,
-			cur: curData.cur,
+			folder_id: curData.folder_id,
 		},
 	});
 }
@@ -53,7 +53,7 @@ function uploadFile(fileData) {
 }
 
 function detailFile(fileData) {
-	return axios.get(`/api/file/${fileData.name}`, {
+	return axios.get(`/api/file/${fileData.fileName}`, {
 		params: {
 			id: fileData.id,
 			cur: fileData.cur,
@@ -70,12 +70,91 @@ function deleteFile(fileData) {
 		},
 	});
 }
+
 function downloadFile(fileData) {
-	return axios.get(`api/file/download/${fileData.fileName}`, {
+	return axios.get(`/api/file/download/${fileData.fileName}`, {
 		params: {
 			//현재 접속한 사람의 id와 다운로드를 위해 선택한 파일의 이름을 파라미터로 넘긴다.
 			id: fileData.id,
 			cur: fileData.cur,
+		},
+	});
+}
+
+function accessedList(curData) {
+	return axios.get('/api/quick', {
+		params: {
+			id: curData.id,
+		},
+	});
+}
+
+function showTrashcan(userId) {
+	return axios.get('/api/trashcan/show', {
+		params: {
+			id: userId,
+		},
+	});
+}
+
+function modifyFile(fileData) {
+	return axios.post(`/api/file/modify/${fileData.name}`, fileData);
+}
+
+function delFavorite(folderData) {
+	return axios.post('/api/favorites/delfolder', folderData);
+}
+
+function addFavorite(folderData) {
+	return axios.post('/api/favorites/addfolder', folderData);
+}
+
+function moveFile(fileData) {
+	return axios.post('/api/folder/move', fileData);
+}
+
+function delFavoriteFile(fileData) {
+	return axios.post('/api/favorites/delfile', fileData);
+}
+
+function addFavoriteFile(fileData) {
+	return axios.post('/api/favorites/addfile', fileData);
+}
+
+function getFavoriteList(userId) {
+	return axios.get('/api/favorites/show', {
+		params: {
+			id: userId,
+		},
+	});
+}
+
+function shareFile(shareData) {
+	return axios.post('/api/share', shareData);
+}
+
+function tdelFolder(tData) {
+	return axios.get('/api/trashcan/delfolder', {
+		params: {
+			id: tData.id,
+			folder_id: tData.folder_id,
+		},
+	});
+}
+
+function tdelFile(tData) {
+	return axios.get('/api/trashcan/delfile', {
+		params: {
+			id: tData.id,
+			file_id: tData.file_id,
+		},
+	});
+}
+
+function tdelAll(userId) {
+	return axios.get('/api/trashcan/all', {
+		params: {
+			id: userId,
 		},
 	});
 }
@@ -91,4 +170,18 @@ export {
 	uploadFile,
 	deleteFile,
 	downloadFile,
+	delFavorite,
+	addFavorite,
+	moveFile,
+	delFavoriteFile,
+	addFavoriteFile,
+	accessedList,
+	detailFile,
+	modifyFile,
+	getFavoriteList,
+	shareFile,
+	tdelFolder,
+	tdelFile,
+	tdelAll,
+	showTrashcan,
 };

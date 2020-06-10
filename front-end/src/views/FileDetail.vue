@@ -1,12 +1,12 @@
 <template lang="html">
-	<contact></contact>
+	<FileDetail></FileDetail>
 </template>
 
 <script>
-import contact from '@/components/make_contact.vue';
+import FileDetail from '@/components/FileDetail';
 export default {
 	components: {
-		contact,
+		FileDetail,
 	},
 };
 </script>

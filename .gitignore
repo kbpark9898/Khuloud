@@ -114,3 +114,6 @@ dist
 .yarn/build-state.yml
 .yarn/install-state.gz
 .pnp.*
+
+backend/routes/modules/s3/download/*
+backend/routes/modules/awsconfig.json

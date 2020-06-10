@@ -14,12 +14,7 @@
 		<v-list>
 			<!-- <v-subheader inset>Folders</v-subheader> -->
 			<!-- Folder view -->
-			<v-list-item
-				v-if="this.$route.path !== '/fav'"
-				@click=""
-				@dblclick="$router.go(-1)"
-				>...</v-list-item
-			>
+			<v-list-item @click="" @dblclick="$router.go(-1)">...</v-list-item>
 			<v-list-item
 				v-for="item in calData"
 				:key="item.folder_id"
@@ -75,7 +70,7 @@
 				</v-list-item-action>
 			</v-list-item>
 		</v-list>
-		<!--file detial -->
+		<!--file detail -->
 		<v-dialog v-model="showdetailF" max-width="290">
 			<v-card>
 				<v-card-title class="headline">
@@ -96,6 +91,28 @@
 					>
 						save
 					</v-btn>
+				</v-card-actions>
+			</v-card>
+		</v-dialog>
+		<!-- file share menu -->
+		<v-dialog v-model="showShareF" width="500px">
+			<v-card>
+				<v-card-title>
+					Share File
+				</v-card-title>
+				<v-card-text>
+					<v-text-field v-model="this.cfilename.file_name"></v-text-field>
+				</v-card-text>
+				<v-card-text>
+					<v-text-field
+						v-model="targetUid"
+						label="target user id"
+					></v-text-field>
+				</v-card-text>
+				<v-card-actions>
+					<v-spacer></v-spacer>
+					<v-btn @click.prevent="file_share">ok</v-btn>
+					<v-btn @click="showShareF = false">cancle</v-btn>
 				</v-card-actions>
 			</v-card>
 		</v-dialog>
@@ -256,8 +273,51 @@
 						<v-list-item-title>즐겨 찾기 추가</v-list-item-title>
 					</v-list-item-content>
 				</v-list-item>
+				<v-list-item @click.prevent="showShareF = !showShareF">
+					<v-list-item-icon>
+						<v-icon>fas fa-share-alt</v-icon>
+					</v-list-item-icon>
+					<v-list-item-content>
+						<v-list-item-title>공유 하기</v-list-item-title>
+					</v-list-item-content>
+				</v-list-item>
 			</v-list>
 		</v-menu>
+		<input
+			id="file-selector"
+			ref="uploadedfile"
+			type="file"
+			v-on:change="handleFileUpload()"
+		/>
+		<br />
+		<v-btn color="blue" @click="upload_file">upload</v-btn>
+		<v-btn bottom color="blue" dark fab fixed right @click="dialog = !dialog">
+			<v-icon>mdi-plus</v-icon>
+		</v-btn>
+		<!-- Create Folder -->
+		<v-dialog v-model="dialog" width="500px">
+			<v-card>
+				<v-card-title class="grey darken-2">
+					Create Folder
+				</v-card-title>
+				<v-container>
+					<div>
+						<v-icon>mdi-folder</v-icon>
+						<v-text-field
+							placeholder="name"
+							id="foldername"
+							type="text"
+							v-model="foldername"
+						></v-text-field>
+					</div>
+				</v-container>
+				<v-card-actions>
+					<v-spacer></v-spacer>
+					<v-btn text color="primary" @click="dialog = false">Cancel</v-btn>
+					<v-btn text @click="makeF">Create</v-btn>
+				</v-card-actions>
+			</v-card>
+		</v-dialog>
 	</div>
 </template>
 <script>
@@ -277,7 +337,7 @@ import {
 	addFavoriteFile,
 	detailFile,
 	modifyFile,
-	getFavoriteList,
+	shareFile,
 } from '../api/index';
 import Axios from 'axios';
 
@@ -296,6 +356,9 @@ export default {
 			files: [],
 			search: '',
 			id: '',
+			share_file_name: '',
+			showShareF: false,
+			targetUid: '',
 			current_filename: null, //파일 상세정보 (이름)
 			current_filedata: null, //파일 상세정보 (내용)
 			dialog: false,
@@ -345,12 +408,21 @@ export default {
 	methods: {
 		async fetchData() {
 			try {
-				const response = await getFavoriteList(this.$store.state.id);
-				console.log(response.data);
-				this.$store.commit('setfavFolderList', response.data.folders);
-				this.$store.commit('setfavFileList', response.data.files);
-				this.folders = response.data.folders;
-				this.files = response.data.files;
+				console.log(this.$route.params.id);
+				const curData = {
+					id: this.$store.state.id,
+					folder_id: this.$route.params.id,
+				};
+				console.log(curData);
+				const response = await folder(curData);
+				// const file_response = await file(curData);
+				this.$store.commit('setFolder', response.data.folders);
+				this.$store.commit('setCur', response.data.cur);
+				this.$store.commit('setParent', response.data.parentPath);
+				this.$store.commit('setFile', response.data.files);
+				this.folders = this.$store.getters.folderL;
+				console.log(this.$store.getters.fileL);
+				this.files = this.$store.getters.fileL;
 			} catch (error) {
 				console.log('에러');
 				console.log(error);
@@ -387,26 +459,6 @@ export default {
 			} finally {
 				this.initFolderName();
 				this.dialog = false;
-			}
-		},
-		async moveF(move_folder_name) {
-			try {
-				const curData = {
-					id: this.$store.state.id,
-					cur: this.$store.state.cur + move_folder_name + '/',
-				};
-				const response = await folder(curData);
-				const file_response = await file(curData);
-				console.log(response.data);
-				this.$store.commit('setFolder', response.data.folders);
-				this.$store.commit('setFile', file_response.data.files);
-				this.$store.commit('setCur', response.data.cur);
-				this.$store.commit('setParent', response.data.parentPath);
-				this.folders = this.$store.getters.folderL;
-				this.files = this.$store.getters.fileL;
-			} catch (error) {
-				console.log('에러');
-				console.log(error.response.data);
 			}
 		},
 		async moveParent() {
@@ -536,13 +588,12 @@ export default {
 			try {
 				const cData = {
 					id: this.$store.state.id,
-					cur: this.curfName.location,
+					cur: this.$store.state.cur,
 					name: this.curfName.folder_name,
 				};
 				console.log(cData);
-				const del = await delFavorite(cData);
-				const response = await getFavoriteList(this.$store.state.id);
-				this.$store.commit('setfavFolderList', response.data.folders);
+				const response = await delFavorite(cData);
+				this.$store.commit('setFolder', response.data.folders);
 				this.folders = response.data.folders;
 			} catch (error) {
 				console.log('에러');
@@ -558,6 +609,7 @@ export default {
 				console.log(cData);
 				const response = await addFavorite(cData);
 				this.$store.commit('setFolder', response.data.folders);
+				this.folders = response.data.folders;
 			} catch (error) {
 				console.log('에러');
 			}
@@ -566,13 +618,12 @@ export default {
 			try {
 				const fData = {
 					id: this.$store.state.id,
-					cur: this.cfilename.location,
+					cur: this.$store.state.cur,
 					name: this.cfilename.file_name,
 				};
 				console.log(fData);
-				const del = await delFavoriteFile(fData);
-				const response = await getFavoriteList(this.$store.state.id);
-				this.$store.commit('setfavFileList', response.data.files);
+				const response = await delFavoriteFile(fData);
+				this.$store.commit('setFile', response.data.files);
 				this.files = response.data.files;
 			} catch (error) {
 				console.log('에러');
@@ -588,6 +639,7 @@ export default {
 				console.log(fData);
 				const response = await addFavoriteFile(fData);
 				this.$store.commit('setFile', response.data.files);
+				this.files = response.data.files;
 			} catch (error) {
 				console.log('에러');
 			}
@@ -648,6 +700,25 @@ export default {
 			} catch (error) {
 				console.log('에러');
 				console.log(error);
+			}
+		},
+		async file_share() {
+			try {
+				const shareData = {
+					id: this.$store.state.id,
+					cur: this.$store.state.cur,
+					file_name: this.cfilename.file_name,
+					target_id: this.targetUid,
+				};
+				const response = await shareFile(shareData);
+				if (response.status == 200) {
+					alert('파일 공유 완료');
+				}
+			} catch (error) {
+				console.log('에러');
+				alert('존재 하지 않은 유저입니다.');
+			} finally {
+				this.showShareF = false;
 			}
 		},
 		show(folderObj, e) {
