@@ -3,7 +3,9 @@ const router = express.Router();
 const AWS = require("aws-sdk");
 const moment = require("moment");
 AWS.config.loadFromPath(__dirname + "/modules/awsconfig.json");
-var S3 = require('../modules/s3/s3');
+var S3 = require(__dirname + '/modules/s3/s3');
+
+const s3 = new AWS.S3();
 
 router.get('/delfile', function(req, res, next) {
     var file_id = req.query.file_id;
@@ -20,7 +22,7 @@ router.get('/delfile', function(req, res, next) {
                 console.log('exist error');
                 res.send({ erorr: 'exist error' });
             } else {
-                var curPath = rows[0].location;
+                var curPath = '/trashcan/';
                 var file_name = rows[0].file_name;
                 var sourceFile = curPath.substring(1) + file_name;
 
@@ -65,7 +67,6 @@ router.get('/delfolder', function(req, res, next) {
             } else {
                 var curPath = '/trashcan/'
                 var folder_name = rows[0].folder_name;
-                var sourcefolder = curPath.substring(1) + folder_name + '/';
 
                 var sql1 = 'DELETE FROM folders WHERE folder_name = (?) AND location=(?) AND user_Id = (?)';
                 connection.query(sql1, [folder_name, curPath, user_id], function(err) {
@@ -97,5 +98,59 @@ router.get('/delfolder', function(req, res, next) {
     })
 });
 
+router.get('/all', function(req, res, next) {
+    var user_id = req.query.id;
+
+    var getfolder = "SELECT * FROM folders WHERE user_id = ? AND location = ?;";
+    connection.query(getfolder, [user_id, '/trashcan/'], function(err, folders) {
+        if (err) {
+            console.log('select db error');
+            res.send({ erorr: 'db select error' });
+        } else {
+            var getfile = "SELECT * FROM files WHERE user_id = ? AND location = ?;";
+            connection.query(getfile, [user_id, '/trashcan/'], function(err, files) {
+                if (err) {
+                    console.log('select db error');
+                    res.send({ erorr: 'db select error' });
+                } else {
+                    for (let i of files) {
+                        var sql1 = 'DELETE FROM files WHERE file_id = ?;';
+                        var sourceFile = 'trashcan/' + i.file_name;
+                        connection.query(sql1, [i.file_id], function(err) {
+                            if (err) {
+                                console.log('delete db error');
+                                res.send({ erorr: 'db delete error' });
+                            } else {
+                                S3.deleteFile(S3.BUCKET_NAME, user_id, sourceFile, function(result) {})
+                            }
+                        })
+                    }
+                    for (let j of folders) {
+                        var curPath = '/trashcan/';
+
+                        var sql1 = 'DELETE FROM folders WHERE folder_name = (?) AND location=(?) AND user_Id = (?)';
+                        connection.query(sql1, [j.folder_name, curPath, user_id], function(err) {
+                            if (err) {
+                                console.log('delete db error');
+                                res.send({ erorr: 'db delete error' });
+                            } else {
+                                var params = {
+                                    Bucket: S3.BUCKET_NAME,
+                                    Key: 'drive/' + user_id + curPath + j.folder_name + '/'
+                                };
+                                s3.deleteObject(params, function(err, data) {
+                                    if (err) {
+                                        res.status(400).send({ err: err });
+                                    }
+                                });
+                            }
+                        });
+                    }
+                    res.send({ success: "success" });
+                }
+            });
+        }
+    });
+});
 
 module.exports = router;
