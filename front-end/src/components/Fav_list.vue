@@ -50,7 +50,7 @@
 			</v-list-item>
 			<!-- File view -->
 			<v-list-item
-				v-for="item in this.$store.getters.faveFileL"
+				v-for="item in this.$store.getters.favFileL"
 				:key="item.title"
 				@click.right="showF(item, $event)"
 				@dblclick="
