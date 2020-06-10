@@ -10,6 +10,7 @@ var userRouter = require('./routes/userlogin/user');
 var loginRouter = require('./routes/userlogin/login');
 var registerRouter = require('./routes/userlogin/register');
 var fileRouter = require('./routes/file/router');
+var contactRouter = require('./routes/contact');
 //var trashcanRouter = require('./routes/trashcan/router');
 var folderRouter = require('./routes/folders');
 var quickRouter = require('./routes/quick');
@@ -69,7 +70,7 @@ app.use('/api/trashcan', trashcanRouter);
 //app.use('/users', usersRouter);
 app.use('/api/file', fileRouter);
 app.use('/api/quick', quickRouter);
-
+app.use('/api/contact', contactRouter);
 // catch 404 and forward to error handler
 app.use(function(req, res, next) {
     next(createError(404));

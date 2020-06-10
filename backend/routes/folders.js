@@ -4,7 +4,7 @@ const AWS = require("aws-sdk");
 const moment = require("moment");
 AWS.config.loadFromPath(__dirname + "/modules/awsconfig.json");
 
-const BUCKET_NAME = "hong-s3-cloud";
+const BUCKET_NAME = "qkrrlqja-test";
 let curPath = "";
 let user_id = "";
 let parentPath = "";
