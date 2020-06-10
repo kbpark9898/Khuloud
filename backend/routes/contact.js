@@ -63,8 +63,9 @@ router.post('/contact_upload', upload.single('file'), function(req, res, next) {
         else if(j==3){
           temp = "D" + (i+1);
           added_date.push(firstWSheet[temp].v);
-          sqlquery += '","' + added_date[i-1] + '"),';
-          }
+          sqlquery += '",STR_TO_DATE("' + added_date[i-1] + '",' + "'%Y.%m.%d')),";
+        }
+
       }
     }
     sqlquery = sqlquery.substring(0,sqlquery.length-1);
