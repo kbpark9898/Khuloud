@@ -7,6 +7,32 @@ var S3 = require(__dirname + '/modules/s3/s3');
 
 const s3 = new AWS.S3();
 
+router.get('/show', function(req, res, next) {
+    console.log(req.query);
+    user_id = req.query.id;
+
+    let checkfolder = 'SELECT * FROM folders WHERE location = ? AND user_id = ?;';
+    connection.query(checkfolder, ['/trashcan/', user_id], function(err, folder) {
+        if (err) {
+            console.log('select error');
+            res.status(400).send({ err: err });
+        } else {
+            let checkfile = 'SELECT * FROM files WHERE location = ? AND user_id = ?;';
+            connection.query(checkfile, ['/trashcan/', user_id], function(err, file) {
+                if (err) {
+                    console.log('select error');
+                    res.status(400).send({ err: err });
+                } else {
+                    res.status(200).send({
+                        folders: folder,
+                        files: file
+                    })
+                }
+            });
+        }
+    });
+});
+
 router.get('/delfile', function(req, res, next) {
     var file_id = req.query.file_id;
     var user_id = req.query.id;
