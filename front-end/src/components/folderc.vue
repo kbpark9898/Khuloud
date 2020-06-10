@@ -70,7 +70,7 @@
 				</v-list-item-action>
 			</v-list-item>
 		</v-list>
-		<!--file detial -->
+		<!--file detail -->
 		<v-dialog v-model="showdetailF" max-width="290">
 			<v-card>
 				<v-card-title class="headline">
