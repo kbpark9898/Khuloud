@@ -113,6 +113,9 @@ export default {
 			showMenu: false,
 			cfilename: {},
 			showMenuF: false,
+			x: 0,
+			y: 0,
+			search: '',
 		};
 	},
 	created() {
