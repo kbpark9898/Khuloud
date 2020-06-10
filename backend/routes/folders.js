@@ -140,8 +140,8 @@ router.post('/makefolder', function(req, res, next) {
                                 console.log('insert error');
                                 res.status(400).send({ err: err });
                             } else {
-                                let checkfolder = 'SELECT * FROM folders WHERE location = ? AND user_id = ?;';
-                                connection.query(checkfolder, [cur, user_id], function(err, rows, fields) {
+                                let checkfolder = 'SELECT * FROM folders WHERE location = ? AND user_id = ? AND folder_name != ?;';
+                                connection.query(checkfolder, [cur, user_id, 'trashcan'], function(err, rows, fields) {
                                     console.log(rows);
                                     res.status(200).send({
                                         folders: rows
@@ -198,8 +198,8 @@ router.post('/delfolder', function(req, res, next) {
                                     console.log("updatesql error");
                                     res.status(304).send({ error: "updatesql error" });
                                 } else {
-                                    let resultsql = 'SELECT * FROM folders WHERE location = ? AND user_id = ?;';
-                                    connection.query(resultsql, [cur, user_id], function(err, rows, fields) {
+                                    let resultsql = 'SELECT * FROM folders WHERE location = ? AND user_id = ? AND folder_name != ?;';
+                                    connection.query(resultsql, [cur, user_id, 'trashcan'], function(err, rows, fields) {
                                         res.status(200).send({
                                             folders: rows
                                         });
@@ -268,8 +268,8 @@ router.post('/move', function(req, res, next) {
                                                     console.log("updatesql error");
                                                     res.status(304).send({ error: "updatesql error" });
                                                 } else {
-                                                    let resultsql = 'SELECT * FROM folders WHERE location = ? AND user_id = ?;';
-                                                    connection.query(resultsql, [cur, user_id], function(err, rows, fields) {
+                                                    let resultsql = 'SELECT * FROM folders WHERE location = ? AND user_id = ? AND folder_name != ?;';
+                                                    connection.query(resultsql, [cur, user_id, 'trashcan'], function(err, rows, fields) {
                                                         res.status(200).send({
                                                             folders: rows
                                                         });
@@ -317,10 +317,10 @@ router.post('/move', function(req, res, next) {
                                     if (err3) {
                                         res.status(304).send({ error: "updatesql error" });
                                     } else {
-                                        let resultsql = 'SELECT * FROM folders WHERE location = ? AND user_id = ?;';
+                                        let resultsql = 'SELECT * FROM files WHERE location = ? AND user_id = ?;';
                                         connection.query(resultsql, [cur, user_id], function(err, rows, fields) {
                                             res.status(200).send({
-                                                folders: rows
+                                                files: rows
                                             });
                                         });
                                     }
@@ -407,8 +407,8 @@ router.get('/search', function(req, res, next) {
     console.log(target);
     let folders = []
     let files = []
-    let checkfolder = 'SELECT * FROM folders WHERE folder_name LIKE ' + target + ' AND user_id = ?;';
-    connection.query(checkfolder, [user_id], function(err, folder, fields) {
+    let checkfolder = 'SELECT * FROM folders WHERE folder_name LIKE ' + target + ' AND user_id = ? AND folder_name != ?;';
+    connection.query(checkfolder, [user_id, 'trashcan'], function(err, folder, fields) {
         console.log(folder);
         folders.push(folder)
         let checkfile = 'SELECT * FROM files WHERE file_name LIKE ' + target + ' AND user_id = ?;';
