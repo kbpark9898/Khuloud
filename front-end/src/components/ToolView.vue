@@ -47,7 +47,7 @@
 						<v-list-item-title>연락처</v-list-item-title>
 					</v-list-item-content>
 				</v-list-item>
-				<v-list-item>
+				<v-list-item router :to="{ name: 'Trash' }" exact>
 					<v-list-item-action>
 						<v-icon>mdi-delete</v-icon>
 					</v-list-item-action>

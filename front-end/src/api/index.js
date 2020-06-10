@@ -89,6 +89,14 @@ function accessedList(curData) {
 	});
 }
 
+function showTrashcan(userId) {
+	return axios.get('/api/trashcan/show', {
+		params: {
+			id: userId,
+		},
+	});
+}
+
 function modifyFile(fileData) {
 	return axios.post(`/api/file/modify/${fileData.name}`, fileData);
 }
@@ -125,6 +133,32 @@ function shareFile(shareData) {
 	return axios.post('/api/share', shareData);
 }
 
+function tdelFolder(tData) {
+	return axios.get('/api/trashcan/delfolder', {
+		params: {
+			id: tData.id,
+			folder_id: tData.folder_id,
+		},
+	});
+}
+
+function tdelFile(tData) {
+	return axios.get('/api/trashcan/delfile', {
+		params: {
+			id: tData.id,
+			file_id: tData.file_id,
+		},
+	});
+}
+
+function tdelAll(userId) {
+	return axios.get('/api/trashcan/all', {
+		params: {
+			id: userId,
+		},
+	});
+}
+
 export {
 	registerUser,
 	loginUser,
@@ -146,4 +180,8 @@ export {
 	modifyFile,
 	getFavoriteList,
 	shareFile,
+	tdelFolder,
+	tdelFile,
+	tdelAll,
+	showTrashcan,
 };

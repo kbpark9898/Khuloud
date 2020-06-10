@@ -13,6 +13,8 @@ export default new Vuex.Store({
 		recentList: [],
 		favFolderList: [],
 		favFileList: [],
+		trashFolderList: [],
+		trashFileList: [],
 	},
 	mutations: {
 		setId(state, userid) {
@@ -41,6 +43,12 @@ export default new Vuex.Store({
 		},
 		setfavFileList(state, fflist) {
 			state.favFileList = fflist;
+		},
+		settrashFolderList(state, tflist) {
+			state.trashFolderList = tflist;
+		},
+		settrashFileList(state, tflist) {
+			state.trashFileList = tflist;
 		},
 	},
 	getters: {
@@ -73,6 +81,12 @@ export default new Vuex.Store({
 		},
 		favFileL(state) {
 			return state.favFileList;
+		},
+		trashFolderL(state) {
+			return state.trashFolderList;
+		},
+		trashFileL(state) {
+			return state.trashFolderList;
 		},
 	},
 });

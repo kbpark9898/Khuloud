@@ -72,5 +72,10 @@ export default new VueRouter({
 			component: () => import('../components/folderc'),
 			props: true,
 		},
+		{
+			path: '/trash',
+			name: 'Trash',
+			component: () => import('../views/TrashPage'),
+		},
 	],
 });
