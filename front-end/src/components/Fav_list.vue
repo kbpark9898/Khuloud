@@ -518,7 +518,8 @@ export default {
 					name: this.curfName.folder_name,
 				};
 				console.log(cData);
-				const response = await delFavorite(cData);
+				const del = await delFavorite(cData);
+				const response = await getFavoriteList(this.$store.state.id);
 				this.$store.commit('setfavFolderList', response.data.folders);
 			} catch (error) {
 				console.log('에러');
@@ -546,7 +547,8 @@ export default {
 					name: this.cfilename.file_name,
 				};
 				console.log(fData);
-				const response = await delFavoriteFile(fData);
+				const del = await delFavoriteFile(fData);
+				const response = await getFavoriteList(this.$store.state.id);
 				this.$store.commit('setfavFileList', response.data.files);
 			} catch (error) {
 				console.log('에러');

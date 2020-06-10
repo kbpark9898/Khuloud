@@ -44,8 +44,8 @@ router.post('/addfolder', function(req, res, next) {
                         console.log('update error');
                         res.status(400).send({ error: err });
                     } else {
-                        let getfolder = 'SELECT * FROM folders WHERE location = ? AND user_id = ?;';
-                        connection.query(getfolder, [cur, user_id], function(err, folders, fields) {
+                        let getfolder = 'SELECT * FROM folders WHERE location = ? AND user_id = ? AND folder_name != ?;';
+                        connection.query(getfolder, [cur, user_id, 'trashcan'], function(err, folders, fields) {
                             res.status(200).send({
                                 folders: folders
                             })
@@ -112,8 +112,8 @@ router.post('/delfolder', function(req, res, next) {
                         console.log('update error');
                         res.status(400).send({ error: err });
                     } else {
-                        let getfolder = 'SELECT * FROM folders WHERE location = ? AND user_id = ?;';
-                        connection.query(getfolder, [cur, user_id], function(err, folders, fields) {
+                        let getfolder = 'SELECT * FROM folders WHERE location = ? AND user_id = ? AND folder_name != ?;';
+                        connection.query(getfolder, [cur, user_id, 'trashcan'], function(err, folders, fields) {
                             res.status(200).send({
                                 folders: folders
                             })

@@ -179,4 +179,116 @@ router.get('/all', function(req, res, next) {
     });
 });
 
+router.post('/restore', function(req, res, next) {
+    console.log(req.body);
+    let user_id = req.body.user_id;
+    let id = req.body.id;
+    if (req.body.isfolder) {
+        let checkfolder = 'SELECT * FROM folders WHERE folder_id = ? AND user_id = ?;';
+        connection.query(checkfolder, [id, user_id], function(err1, rows, fields) {
+            console.log(rows);
+            if (rows.length != 0) {
+                let curPath = user_id + '/trashcan/'
+                let name = rows[0].folder_name
+                let copy_params = {
+                    Bucket: S3.BUCKET_NAM,
+                    CopySource: S3.BUCKET_NAM + '/drive/' + curPath + name + '/',
+                    Key: 'drive/' + user_id + '/' + name + '/'
+                };
+                let del_params = {
+                    Bucket: S3.BUCKET_NAM,
+                    Key: 'drive/' + curPath + name + '/'
+                };
+                s3.copyObject(copy_params, function(err, data) {
+                    if (err) {
+                        console.log(err, data);
+                        console.log("copy error");
+                        res.status(304).send({ error: "copy error" });
+                    } else {
+                        s3.deleteObject(del_params, function(err, data) {
+                            if (err) {
+                                console.log(err, data);
+                                console.log("delete error");
+                                res.status(304).send({ error: "delete error" });
+                            } else {
+                                let values = ['/', '/trashcan/', name, user_id];
+                                let updatesql = 'UPDATE folders SET location = ? WHERE location = ? AND folder_name = ? AND user_id = ?;';
+                                connection.query(updatesql, values, function(err3, result, field) {
+                                    if (err3) {
+                                        console.log("updatesql error");
+                                        res.status(304).send({ error: "updatesql error" });
+                                    } else {
+                                        let resultsql = 'SELECT * FROM folders WHERE location = ? AND user_id = ?;';
+                                        connection.query(resultsql, ['/trashcan/', user_id], function(err, folder, fields) {
+                                            res.status(200).send({
+                                                folders: folder
+                                            });
+                                        });
+                                    }
+                                });
+                            }
+                        });
+                    }
+                });
+            } else {
+                console.log("Does not exist folder");
+                res.status(304).send({ error: "Does not exist" });
+            }
+        });
+    } else {
+        let checkfile = 'SELECT * FROM files WHERE file_id = ? AND user_id = ?;';
+        connection.query(checkfile, [id, user_id], function(err1, rows, fields) {
+            console.log(rows);
+            if (rows.length != 0) {
+                let curPath = user_id + '/trashcan/'
+                let name = rows[0].file_name
+                let copy_params = {
+                    Bucket: S3.BUCKET_NAME,
+                    CopySource: S3.BUCKET_NAME + '/drive/' + curPath + name,
+                    Key: 'drive/' + user_id + '/' + name
+                };
+                let del_params = {
+                    Bucket: S3.BUCKET_NAME,
+                    Key: 'drive/' + curPath + name
+                };
+                s3.copyObject(copy_params, function(err, data) {
+                    if (err) {
+                        console.log(err, data);
+                        console.log("copy error");
+                        res.status(304).send({ error: "copy error" });
+                    } else {
+                        s3.deleteObject(del_params, function(err, data) {
+                            if (err) {
+                                console.log(err, data);
+                                console.log("delete error");
+                                res.status(304).send({ error: "delete error" });
+                            } else {
+                                let values = ['/', '/trashcan/', name, user_id];
+                                let updatesql = 'UPDATE files SET location = ? WHERE location = ? AND folder_name = ? AND user_id = ?;';
+                                connection.query(updatesql, values, function(err3, result, field) {
+                                    if (err3) {
+                                        console.log("updatesql error");
+                                        res.status(304).send({ error: "updatesql error" });
+                                    } else {
+                                        let resultsql = 'SELECT * FROM files WHERE location = ? AND user_id = ?;';
+                                        connection.query(resultsql, ['/trashcan/', user_id], function(err, file, fields) {
+                                            res.status(200).send({
+                                                files: file
+                                            });
+                                        });
+                                    }
+                                });
+                            }
+                        });
+                    }
+                });
+            } else {
+                console.log("Does not exist file");
+                res.status(304).send({ error: "Does not exist" });
+            }
+        });
+
+    }
+});
+
 module.exports = router;
