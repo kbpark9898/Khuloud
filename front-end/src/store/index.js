@@ -15,6 +15,7 @@ export default new Vuex.Store({
 		favFileList: [],
 		trashFolderList: [],
 		trashFileList: [],
+		contactList:[]
 	},
 	mutations: {
 		setId(state, userid) {
@@ -50,6 +51,9 @@ export default new Vuex.Store({
 		settrashFileList(state, tflist) {
 			state.trashFileList = tflist;
 		},
+		setContactList(state, list){
+			state.contactList = list;
+		}
 	},
 	getters: {
 		isLogin(state) {
@@ -88,5 +92,8 @@ export default new Vuex.Store({
 		trashFileL(state) {
 			return state.trashFileList;
 		},
+		contact(state){
+			return state.contactList;
+		}
 	},
 });

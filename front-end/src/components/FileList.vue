@@ -285,12 +285,14 @@
 				</v-list-item>
 			</v-list>
 		</v-menu>
-		<input
-			id="file-selector"
-			ref="uploadedfile"
-			type="file"
-			v-on:change="handleFileUpload()"
-		/>
+		<div v-cloak @drop.prevnet="addFile" @dragover.prevent>
+			<input
+				id="file-selector"
+				ref="uploadedfile"
+				type="file"
+				v-on:change="handleFileUpload()"
+			/>
+		</div>
 		<br />
 		<v-btn @click="upload_file"><v-icon>fas fa-upload</v-icon></v-btn>
 		<v-btn bottom color="blue" dark fab fixed right @click="dialog = !dialog">
@@ -404,6 +406,11 @@ export default {
 		$route: 'fetchData',
 	},
 	methods: {
+		addFile(event){
+			let droppedFiles = event.dataTransfer.files;
+			if(!droppedFiles) return;
+			console.log(droppedFiles);
+		},
 		async fetchData() {
 			try {
 				const curData = {

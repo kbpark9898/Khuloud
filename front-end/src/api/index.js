@@ -70,7 +70,6 @@ function deleteFile(fileData) {
 		},
 	});
 }
-
 function downloadFile(fileData) {
 	return axios.get(`/api/file/download/${fileData.fileName}`, {
 		params: {
@@ -158,6 +157,26 @@ function tdelAll(userId) {
 		},
 	});
 }
+function uploadContact(contactData){
+	return axios.post('/api/contact/contact_upload', contactData.file,{
+		headers: {
+			'Content-Type': 'multipart/form-data',
+		},
+		params:{
+				id: contactData.id,
+		}
+	});
+}
+function downloadContact(userID){
+	return axios.post('/api/contact/contact_download', null, {params:{id:userID}});
+}
+function printContact(userID){
+	console.log(String(userID));
+	return axios.post('api/contact/contact_list', {id:userID}, {params:{id:userID},});
+}
+function deleteContact(userID){
+	return axios.post('api/contact/contact_delete', {id:userID}, {params:{id:userID}});
+}
 
 export {
 	registerUser,
@@ -184,4 +203,8 @@ export {
 	tdelFile,
 	tdelAll,
 	showTrashcan,
+	uploadContact,
+	downloadContact,
+	printContact,
+	deleteContact
 };
