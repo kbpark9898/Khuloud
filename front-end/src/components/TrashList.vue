@@ -69,7 +69,7 @@
 			</v-list>
 		</v-menu>
 		<v-menu
-			v-model="showMenu"
+			v-model="showMenuF"
 			:position-x="x"
 			:position-y="y"
 			absolute
@@ -111,6 +111,9 @@ export default {
 		return {
 			curfName: {},
 			showMenu: false,
+			search: '',
+			x: 0,
+			y: 0,
 			cfilename: {},
 			showMenuF: false,
 			x: 0,
@@ -129,6 +132,7 @@ export default {
 			try {
 				const id = this.$store.state.id;
 				const response = await showTrashcan(id);
+				console.log(response.data);
 				this.$store.commit('settrashFolderList', response.data.folders);
 				this.$store.commit('settrashFileList', response.data.files);
 			} catch (error) {
