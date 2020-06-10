@@ -94,7 +94,7 @@
 			</v-card>
 		</v-dialog>
 		<!-- file share menu -->
-		<v-dialog v-model="showShareF">
+		<v-dialog v-model="showShareF" width="500px">
 			<v-card>
 				<v-card-title>
 					Share File
@@ -108,11 +108,11 @@
 						label="target user id"
 					></v-text-field>
 				</v-card-text>
-				<v-card-cation>
+				<v-card-actions>
 					<v-spacer></v-spacer>
 					<v-btn @click.prevent="file_share">ok</v-btn>
 					<v-btn @click="showShareF = false">cancle</v-btn>
-				</v-card-cation>
+				</v-card-actions>
 			</v-card>
 		</v-dialog>
 		<!-- Move Folder -->
@@ -275,7 +275,7 @@
 						<v-list-item-title>즐겨 찾기 추가</v-list-item-title>
 					</v-list-item-content>
 				</v-list-item>
-				<v-list-item @click.prevent="showShareF != showShareF">
+				<v-list-item @click.prevent="showShareF = !showShareF">
 					<v-list-item-icon>
 						<v-icon>fas fa-share-alt</v-icon>
 					</v-list-item-icon>
