@@ -16,6 +16,7 @@ router.get('/:name', function (req, res) {
     var user_id = req.query.id;
 
     var targetFile = curPath.substring(1) + file_name;  // folder1/folder2/test.txt
+    console.log(targetFile);
 
 
     S3.downloadFile3(S3.BUCKET_NAME, user_id, targetFile, function (result, downloadDir) {
@@ -29,7 +30,7 @@ router.get('/:name', function (req, res) {
                 }
             })
         }else{
-            res.send({ err: 'download error'})
+            res.send({ err: 'no such file'})
         }
     })
 }); 

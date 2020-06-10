@@ -22,7 +22,7 @@ router.post('/:name', function(req, res){
     if (curPath == '/') {
         targetPath = '';
     } else {
-        targetPath = curPath.substring(1, curPaht.length-1);  // folder1/folder2
+        targetPath = curPath.substring(1, curPath.length-1);  // folder1/folder2
     }
 
     var originalDir = __dirname + '/../modules/s3/download/' + user_id + curPath + file_name;
@@ -50,7 +50,7 @@ router.post('/:name', function(req, res){
                                     res.send({ error: 'update error' });
                                 } else {
                                     fs.unlinkSync(tempDownloadDir);
-                                    res.send('modify file success');
+                                    res.send({message: 'modify file success'});
                                 }
                             })
                         } else {
