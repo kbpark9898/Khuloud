@@ -1,15 +1,9 @@
 <template>
 	<div>
 		<v-toolbar flat>
-			<v-toolbar-title>내 드라이브</v-toolbar-title>
+			<v-toolbar-title>휴지통</v-toolbar-title>
 			<v-spacer></v-spacer>
-			<v-text-field
-				v-model="search"
-				append-icon="mdi-magnify"
-				label="검색"
-				single-line
-				hide-details
-			></v-text-field>
+			<v-btn @click="delAll">비우기</v-btn>
 		</v-toolbar>
 		<v-list two-line subheader>
 			<!-- <v-subheader inset>Folders</v-subheader> -->
@@ -116,9 +110,6 @@ export default {
 			y: 0,
 			cfilename: {},
 			showMenuF: false,
-			x: 0,
-			y: 0,
-			search: '',
 		};
 	},
 	created() {
