@@ -93,16 +93,13 @@ router.post('/contact_download', function(req, res, next) {
 
   var filename = 'public/upload/contactdownload.xlsx';
   fs.exists(filename, function (exists) {
-    console.log(exists);
     if(exists == true)
     {
       fs.unlink(filename, function (err) {
             if (err) throw err;
-            console.log('file deleted');
         });
     }
   });
-
   // Create a new instance of a Workbook class
   var wb = new xl.Workbook();
 
@@ -135,10 +132,14 @@ router.post('/contact_download', function(req, res, next) {
               ws.cell(i+2, 4).string(rows[i].added_date);
             }
           }
-            wb.write('public/upload/contactdownload.xlsx');
-            var file = __dirname + '/public/upload/contactdownload.xlsx';
-            // console.log(file);
-            res.download(file);
+          wb.write('public/upload/contactdownload.xlsx', (err, stats)=> {
+              if (err){
+                throw err;
+              }
+              else {
+                res.sendFile(path.join(__dirname, '../public/upload/contactdownload.xlsx'));
+              }
+            });
         }
 
       });
