@@ -18,7 +18,7 @@ router.post('/', function(req, res, next) {
     let target_id = req.body.target_id;
 
     let checkfile = 'SELECT * FROM files WHERE location = ? AND file_name = ? AND user_id = ?';
-    connection.query(checkfile, [curPath, name, user_id], function(err1, rows, fields) {
+    connection.query(checkfile, [cur, name, user_id], function(err1, rows, fields) {
         if (rows.length != 0) {
             let copy_params = {
                 Bucket: BUCKET_NAME,
@@ -43,6 +43,7 @@ router.post('/', function(req, res, next) {
                 }
             });
         } else {
+            console.log("Does not exist");
             res.status(304).send({ error: "Does not exist" });
         }
     });
