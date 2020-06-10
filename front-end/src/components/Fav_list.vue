@@ -11,7 +11,7 @@
 				hide-details
 			></v-text-field>
 		</v-toolbar>
-		<v-list two-line subheader>
+		<v-list>
 			<!-- <v-subheader inset>Folders</v-subheader> -->
 			<!-- Folder view -->
 			<v-list-item
@@ -21,7 +21,7 @@
 				>...</v-list-item
 			>
 			<v-list-item
-				v-for="item in this.$store.getters.favFolderL"
+				v-for="item in calData"
 				:key="item.folder_id"
 				:search="search"
 				@click.right="show(item, $event)"
@@ -50,7 +50,7 @@
 			</v-list-item>
 			<!-- File view -->
 			<v-list-item
-				v-for="item in this.$store.getters.favFileL"
+				v-for="item in calData2"
 				:key="item.title"
 				@click.right="showF(item, $event)"
 				@dblclick="
@@ -319,6 +319,26 @@ export default {
 	created() {
 		this.fetchData();
 	},
+	computed: {
+		calData() {
+			return this.folders
+				.filter(data => {
+					return data.folder_name
+						.toLowerCase()
+						.includes(this.search.toLowerCase());
+				})
+				.slice(0);
+		},
+		calData2() {
+			return this.files
+				.filter(data => {
+					return data.file_name
+						.toLowerCase()
+						.includes(this.search.toLowerCase());
+				})
+				.slice(0);
+		},
+	},
 	watch: {
 		$route: 'fetchData',
 	},
@@ -329,6 +349,8 @@ export default {
 				console.log(response.data);
 				this.$store.commit('setfavFolderList', response.data.folders);
 				this.$store.commit('setfavFileList', response.data.files);
+				this.folders = response.data.folders;
+				this.files = response.data.files;
 			} catch (error) {
 				console.log('에러');
 				console.log(error);
@@ -521,6 +543,7 @@ export default {
 				const del = await delFavorite(cData);
 				const response = await getFavoriteList(this.$store.state.id);
 				this.$store.commit('setfavFolderList', response.data.folders);
+				this.folders = response.data.folders;
 			} catch (error) {
 				console.log('에러');
 			}
@@ -550,6 +573,7 @@ export default {
 				const del = await delFavoriteFile(fData);
 				const response = await getFavoriteList(this.$store.state.id);
 				this.$store.commit('setfavFileList', response.data.files);
+				this.files = response.data.files;
 			} catch (error) {
 				console.log('에러');
 			}

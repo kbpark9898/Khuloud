@@ -5,7 +5,7 @@
 			<v-spacer></v-spacer>
 			<v-btn @click="delAll">비우기</v-btn>
 		</v-toolbar>
-		<v-list two-line subheader>
+		<v-list>
 			<!-- <v-subheader inset>Folders</v-subheader> -->
 			<!-- Folder view -->
 			<v-list-item

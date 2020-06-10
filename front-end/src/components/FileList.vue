@@ -11,11 +11,11 @@
 				hide-details
 			></v-text-field>
 		</v-toolbar>
-		<v-list two-line subheader>
+		<v-list>
 			<!-- <v-subheader inset>Folders</v-subheader> -->
 			<!-- Folder view -->
 			<v-list-item
-				v-for="item in this.$store.getters.folderL"
+				v-for="item in calData"
 				:key="item.folder_id"
 				:search="search"
 				@click.right="show(item, $event)"
@@ -44,8 +44,8 @@
 			</v-list-item>
 			<!-- File view -->
 			<v-list-item
-				v-for="item in this.$store.getters.fileL"
-				:key="item.title"
+				v-for="item in calData2"
+				:key="item.file_id"
 				@click.right="showF(item, $event)"
 				@dblclick="
 					detailF(item, $event);
@@ -124,8 +124,8 @@
 				<v-container>
 					<v-list>
 						<v-list-item
-							v-for="item2 in folders"
-							:key="item2.folder_id"
+							v-for="(item2, index) in folders"
+							:key="index"
 							@click.left="transferF(item2.folder_name)"
 							v-if="item2.folder_name !== curfName.folder_name"
 						>
@@ -199,8 +199,8 @@
 				<v-container>
 					<v-list>
 						<v-list-item
-							v-for="item2 in folders"
-							:key="item2.folder_id"
+							v-for="(item2, index) in folders"
+							:key="index"
 							@click.left="transferFile(item2.folder_name)"
 						>
 							<v-list-item-avatar>
@@ -353,6 +353,7 @@ export default {
 			files: [],
 			search: '',
 			id: '',
+			searchD: '',
 			share_file_name: '',
 			showShareF: false,
 			targetUid: '',
@@ -378,6 +379,26 @@ export default {
 	},
 	created() {
 		this.fetchData();
+	},
+	computed: {
+		calData() {
+			return this.folders
+				.filter(data => {
+					return data.folder_name
+						.toLowerCase()
+						.includes(this.search.toLowerCase());
+				})
+				.slice(0);
+		},
+		calData2() {
+			return this.files
+				.filter(data => {
+					return data.file_name
+						.toLowerCase()
+						.includes(this.search.toLowerCase());
+				})
+				.slice(0);
+		},
 	},
 	watch: {
 		$route: 'fetchData',
@@ -569,6 +590,7 @@ export default {
 				console.log(cData);
 				const response = await delFavorite(cData);
 				this.$store.commit('setFolder', response.data.folders);
+				this.folders = response.data.folders;
 			} catch (error) {
 				console.log('에러');
 			}
@@ -583,6 +605,7 @@ export default {
 				console.log(cData);
 				const response = await addFavorite(cData);
 				this.$store.commit('setFolder', response.data.folders);
+				this.folders = response.data.folders;
 			} catch (error) {
 				console.log('에러');
 			}
@@ -597,6 +620,7 @@ export default {
 				console.log(fData);
 				const response = await delFavoriteFile(fData);
 				this.$store.commit('setFile', response.data.files);
+				this.files = response.data.files;
 			} catch (error) {
 				console.log('에러');
 			}
@@ -611,6 +635,7 @@ export default {
 				console.log(fData);
 				const response = await addFavoriteFile(fData);
 				this.$store.commit('setFile', response.data.files);
+				this.files = response.data.files;
 			} catch (error) {
 				console.log('에러');
 			}

@@ -11,12 +11,12 @@
 				hide-details
 			></v-text-field>
 		</v-toolbar>
-		<v-list two-line subheader>
+		<v-list>
 			<!-- <v-subheader inset>Folders</v-subheader> -->
 			<!-- Folder view -->
 			<v-list-item @click="" @dblclick="$router.go(-1)">...</v-list-item>
 			<v-list-item
-				v-for="item in this.$store.getters.folderL"
+				v-for="item in calData"
 				:key="item.folder_id"
 				:search="search"
 				@click.right="show(item, $event)"
@@ -45,7 +45,7 @@
 			</v-list-item>
 			<!-- File view -->
 			<v-list-item
-				v-for="item in this.$store.getters.fileL"
+				v-for="item in calData2"
 				:key="item.title"
 				@click.right="showF(item, $event)"
 				@dblclick="
@@ -382,6 +382,26 @@ export default {
 	created() {
 		this.fetchData();
 	},
+	computed: {
+		calData() {
+			return this.folders
+				.filter(data => {
+					return data.folder_name
+						.toLowerCase()
+						.includes(this.search.toLowerCase());
+				})
+				.slice(0);
+		},
+		calData2() {
+			return this.files
+				.filter(data => {
+					return data.file_name
+						.toLowerCase()
+						.includes(this.search.toLowerCase());
+				})
+				.slice(0);
+		},
+	},
 	watch: {
 		$route: 'fetchData',
 	},
@@ -574,6 +594,7 @@ export default {
 				console.log(cData);
 				const response = await delFavorite(cData);
 				this.$store.commit('setFolder', response.data.folders);
+				this.folders = response.data.folders;
 			} catch (error) {
 				console.log('에러');
 			}
@@ -588,6 +609,7 @@ export default {
 				console.log(cData);
 				const response = await addFavorite(cData);
 				this.$store.commit('setFolder', response.data.folders);
+				this.folders = response.data.folders;
 			} catch (error) {
 				console.log('에러');
 			}
@@ -602,6 +624,7 @@ export default {
 				console.log(fData);
 				const response = await delFavoriteFile(fData);
 				this.$store.commit('setFile', response.data.files);
+				this.files = response.data.files;
 			} catch (error) {
 				console.log('에러');
 			}
@@ -616,6 +639,7 @@ export default {
 				console.log(fData);
 				const response = await addFavoriteFile(fData);
 				this.$store.commit('setFile', response.data.files);
+				this.files = response.data.files;
 			} catch (error) {
 				console.log('에러');
 			}
