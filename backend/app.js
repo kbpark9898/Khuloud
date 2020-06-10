@@ -15,6 +15,7 @@ var folderRouter = require('./routes/folders');
 var quickRouter = require('./routes/quick');
 var favoritesRouter = require('./routes/favorites');
 var shareRouter = require('./routes/share');
+var trashcanRouter = require('./routes/trashcan');
 
 
 var passport = require('passport');
@@ -64,6 +65,7 @@ app.use('/api/RegistUser', registerRouter);
 app.use('/api/folder', folderRouter);
 app.use('/api/favorites', favoritesRouter);
 app.use('/api/share', shareRouter);
+app.use('/api/trashcan', trashcanRouter);
 //app.use('/users', usersRouter);
 app.use('/api/file', fileRouter);
 app.use('/api/quick', quickRouter);
