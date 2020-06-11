@@ -15,7 +15,7 @@ router.get('/:name', function (req, res) {
     var targetPath = 'trashcan';
     var sourceFile = curPath.substring(1) + file_name;
 
-    var sql1 = 'UPDATE files SET location = ? WHERE location = ? AND file_name = ? AND user_id = ?;';
+    var sql1 = 'UPDATE files SET location = ?, recent_access=NULL WHERE location = ? AND file_name = ? AND user_id = ?;';
     connection.query(sql1, ['/trashcan/', curPath, file_name, user_id], function (err) {
         if (err) {
             console.log('update db error');
