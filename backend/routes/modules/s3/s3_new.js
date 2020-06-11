@@ -16,7 +16,7 @@
 var AWS = require('aws-sdk');
 AWS.config.update({ region: 'ap-northeast-2' });
 
-var BUCKET_NAME = 'qkrrlqja-test';
+var BUCKET_NAME = 'khuloud';
 
 var s3 = new AWS.S3();
 var fs = require('fs');
@@ -165,16 +165,23 @@ var S3 = {
                     Bucket: bucketName,
                     Key: 'drive/' + userId + '/' + targetFile
                 };
-                try {
-                    var stream = s3.getObject(params).createReadStream().pipe(file);
-                    stream.on('end', function () {
-                        console.log('end!');
+                s3.getObject(params)
+                    .createReadStream()
+                    .on('error', function (e) {
+                        callback(false);
+                    })
+                    .pipe(file)
+                    .on('close', function () {
                         callback(true, tempDownloadDir);
-                    });
-                } catch (err) {
-                    console.log('no such file', err);
-                    callback(false);
-                }
+                    })
+                //try {
+                //    var file = s3.getObject(params);
+                //    file.createReadStream().pipe(file);
+                //    callback(true, tempDownloadDir);
+                //} catch (err) {
+                //    console.log('no such file');
+                //   callback(false);
+                //}
             } else {
                 callback(false);
             }
@@ -329,6 +336,32 @@ var S3 = {
         })
     },
 
+    // 파일 삭제 때 쓰임
+    moveFile4: function (bucketName, userId, sourceFile, targetPath, callback) {
+        // sourceFile => folder1/folder2/test.txt
+        var paths = sourceFile.split('/');
+        var filename = paths[paths.length - 1];
+        //var targetFile = targetPath + '/' + sourceFile;
+        targetFile = targetPath + '/' + filename;
+
+        S3.copyFile2(bucketName, userId, sourceFile, targetFile, function (res) {
+            if (!res) {
+                console.log("Move Error on Copying File2");
+                callback(false);
+            } else {
+                S3.deleteFile(bucketName, userId, sourceFile, function (res) {
+                    if (!res) {
+                        console.log("Move Error on Deleting File");
+                        callback(false);
+                    } else {
+                        console.log("Move Success");
+                        callback(true);
+                    }
+                })
+            }
+        })
+    },
+
     renameFile: function (bucketName, userId, sourceFile, modiFile, targetPath, callback) {
         // sourceFile = test.txt
         // modiFile = test2.txt
@@ -337,10 +370,12 @@ var S3 = {
         if (sourceFile == modiFile) {    // 이름 변경되지 않은 경우
             callback(true, sourceFile);
         } else {
+            var targetFile;
             if (targetPath != '') {
-                targetPath = targetpath + '/';
+                targetFile = targetPath + '/' + modiFile;
+            } else {
+                targetFile = modiFile;
             }
-            var targetFile = targetPath + modiFile;
 
             S3.isFileOverlapped(bucketName, userId, targetFile, function (res, ans, lvNum) {
                 if (!res) {

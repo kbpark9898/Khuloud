@@ -6,7 +6,7 @@ var moment = require('moment');
 
 var AWS = require('aws-sdk');
 AWS.config.loadFromPath(__dirname + "/../modules/awsconfig.json");
-var S3 = require('../modules/s3/s3');
+var S3 = require('../modules/s3/s3_new');
 
 
 
