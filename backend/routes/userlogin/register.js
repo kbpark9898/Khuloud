@@ -6,7 +6,7 @@ AWS.config.loadFromPath(__dirname + "/../modules/awsconfig.json");
 var cryptoM = require('./../../routes/modules/cryptoM.js');
 const moment = require("moment");
 
-const BUCKET_NAME = "hong-s3-cloud";
+const BUCKET_NAME = "khuloud";
 const s3 = new AWS.S3();
 
 var router = express.Router();

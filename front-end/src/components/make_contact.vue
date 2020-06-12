@@ -1,6 +1,8 @@
 <template lang="html">
   <v-flex>
-    <h1>연락처</h1>
+    <v-toolbar flat>
+      <v-toolbar-title>연락처</v-toolbar-title>
+    </v-toolbar>
     <v-text-field
       v-model="search"
       append-icon="mdi-magnify"

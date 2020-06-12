@@ -63,14 +63,6 @@
 						<v-list-item-title>피드백</v-list-item-title>
 					</v-list-item-content>
 				</v-list-item>
-				<v-list-item router :to="{ name: 'Main' }" exact>
-					<v-list-item-action>
-						<v-icon>mdi-help-circle</v-icon>
-					</v-list-item-action>
-					<v-list-item-content>
-						<v-list-item-title>도움말</v-list-item-title>
-					</v-list-item-content>
-				</v-list-item>
 			</v-list>
 		</v-navigation-drawer>
 
@@ -88,14 +80,6 @@
 				<span class="hidden-sm-and-down">KhuLoud</span>
 			</v-toolbar-title>
 			<template v-if="isUserLogin">
-				<v-text-field
-					flat
-					solo-inverted
-					hide-details
-					prepend-inner-icon="mdi-magnify"
-					label="전체 검색"
-					class="hidden-sm-and-down"
-				></v-text-field>
 			</template>
 			<template v-else>
 				<div></div>
@@ -140,8 +124,10 @@ export default {
 		],
 	}),
 	computed: {
+
 		isUserLogin() {
 			return this.$store.getters.isLogin;
+			console.log(thks.$store.getters.folderL)
 		},
 	},
 	methods: {
