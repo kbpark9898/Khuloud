@@ -3,7 +3,7 @@ const router = express.Router();
 const AWS = require("aws-sdk");
 const moment = require("moment");
 AWS.config.loadFromPath(__dirname + "/modules/awsconfig.json");
-var S3 = require(__dirname + '/modules/s3/s3');
+var S3 = require(__dirname + '/modules/s3/s3_new');
 
 const s3 = new AWS.S3();
 
