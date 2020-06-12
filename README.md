@@ -10,7 +10,7 @@
 2014104162 홍성현   
 
 ##### 기술 stack   
-1. Frontend : Vue.js, HTML/CSS, Javascript
+1. Frontend : Vue(with vuetify), HTML/CSS, Javascript
 2. Backend : Node.js
 3. Database : AWS RDS (engine : MySQL)
 4. Storage : AWS S3 
