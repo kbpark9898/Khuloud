@@ -3,6 +3,7 @@ var router = express.Router();
 
 var fs = require('fs');
 var moment = require('moment');
+var mime = require('mime');
 
 var AWS = require('aws-sdk');
 AWS.config.loadFromPath(__dirname + "/../modules/awsconfig.json");
@@ -10,6 +11,26 @@ var S3 = require('../modules/s3/s3_new');
 
 
 
+router.get('/:name', function (req, res) {
+    var file_name = req.params.name;
+    var curPath = req.query.cur;    // /folder1/folder2/
+    var user_id = req.query.id;
+
+    var targetFile = curPath.substring(1) + file_name;  // folder1/folder2/test.txt
+    console.log(targetFile);
+
+
+    S3.getUrlFile(S3.BUCKET_NAME, user_id, targetFile, function (url) {
+        if (url) {
+            console.log(url);
+            res.send(url);
+        }
+    })
+});
+
+
+
+/*
 router.get('/:name', function (req, res) {
     var file_name = req.params.name;
     var curPath = req.query.cur;    // /folder1/folder2/
@@ -33,7 +54,9 @@ router.get('/:name', function (req, res) {
             res.send({ err: 'no such file'})
         }
     })
-}); 
+});
+*/
+
 
 /*
 router.get('/:name', function (req, res, next) {

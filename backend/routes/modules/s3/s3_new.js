@@ -216,6 +216,18 @@ var S3 = {
         })
     },
 
+    getUrlFile: function(bucketName, userId, targetFile, callback) {
+        var signedUrlExprireSeconds = 60*5;
+
+        var url = s3.getSignedUrl('getObject', {
+            Bucket: bucketName,
+            Key: 'drive/' + userId + '/' + targetFile,
+            Expires: signedUrlExprireSeconds
+        })
+
+        callback(url);
+    },
+
     isFileOverlapped: function (bucketName, userId, targetFile, callback) {
         var paths = targetFile.split('/');
         var index = targetFile.length - (paths[paths.length - 1].length + 1);
