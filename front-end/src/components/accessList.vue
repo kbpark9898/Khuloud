@@ -14,7 +14,9 @@
 					</tr>
 				</thead>
 				<tbody>
-					<tr v-for="item in recent_list" :key="item.name" @dblclick.stop = "dialog = true;download_file(item.file_name, item.location); ">
+					<tr v-for="item in recent_list" :key="item.name" @click.right="
+					showMenuF=true; x=$event.clientX; y=$event.clientY; download_file(item.file_name, item.location); "
+					@contextmenu.prevent>
 						<td>{{ item.file_id }}</td>
 						<td>{{ item.file_name }}</td>
 						<td>{{ item.location }}</td>
@@ -24,6 +26,26 @@
 			</template>
 		</v-simple-table>
 		<v-divider></v-divider>
+		<v-menu
+			v-model="showMenuF"
+			:position-x="x"
+			:position-y="y"
+			absolute
+			offset-y
+		>
+			<v-list dense>
+				<a :href="currentDLpath">
+					<v-list-item >
+						<v-list-item-icon>
+							<v-icon>mdi-download</v-icon>
+						</v-list-item-icon>
+						<v-list-item-content>
+								<v-list-item-title>다운로드</v-list-item-title>
+						</v-list-item-content>
+					</v-list-item>
+				</a>
+			</v-list>
+		</v-menu>
 		<v-dialog
       v-model="dialog"
       max-width="290"
@@ -46,6 +68,10 @@ export default {
 		return {
 			recent_list: [],
 			dialog :false,
+			showMenuF : false,
+			currentDLpath :null,
+			x:0,
+			y:0
 		};
 	},
 	async created() {
@@ -64,6 +90,16 @@ export default {
 		}
 	},
 	methods: {
+		showF(fileObj, e) {
+			e.preventDefault();
+			this.showMenuF = false;
+			this.x = e.clientX;
+			this.y = e.clientY;
+			this.$nextTick(() => {
+				this.showMenuF = true;
+			});
+			console.log(this.showMenuF);
+		},
 		async download_file(name, dir) {
 			try {
 				const currentData = {
@@ -72,7 +108,8 @@ export default {
 					cur: dir
 				};
 				const result = await downloadFile(currentData);
-				console.log(result);
+				this.currentDLpath = result.data;
+				console.log(this.currentDLpath);
 			} catch (error) {
 				console.log('에러');
 				console.log(error);

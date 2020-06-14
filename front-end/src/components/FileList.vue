@@ -46,7 +46,7 @@
 			<v-list-item
 				v-for="item in calData2"
 				:key="item.file_id"
-				@click.right="showF(item, $event)"
+				@click.right="showF(item, $event); download_file(item);"
 				@dblclick="
 					detailF(item, $event);
 					file_detail(item);
@@ -245,14 +245,16 @@
 						<v-list-item-title>삭제</v-list-item-title>
 					</v-list-item-content>
 				</v-list-item>
-				<v-list-item @click.prevent="download_file">
-					<v-list-item-icon>
-						<v-icon>mdi-download</v-icon>
-					</v-list-item-icon>
-					<v-list-item-content>
-						<v-list-item-title>다운로드</v-list-item-title>
-					</v-list-item-content>
-				</v-list-item>
+				<a :href="currentDLpath">
+					<v-list-item >
+						<v-list-item-icon>
+							<v-icon>mdi-download</v-icon>
+						</v-list-item-icon>
+						<v-list-item-content>
+								<v-list-item-title>다운로드</v-list-item-title>
+						</v-list-item-content>
+					</v-list-item>
+				</a>
 				<v-list-item
 					v-if="cfilename.favorite === 1"
 					@click.prevent="delete_favorite_file"
@@ -347,6 +349,7 @@ import Axios from 'axios';
 export default {
 	data() {
 		return {
+			currentDLpath:null,
 			uploadedfile: null,
 			foldername: '',
 			curfName: {},
@@ -574,15 +577,16 @@ export default {
 				console.log(error);
 			}
 		},
-		async download_file() {
+		async download_file(item) {
 			try {
 				const currentData = {
-					fileName: this.cfilename.file_name,
+					fileName: item.file_name,
 					id: this.$store.state.id,
 					cur: this.$store.state.cur,
 				};
 				const result = await downloadFile(currentData);
-				console.log(result);
+				this.currentDLpath = result.data;
+				console.log(this.currentDLpath);
 			} catch (error) {
 				console.log('에러');
 				console.log(error);
@@ -759,3 +763,6 @@ export default {
 	},
 };
 </script>
+<style type"text/css">
+
+</style>
