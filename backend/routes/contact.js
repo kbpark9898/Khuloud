@@ -41,7 +41,7 @@ router.post('/contact_upload', upload.single('file'), function(req, res, next) {
     var length = firstWSheet['!ref'][4];
     var temp ="";
 
-    var sqlquery = "insert into contact(user_id,name,email,phone,added_date) values";
+    var sqlquery = "insert into contact(user_id,name,phone,email,added_date) values ";
     for(var i=1;i<length;i++)
     {
       for(var j=0;j<4;j++)
