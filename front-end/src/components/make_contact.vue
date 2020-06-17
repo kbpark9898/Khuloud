@@ -66,8 +66,8 @@
             sortable: false,
             value: 'name'
           },
-          {text: 'phone', value:'email'},
-          {text:'email', value:'phone'}
+          {text: 'phone', value:'phone'},
+          {text:'email', value:'email'}
         ],
         contact_list : [],
         contact_file : null

@@ -680,7 +680,7 @@ export default {
 					cur: this.cfilename.location,
 					fileName: this.cfilename.file_name,
 				};
-				console.log(curentData.cur);
+				console.log(currentData.cur);
 				const detailData = await detailFile(currentData);
 				this.current_filename = detailData.data.file_name;
 				this.current_filedata = detailData.data.content;
